@@ -2,10 +2,9 @@ import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { View } from 'react-native';
 
+import { StepScaffold } from '@shared/components/StepScaffold';
+import { STEPS } from '@shared/lib/steps';
 import { Button, Text, TextButton } from '@shared/ui';
-
-import { STEPS } from '../lib/steps';
-import { StepLayout } from '../ui/StepLayout';
 
 /**
  * The grey bust that stands in for a portrait before one is chosen: a head
@@ -30,8 +29,8 @@ export function PhotoScreen() {
   const next = () => router.push('/(onboarding)/verification');
 
   return (
-    <StepLayout
-      step={STEPS.photo}
+    <StepScaffold
+      position={STEPS.photo}
       className="bg-surface"
       footer={
         <>
@@ -57,6 +56,6 @@ export function PhotoScreen() {
           </Text>
         </View>
       </View>
-    </StepLayout>
+    </StepScaffold>
   );
 }

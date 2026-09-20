@@ -7,7 +7,7 @@ import { gradients } from '@shared/theme/tokens';
 import {
   Avatar,
   Button,
-  Caret,
+  NoteField,
   Chip,
   SectionLabel,
   SheetScrim,
@@ -80,12 +80,7 @@ export function LeavePlanScreen() {
 
         <View className="gap-[8px]">
           <SectionLabel sheet>{t('plan.leave.messageLabel')}</SectionLabel>
-          <View className="min-h-[118px] rounded-tile border-2 border-brand bg-surface px-[16px] py-[14px]">
-            <Text className="text-[17px] leading-[24.65px] text-ink-trace">
-              {SAMPLE_NOTE}
-              <Caret height={20} />
-            </Text>
-          </View>
+          <NoteField value={SAMPLE_NOTE} muted padding={{ vertical: 14, horizontal: 16 }} />
           <View className="flex-row flex-wrap gap-[8px]">
             <Chip label={t('plan.leave.reasonWork')} size="reason" tone="fill" />
             <Chip label={t('plan.leave.reasonSick')} size="reason" tone="fill" />

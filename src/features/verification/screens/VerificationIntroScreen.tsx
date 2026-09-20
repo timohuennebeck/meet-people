@@ -2,8 +2,8 @@ import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { View } from 'react-native';
 
-import { STEPS } from '@features/onboarding/lib/steps';
-import { StepLayout } from '@features/onboarding/ui/StepLayout';
+import { StepScaffold } from '@shared/components/StepScaffold';
+import { STEPS } from '@shared/lib/steps';
 import { Button, Mascot, Spacer, Text, TextButton } from '@shared/ui';
 
 /** `#EAF1FE · radius:24px` card describing one verification step. */
@@ -34,8 +34,8 @@ export function VerificationIntroScreen() {
   const router = useRouter();
 
   return (
-    <StepLayout
-      step={STEPS.verification}
+    <StepScaffold
+      position={STEPS.verification}
       eyebrow={t('verification.intro.eyebrow')}
       title={t('verification.intro.title')}
       subtitle={t('verification.intro.subtitle')}
@@ -67,6 +67,6 @@ export function VerificationIntroScreen() {
       </View>
 
       <Spacer />
-    </StepLayout>
+    </StepScaffold>
   );
 }

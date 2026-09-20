@@ -2,8 +2,8 @@ import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { View } from 'react-native';
 
-import { STEPS } from '@features/onboarding/lib/steps';
-import { StepLayout } from '@features/onboarding/ui/StepLayout';
+import { StepScaffold } from '@shared/components/StepScaffold';
+import { STEPS } from '@shared/lib/steps';
 import { Button, Spacer, Text, TimelineStep } from '@shared/ui';
 
 /** Step 15c — the review timeline, shown while a human checks the selfie. */
@@ -12,8 +12,8 @@ export function VerificationPendingScreen() {
   const router = useRouter();
 
   return (
-    <StepLayout
-      step={STEPS.verification}
+    <StepScaffold
+      position={STEPS.verification}
       title={t('verification.pending.title')}
       subtitle={t('verification.pending.subtitle')}
       footer={
@@ -52,6 +52,6 @@ export function VerificationPendingScreen() {
       </View>
 
       <Spacer />
-    </StepLayout>
+    </StepScaffold>
   );
 }

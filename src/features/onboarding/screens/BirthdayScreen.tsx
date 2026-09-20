@@ -1,10 +1,9 @@
 import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 
+import { StepScaffold } from '@shared/components/StepScaffold';
+import { STEPS } from '@shared/lib/steps';
 import { Button, Spacer, WheelPicker } from '@shared/ui';
-
-import { STEPS } from '../lib/steps';
-import { StepLayout } from '../ui/StepLayout';
 
 /** The three wheels, centred on the selected 14 Mar 2002. */
 const COLUMNS = [
@@ -19,8 +18,8 @@ export function BirthdayScreen() {
   const router = useRouter();
 
   return (
-    <StepLayout
-      step={STEPS.birthday}
+    <StepScaffold
+      position={STEPS.birthday}
       title={t('onboarding.birthday.title')}
       subtitle={t('onboarding.birthday.subtitle')}
       footer={
@@ -44,6 +43,6 @@ export function BirthdayScreen() {
       />
 
       <Spacer />
-    </StepLayout>
+    </StepScaffold>
   );
 }

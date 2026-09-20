@@ -2,11 +2,11 @@ import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { View } from 'react-native';
 
-import { Button, Caret, Glyph, Spacer, Text, TextField } from '@shared/ui';
+import { StepScaffold } from '@shared/components/StepScaffold';
+import { STEPS } from '@shared/lib/steps';
+import { Button, Glyph, Spacer, Text, TextField } from '@shared/ui';
 
-import { STEPS } from '../lib/steps';
 import { LegalNote } from '../ui/LegalNote';
-import { StepLayout } from '../ui/StepLayout';
 
 /** `13px/600 · .06em tracking` — the label above each field on this variant. */
 function FieldLabel({ children }: { children: string }) {
@@ -31,8 +31,8 @@ export function AccountInlineScreen() {
   const router = useRouter();
 
   return (
-    <StepLayout
-      step={STEPS.account}
+    <StepScaffold
+      position={STEPS.account}
       title={t('onboarding.account.title')}
       subtitle={t('onboarding.account.subtitle')}
       footer={<LegalNote />}
@@ -54,10 +54,7 @@ export function AccountInlineScreen() {
       <View className="mt-[22px] shrink-0 gap-[14px]">
         <View className="gap-[7px]">
           <FieldLabel>{t('onboarding.account.emailLabel')}</FieldLabel>
-          <View className="h-[56px] flex-row items-center rounded-field border-2 border-brand bg-surface px-[14px]">
-            <Text className="text-[16.5px]">sara@</Text>
-            <Caret height={20} />
-          </View>
+          <TextField value="sara@" focused caret />
         </View>
 
         <View className="gap-[7px]">
@@ -73,6 +70,6 @@ export function AccountInlineScreen() {
       />
 
       <Spacer min={14} />
-    </StepLayout>
+    </StepScaffold>
   );
 }

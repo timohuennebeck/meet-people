@@ -3,10 +3,9 @@ import { useTranslation } from 'react-i18next';
 import { View } from 'react-native';
 
 import { SpokenLanguageList } from '@shared/components/SpokenLanguageList';
+import { StepScaffold } from '@shared/components/StepScaffold';
+import { STEPS } from '@shared/lib/steps';
 import { Button, Spacer, TextButton } from '@shared/ui';
-
-import { STEPS } from '../lib/steps';
-import { StepLayout } from '../ui/StepLayout';
 
 /** The shortlist the design offers on this step. */
 const OPTIONS = ['de', 'en', 'tr', 'es', 'pl'];
@@ -17,8 +16,8 @@ export function LanguagesScreen() {
   const router = useRouter();
 
   return (
-    <StepLayout
-      step={STEPS.languages}
+    <StepScaffold
+      position={STEPS.languages}
       title={t('onboarding.languages.title')}
       subtitle={t('onboarding.languages.subtitle')}
       footer={
@@ -37,6 +36,6 @@ export function LanguagesScreen() {
       />
 
       <Spacer />
-    </StepLayout>
+    </StepScaffold>
   );
 }

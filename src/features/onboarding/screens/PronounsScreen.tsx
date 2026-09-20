@@ -4,11 +4,10 @@ import { useTranslation } from 'react-i18next';
 import { View } from 'react-native';
 
 import { ChoiceTile } from '@shared/components/ChoiceTile';
+import { StepScaffold } from '@shared/components/StepScaffold';
 import type { Pronouns } from '@shared/data/schemas';
+import { STEPS } from '@shared/lib/steps';
 import { Button, Spacer, Text, TextButton } from '@shared/ui';
-
-import { STEPS } from '../lib/steps';
-import { StepLayout } from '../ui/StepLayout';
 
 /** Step 13 — pronouns, shown beside the user's name. Skippable. */
 export function PronounsScreen() {
@@ -26,8 +25,8 @@ export function PronounsScreen() {
   ];
 
   return (
-    <StepLayout
-      step={STEPS.pronouns}
+    <StepScaffold
+      position={STEPS.pronouns}
       title={t('onboarding.pronouns.title')}
       subtitle={t('onboarding.pronouns.subtitle')}
       footer={
@@ -66,6 +65,6 @@ export function PronounsScreen() {
       </View>
 
       <Spacer />
-    </StepLayout>
+    </StepScaffold>
   );
 }

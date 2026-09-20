@@ -4,11 +4,10 @@ import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { View } from 'react-native';
 
+import { StepScaffold } from '@shared/components/StepScaffold';
+import { STEPS } from '@shared/lib/steps';
 import { colors } from '@shared/theme/tokens';
 import { Button, Mascot, Text, TextButton } from '@shared/ui';
-
-import { STEPS } from '../lib/steps';
-import { StepLayout } from '../ui/StepLayout';
 
 /** `30px brand-tinted bubble · 15.5px body` — one reassurance line. */
 function Benefit({ icon, children }: { icon: ReactNode; children: string }) {
@@ -28,8 +27,8 @@ export function LocationScreen() {
   const router = useRouter();
 
   return (
-    <StepLayout
-      step={STEPS.location}
+    <StepScaffold
+      position={STEPS.location}
       padding="stepWide"
       title={t('onboarding.location.title')}
       subtitle={t('onboarding.location.subtitle')}
@@ -59,6 +58,6 @@ export function LocationScreen() {
           {t('onboarding.location.benefitPrivacy')}
         </Benefit>
       </View>
-    </StepLayout>
+    </StepScaffold>
   );
 }

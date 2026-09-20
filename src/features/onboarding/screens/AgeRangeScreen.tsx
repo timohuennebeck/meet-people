@@ -3,10 +3,9 @@ import { useTranslation } from 'react-i18next';
 
 import { usePreferences, useUpdatePreferences } from '@features/settings/data/usePreferences';
 import { AgePresets, AgeRangeControl } from '@shared/components/AgeRangeControl';
+import { StepScaffold } from '@shared/components/StepScaffold';
+import { STEPS } from '@shared/lib/steps';
 import { Button, Spacer } from '@shared/ui';
-
-import { STEPS } from '../lib/steps';
-import { StepLayout } from '../ui/StepLayout';
 
 /** Step 4 — which ages the user wants to see on the map. */
 export function AgeRangeScreen() {
@@ -18,8 +17,8 @@ export function AgeRangeScreen() {
   const range = preferences?.ageRange ?? [21, 34];
 
   return (
-    <StepLayout
-      step={STEPS.ageRange}
+    <StepScaffold
+      position={STEPS.ageRange}
       title={t('onboarding.ageRange.title')}
       subtitle={t('onboarding.ageRange.subtitle')}
       footer={
@@ -45,6 +44,6 @@ export function AgeRangeScreen() {
         allLabel={t('onboarding.ageRange.presetAll')}
       />
       <Spacer min={16} />
-    </StepLayout>
+    </StepScaffold>
   );
 }

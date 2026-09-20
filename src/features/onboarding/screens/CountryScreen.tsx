@@ -3,10 +3,10 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { View } from 'react-native';
 
+import { StepScaffold } from '@shared/components/StepScaffold';
+import { COUNTRIES } from '@shared/lib/languages';
+import { STEPS } from '@shared/lib/steps';
 import { Button, SelectableRow, Spacer, TextButton } from '@shared/ui';
-
-import { COUNTRY_OPTIONS, STEPS } from '../lib/steps';
-import { StepLayout } from '../ui/StepLayout';
 
 /** Step 6 — home country, whose flag ends up on the profile avatar. Skippable. */
 export function CountryScreen() {
@@ -17,8 +17,8 @@ export function CountryScreen() {
   const next = () => router.push('/(onboarding)/account');
 
   return (
-    <StepLayout
-      step={STEPS.country}
+    <StepScaffold
+      position={STEPS.country}
       title={t('onboarding.country.title')}
       subtitle={t('onboarding.country.subtitle')}
       footer={
@@ -34,7 +34,7 @@ export function CountryScreen() {
       }
     >
       <View className="mt-[20px] gap-[10px]">
-        {COUNTRY_OPTIONS.map((country) => (
+        {COUNTRIES.map((country) => (
           <SelectableRow
             key={country.code}
             title={country.name}
@@ -53,6 +53,6 @@ export function CountryScreen() {
       />
 
       <Spacer />
-    </StepLayout>
+    </StepScaffold>
   );
 }

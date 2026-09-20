@@ -2,12 +2,11 @@ import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { Pressable, View } from 'react-native';
 
+import { StepScaffold } from '@shared/components/StepScaffold';
 import { cn } from '@shared/lib/cn';
+import { STEPS } from '@shared/lib/steps';
 import { colors } from '@shared/theme/tokens';
 import { Button, Caret, Glyph, Spacer, Text } from '@shared/ui';
-
-import { STEPS } from '../lib/steps';
-import { StepLayout } from '../ui/StepLayout';
 
 /** `12.5px/600 · .14em tracking` — the field label above each input. */
 function FieldLabel({ children, className }: { children: string; className?: string }) {
@@ -44,8 +43,8 @@ export function SignUpScreen() {
   const router = useRouter();
 
   return (
-    <StepLayout
-      step={STEPS.signUp}
+    <StepScaffold
+      position={STEPS.signUp}
       padding="form"
       title={t('onboarding.signUp.title')}
       subtitle={t('onboarding.signUp.subtitle')}
@@ -87,6 +86,6 @@ export function SignUpScreen() {
       </Pressable>
 
       <Spacer />
-    </StepLayout>
+    </StepScaffold>
   );
 }

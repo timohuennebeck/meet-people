@@ -6,83 +6,18 @@
  * `shadowColor`, and Phosphor icon `color`/`size` props.
  */
 
-export const colors = {
-  brand: '#2F7CF6',
-  brandInk: '#1B5FCB',
-  brandDeep: '#2A4A7D',
-  brandSlate: '#2C4C80',
-  brandTint: '#EAF1FE',
-  brandTintAlt: '#E8F1FE',
-  brandWash: '#E4EEFD',
-  brandMist: '#E6F0FE',
-  brandHaze: '#DCEAFE',
-  brandPale: '#EDF3FC',
-  brandBand: '#D6E5FC',
-  brandRail: '#DCE6F6',
-  brandLine: '#C5D7F2',
-  brandRow: '#EAF2FE',
+import { flattenPalette, palette } from './palette';
 
-  ink: '#15181F',
-  inkStrong: '#3B3944',
-  inkBody: '#3E4553',
-  inkMuted: '#5E6676',
-  inkSoft: '#5B6373',
-  inkDim: '#72798A',
-  inkFaint: '#7A8595',
-  inkGhost: '#8A91A0',
-  inkTrace: '#9AA2B1',
-  inkMute: '#A7ADBA',
-
-  surface: '#FFFFFF',
-  surfaceApp: '#F7F9FC',
-  surfaceAlt: '#F4F7FD',
-  surfaceSunken: '#F3F6FA',
-  surfaceFill: '#F1F4F9',
-  surfaceChip: '#EEF2F8',
-  surfaceRail: '#EAEEF5',
-  surfaceDusk: '#E6ECF7',
-  surfaceTint: '#FAFAFC',
-  surfaceNight: '#171B22',
-  surfaceCamera: '#0E1219',
-
-  hair: '#E6EBF3',
-  hairSoft: '#F0F3F8',
-  hairRail: '#E3E9F2',
-  hairMid: '#DFE5EF',
-  hairDeep: '#DCE4F0',
-  hairDash: '#C9CFD9',
-  hairCool: '#E0E7F2',
-  hairSteel: '#C9D5E8',
-  hairBar: '#E1E4EA',
-  hairTag: '#E1E7F0',
-  hairPale: '#C3CAD6',
-  hairStone: '#D6DCE6',
-  hairSlate: '#B4BAC6',
-  hairDot: '#C9D0DC',
-
-  categorySport: '#32C36A',
-  categoryGames: '#4A5163',
-  categoryWalk: '#FF8A3D',
-  categoryCoffee: '#FF5C7A',
-
-  danger: '#E14B4B',
-  dangerDeep: '#C0483C',
-  warn: '#F0A22E',
-  warnSolid: '#E8942A',
-  warnTint: '#FDF0DA',
-  warnWash: '#FFF4E8',
-  warnInk: '#6B4A1B',
-  online: '#34C759',
-
-  mapTop: '#FBE8CE',
-  mapBottom: '#FDF4EA',
-  white: '#FFFFFF',
-} as const;
+/**
+ * The palette, flat: `palette.brand.tint` is `colors.brandTint` here. Tailwind
+ * reads the same source, so the two can never disagree.
+ */
+export const colors = flattenPalette();
 
 /** Linear gradients, as `[from, to]` colour stop pairs for `expo-linear-gradient`. */
 export const gradients = {
   /** Map backdrop behind pins and sheets. */
-  map: ['#FBE8CE', '#FDF4EA'],
+  map: [palette.map.top, palette.map.bottom],
   /** Map backdrop that fades to white at the bottom (join-request sheet). */
   mapFade: ['#FCEBCF', '#FDF3E2', '#FFFFFF'],
   /** Placeholder behind the mascot on plan photos. */

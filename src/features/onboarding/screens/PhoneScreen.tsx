@@ -2,10 +2,9 @@ import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { View } from 'react-native';
 
+import { StepScaffold } from '@shared/components/StepScaffold';
+import { STEPS } from '@shared/lib/steps';
 import { Button, Caret, Flag, Spacer, Text } from '@shared/ui';
-
-import { STEPS } from '../lib/steps';
-import { StepLayout } from '../ui/StepLayout';
 
 /**
  * Phone verification. Taken out of the main onboarding flow for now — the
@@ -16,8 +15,8 @@ export function PhoneScreen() {
   const router = useRouter();
 
   return (
-    <StepLayout
-      step={STEPS.phone}
+    <StepScaffold
+      position={STEPS.phone}
       title={t('onboarding.phone.title')}
       subtitle={t('onboarding.phone.subtitle')}
       footer={
@@ -43,6 +42,6 @@ export function PhoneScreen() {
       </View>
 
       <Spacer />
-    </StepLayout>
+    </StepScaffold>
   );
 }

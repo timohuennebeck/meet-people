@@ -3,12 +3,12 @@ import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { View } from 'react-native';
 
+import { StepScaffold } from '@shared/components/StepScaffold';
+import { STEPS } from '@shared/lib/steps';
 import { gradients } from '@shared/theme/tokens';
 import { Button, Glyph, Mascot, Spacer } from '@shared/ui';
 
-import { STEPS } from '../lib/steps';
 import { LegalNote } from '../ui/LegalNote';
-import { StepLayout } from '../ui/StepLayout';
 
 /** Step 7 — create or restore an account. Mascot card, e-mail first, Google below. */
 export function AccountScreen() {
@@ -16,8 +16,8 @@ export function AccountScreen() {
   const router = useRouter();
 
   return (
-    <StepLayout
-      step={STEPS.account}
+    <StepScaffold
+      position={STEPS.account}
       title={t('onboarding.account.title')}
       subtitle={t('onboarding.account.subtitle')}
       footer={<LegalNote />}
@@ -47,6 +47,6 @@ export function AccountScreen() {
       </View>
 
       <Spacer />
-    </StepLayout>
+    </StepScaffold>
   );
 }

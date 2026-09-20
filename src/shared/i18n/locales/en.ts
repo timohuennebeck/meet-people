@@ -478,14 +478,4 @@ export const en: Translation = {
     chats: 'Chats',
     profile: 'Profile',
   },
-
-  languageNames: {
-    pt: 'Português',
-    ptBR: 'Português (Brasil)',
-    en: 'English',
-    es: 'Español',
-    de: 'Deutsch',
-    fr: 'Français',
-    it: 'Italiano',
-  },
 };

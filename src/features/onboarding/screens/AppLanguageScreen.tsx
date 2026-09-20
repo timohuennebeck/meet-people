@@ -3,11 +3,11 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { View } from 'react-native';
 
+import { StepScaffold } from '@shared/components/StepScaffold';
 import { setLocale } from '@shared/i18n';
+import { APP_LANGUAGES } from '@shared/lib/languages';
+import { STEPS } from '@shared/lib/steps';
 import { Button, SelectableRow, Spacer } from '@shared/ui';
-
-import { APP_LANGUAGES, STEPS } from '../lib/steps';
-import { StepLayout } from '../ui/StepLayout';
 
 /** Step 1 — the app's language, asked before anything else. */
 export function AppLanguageScreen() {
@@ -16,8 +16,8 @@ export function AppLanguageScreen() {
   const [selected, setSelected] = useState('pt');
 
   return (
-    <StepLayout
-      step={STEPS.appLanguage}
+    <StepScaffold
+      position={STEPS.appLanguage}
       title={t('onboarding.appLanguage.title')}
       subtitle={t('onboarding.appLanguage.subtitle')}
       footer={
@@ -44,6 +44,6 @@ export function AppLanguageScreen() {
         ))}
       </View>
       <Spacer min={16} />
-    </StepLayout>
+    </StepScaffold>
   );
 }

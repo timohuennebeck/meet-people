@@ -3,13 +3,13 @@ import type { ReactNode } from 'react';
 import { View } from 'react-native';
 
 import { cn } from '@shared/lib/cn';
+import type { StepPosition } from '@shared/lib/steps';
 import { ProgressHeader, Screen, StepSubtitle, StepTitle, Text } from '@shared/ui';
 import type { ScreenPadding } from '@shared/ui';
 
-import { ONBOARDING_TOTAL, type OnboardingStep } from '../lib/steps';
-
-export interface StepLayoutProps {
-  step: OnboardingStep;
+export interface StepScaffoldProps {
+  /** Where this step sits in its flow — see `@shared/lib/steps`. */
+  position: StepPosition;
   /**
    * The question, with `\n` where the design breaks the line. Omitted on the
    * photo step, whose heading sits centred with the content instead.
@@ -35,11 +35,14 @@ export interface StepLayoutProps {
 }
 
 /**
- * The frame every onboarding step shares: progress header, a `22px` gap, the
- * title, a `10px` gap, the subtitle, then the step's own content.
+ * The frame every step of a guided flow shares: progress header, a `22px` gap,
+ * the title, a `10px` gap, the subtitle, then the step's own content.
+ *
+ * Both the sign-up sequence and the create-plan flow are drawn on it, which is
+ * why it lives here rather than inside either feature.
  */
-export function StepLayout({
-  step,
+export function StepScaffold({
+  position,
   title,
   titleClassName,
   eyebrow,
@@ -49,16 +52,16 @@ export function StepLayout({
   padding = 'step',
   className,
   spacing = { title: 22, subtitle: 10 },
-}: StepLayoutProps) {
+}: StepScaffoldProps) {
   const router = useRouter();
 
   return (
     <Screen padding={padding} className={className}>
       <ProgressHeader
-        step={step.step}
-        total={ONBOARDING_TOTAL}
-        progress={step.progress}
-        dismissible={'dismissible' in step ? step.dismissible : false}
+        step={position.step}
+        total={position.total}
+        progress={position.progress}
+        dismissible={position.dismissible}
         onBack={() => router.back()}
       />
       {eyebrow ? (

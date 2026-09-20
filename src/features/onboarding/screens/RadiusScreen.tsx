@@ -4,11 +4,10 @@ import { useTranslation } from 'react-i18next';
 import { usePreferences, useUpdatePreferences } from '@features/settings/data/usePreferences';
 import { RadiusControl } from '@shared/components/RadiusControl';
 import { RadiusMap } from '@shared/components/RadiusMap';
+import { StepScaffold } from '@shared/components/StepScaffold';
 import type { DistanceUnit } from '@shared/data/schemas';
+import { STEPS } from '@shared/lib/steps';
 import { Button, Spacer } from '@shared/ui';
-
-import { STEPS } from '../lib/steps';
-import { StepLayout } from '../ui/StepLayout';
 
 /** Step 3 — how far the user is willing to travel. */
 export function RadiusScreen() {
@@ -21,8 +20,8 @@ export function RadiusScreen() {
   const unit: DistanceUnit = preferences?.distanceUnit ?? 'mi';
 
   return (
-    <StepLayout
-      step={STEPS.radius}
+    <StepScaffold
+      position={STEPS.radius}
       title={t('onboarding.radius.title')}
       subtitle={t('onboarding.radius.subtitle')}
       footer={
@@ -43,6 +42,6 @@ export function RadiusScreen() {
         onChangeUnit={(next) => update({ distanceUnit: next })}
       />
       <Spacer min={16} />
-    </StepLayout>
+    </StepScaffold>
   );
 }

@@ -1,11 +1,10 @@
 import { useTranslation } from 'react-i18next';
 import { View } from 'react-native';
 
+import { StepScaffold } from '@shared/components/StepScaffold';
 import { cn } from '@shared/lib/cn';
+import { STEPS } from '@shared/lib/steps';
 import { Button, Caret, Spacer, Text } from '@shared/ui';
-
-import { STEPS } from '../lib/steps';
-import { StepLayout } from '../ui/StepLayout';
 
 /** The six code boxes: filled, focused, then empty. */
 const DIGITS = ['4', '7', '1', 'caret', '', ''] as const;
@@ -40,8 +39,8 @@ export function CodeScreen() {
   const { t } = useTranslation();
 
   return (
-    <StepLayout
-      step={STEPS.code}
+    <StepScaffold
+      position={STEPS.code}
       title={t('onboarding.code.title')}
       footer={<Button label={t('onboarding.code.confirm')} disabled />}
     >
@@ -63,6 +62,6 @@ export function CodeScreen() {
       </Text>
 
       <Spacer />
-    </StepLayout>
+    </StepScaffold>
   );
 }

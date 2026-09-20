@@ -7,7 +7,7 @@ import { gradients, gradientStops } from '@shared/theme/tokens';
 import {
   Avatar,
   Button,
-  Caret,
+  NoteField,
   Chip,
   SealNote,
   SheetScrim,
@@ -59,12 +59,7 @@ export function JoinRequestScreen() {
           </View>
         </View>
 
-        <View className="min-h-[118px] rounded-tile border-2 border-brand bg-surface p-[14px]">
-          <Text className="text-[17px] leading-[24.65px]">
-            {SAMPLE_MESSAGE}
-            <Caret height={20} />
-          </Text>
-        </View>
+        <NoteField value={SAMPLE_MESSAGE} />
 
         <View className="flex-row flex-wrap gap-[8px]">
           <Chip label={t('plan.request.chipBeginner')} size="soft" tone="fill" />

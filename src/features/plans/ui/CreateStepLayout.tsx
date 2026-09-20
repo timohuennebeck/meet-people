@@ -1,9 +1,6 @@
-import { useRouter } from 'expo-router';
 import type { ReactNode } from 'react';
-import { View } from 'react-native';
 
-import { cn } from '@shared/lib/cn';
-import { ProgressHeader, Screen, StepSubtitle, StepTitle } from '@shared/ui';
+import { StepScaffold } from '@shared/components/StepScaffold';
 import type { ScreenPadding } from '@shared/ui';
 
 /** The create flow runs to six steps; the age step is the optional last one. */
@@ -23,7 +20,10 @@ export interface CreateStepLayoutProps {
   className?: string;
 }
 
-/** The frame shared by every step of the create-plan flow. */
+/**
+ * The create-plan flow's step frame — `StepScaffold` with this flow's own
+ * numbering, so the steps read `2 de 5` rather than counting against sign-up.
+ */
 export function CreateStepLayout({
   step,
   progress,
@@ -35,15 +35,16 @@ export function CreateStepLayout({
   total = 5,
   className,
 }: CreateStepLayoutProps) {
-  const router = useRouter();
-
   return (
-    <Screen padding={padding} className={cn(className)}>
-      <ProgressHeader step={step} total={total} progress={progress} onBack={() => router.back()} />
-      <StepTitle className="mt-[22px] shrink-0">{title}</StepTitle>
-      {subtitle ? <StepSubtitle className="mt-[10px] shrink-0">{subtitle}</StepSubtitle> : null}
+    <StepScaffold
+      position={{ step, total, progress }}
+      title={title}
+      subtitle={subtitle}
+      footer={footer}
+      padding={padding}
+      className={className}
+    >
       {children}
-      {footer ? <View className="shrink-0">{footer}</View> : null}
-    </Screen>
+    </StepScaffold>
   );
 }

@@ -2,10 +2,9 @@ import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { View } from 'react-native';
 
+import { StepScaffold } from '@shared/components/StepScaffold';
+import { STEPS } from '@shared/lib/steps';
 import { Button, Caret, Mascot, Spacer, Text } from '@shared/ui';
-
-import { STEPS } from '../lib/steps';
-import { StepLayout } from '../ui/StepLayout';
 
 /** Step 11 — first name only. */
 export function NameScreen() {
@@ -13,8 +12,8 @@ export function NameScreen() {
   const router = useRouter();
 
   return (
-    <StepLayout
-      step={STEPS.name}
+    <StepScaffold
+      position={STEPS.name}
       title={t('onboarding.name.title')}
       subtitle={t('onboarding.name.subtitle')}
       footer={
@@ -37,6 +36,6 @@ export function NameScreen() {
       </View>
 
       <Spacer />
-    </StepLayout>
+    </StepScaffold>
   );
 }

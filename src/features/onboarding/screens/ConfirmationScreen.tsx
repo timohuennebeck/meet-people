@@ -2,11 +2,10 @@ import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { View } from 'react-native';
 
+import { StepScaffold } from '@shared/components/StepScaffold';
 import { VIEWER } from '@shared/data/fixtures';
+import { STEPS } from '@shared/lib/steps';
 import { Button, Mascot, Text, TextButton } from '@shared/ui';
-
-import { STEPS } from '../lib/steps';
-import { StepLayout } from '../ui/StepLayout';
 
 /** Step 9 — a short confirmation once the account exists. */
 export function ConfirmationScreen() {
@@ -14,8 +13,8 @@ export function ConfirmationScreen() {
   const router = useRouter();
 
   return (
-    <StepLayout
-      step={STEPS.confirmation}
+    <StepScaffold
+      position={STEPS.confirmation}
       titleClassName="text-center"
       title={
         <>
@@ -46,6 +45,6 @@ export function ConfirmationScreen() {
       <View className="min-h-0 flex-1 items-center justify-center">
         <Mascot size={232} />
       </View>
-    </StepLayout>
+    </StepScaffold>
   );
 }

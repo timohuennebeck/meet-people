@@ -88,3 +88,34 @@ export function TextField({
     </View>
   );
 }
+
+export interface NoteFieldProps {
+  /** Sample content the design shows already typed into the note. */
+  value: string;
+  /** The design pads the request note 14px all round and the leave note 16/14. */
+  padding?: { vertical: number; horizontal: number };
+  /** Greys the text, as the optional leave note is drawn. */
+  muted?: boolean;
+}
+
+/**
+ * `min-height:118px · 2px brand ring` — the multi-line note on the join-request
+ * and leave-plan sheets, focused with the keyboard already up.
+ */
+export function NoteField({
+  value,
+  padding = { vertical: 14, horizontal: 14 },
+  muted = false,
+}: NoteFieldProps) {
+  return (
+    <View
+      className="min-h-[118px] rounded-tile border-2 border-brand bg-surface"
+      style={{ paddingVertical: padding.vertical, paddingHorizontal: padding.horizontal }}
+    >
+      <Text className={cn('text-[17px] leading-[24.65px]', muted && 'text-ink-trace')}>
+        {value}
+        <Caret height={20} />
+      </Text>
+    </View>
+  );
+}

@@ -478,16 +478,6 @@ export const ptBR = {
     chats: 'Conversas',
     profile: 'Perfil',
   },
-
-  languageNames: {
-    pt: 'Português',
-    ptBR: 'Português (Brasil)',
-    en: 'English',
-    es: 'Español',
-    de: 'Deutsch',
-    fr: 'Français',
-    it: 'Italiano',
-  },
 } as const;
 
 /**

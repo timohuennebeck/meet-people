@@ -3,10 +3,9 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { View } from 'react-native';
 
+import { StepScaffold } from '@shared/components/StepScaffold';
+import { STEPS } from '@shared/lib/steps';
 import { Button, Chip, Spacer, TagInput } from '@shared/ui';
-
-import { STEPS } from '../lib/steps';
-import { StepLayout } from '../ui/StepLayout';
 
 /** Suggestions offered under the field, as shown in the design. */
 const SUGGESTIONS = ['Café', 'Café da manhã'];
@@ -18,8 +17,8 @@ export function InterestsScreen() {
   const [tags, setTags] = useState(['Corrida', 'Cinema']);
 
   return (
-    <StepLayout
-      step={STEPS.interests}
+    <StepScaffold
+      position={STEPS.interests}
       padding="keyboard"
       title={t('onboarding.interests.title')}
       subtitle={t('onboarding.interests.subtitle')}
@@ -51,6 +50,6 @@ export function InterestsScreen() {
       </View>
 
       <Spacer min={10} />
-    </StepLayout>
+    </StepScaffold>
   );
 }

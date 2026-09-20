@@ -2,11 +2,10 @@ import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { View } from 'react-native';
 
+import { StepScaffold } from '@shared/components/StepScaffold';
 import { AVATARS } from '@shared/data/fixtures';
+import { STEPS } from '@shared/lib/steps';
 import { AvatarStack, Button, Spacer, Text, TextButton } from '@shared/ui';
-
-import { STEPS } from '../lib/steps';
-import { StepLayout } from '../ui/StepLayout';
 
 /** A dimmed placeholder tile in the mocked home screen behind the widget. */
 function AppTile({ opacity }: { opacity: number }) {
@@ -36,8 +35,8 @@ export function WidgetScreen() {
   const next = () => router.push('/(onboarding)/name');
 
   return (
-    <StepLayout
-      step={STEPS.widget}
+    <StepScaffold
+      position={STEPS.widget}
       title={t('onboarding.widget.title')}
       subtitle={t('onboarding.widget.subtitle')}
       footer={
@@ -93,6 +92,6 @@ export function WidgetScreen() {
       </View>
 
       <Spacer min={16} />
-    </StepLayout>
+    </StepScaffold>
   );
 }

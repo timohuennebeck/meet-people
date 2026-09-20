@@ -4,11 +4,10 @@ import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { View } from 'react-native';
 
+import { StepScaffold } from '@shared/components/StepScaffold';
+import { STEPS } from '@shared/lib/steps';
 import { gradients, shadows } from '@shared/theme/tokens';
 import { Button, Mascot, Spacer, Text, TextButton } from '@shared/ui';
-
-import { STEPS } from '../lib/steps';
-import { StepLayout } from '../ui/StepLayout';
 
 const APP_MARK = require('../../../../assets/images/app-icon-mark.png');
 
@@ -53,8 +52,8 @@ export function NotificationsScreen() {
   const next = () => router.push('/(onboarding)/rules');
 
   return (
-    <StepLayout
-      step={STEPS.notifications}
+    <StepScaffold
+      position={STEPS.notifications}
       title={t('onboarding.notifications.title')}
       subtitle={t('onboarding.notifications.subtitle')}
       footer={
@@ -77,6 +76,6 @@ export function NotificationsScreen() {
       </LinearGradient>
 
       <Spacer />
-    </StepLayout>
+    </StepScaffold>
   );
 }

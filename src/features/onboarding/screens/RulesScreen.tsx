@@ -5,11 +5,10 @@ import { useTranslation } from 'react-i18next';
 import { View } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 
+import { StepScaffold } from '@shared/components/StepScaffold';
+import { STEPS } from '@shared/lib/steps';
 import { gradients, shadows } from '@shared/theme/tokens';
 import { Button, Glyph, Mascot, Spacer, Text, TextButton } from '@shared/ui';
-
-import { STEPS } from '../lib/steps';
-import { StepLayout } from '../ui/StepLayout';
 
 const RULE_COUNT = 3;
 
@@ -55,8 +54,8 @@ export function RulesScreen() {
   };
 
   return (
-    <StepLayout
-      step={STEPS.rules}
+    <StepScaffold
+      position={STEPS.rules}
       // The rules card is taller than a usual step's content, so the design
       // pulls the heading block in.
       spacing={{ title: 20, subtitle: 8 }}
@@ -129,6 +128,6 @@ export function RulesScreen() {
       </View>
 
       <Spacer />
-    </StepLayout>
+    </StepScaffold>
   );
 }
