@@ -16,9 +16,11 @@ export const planKeys = {
   all: ['plans'] as const,
   lists: () => [...planKeys.all, 'list'] as const,
   /**
-   * Plans on the map. The day filter is deliberately not part of the key: the
-   * source cannot narrow by day yet, so keying on it would cache the same four
-   * plans three times over. It becomes `list(filter)` when the query does.
+   * Plans on the map. The day filter is deliberately not part of the key: it is
+   * applied client-side, over the rows this one list already holds. Keying on
+   * it would cache the same plans three times over and cost a round trip per
+   * chip, for a narrowing `nearby_plans()` has already paid for by bounding the
+   * list to upcoming plans inside the radius. See `isOnDayFilter`.
    */
   list: () => key(planKeys.lists()),
   details: () => [...planKeys.all, 'detail'] as const,

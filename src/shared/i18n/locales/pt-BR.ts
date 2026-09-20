@@ -299,6 +299,13 @@ export const ptBR = {
     tomorrow: 'Amanhã',
     weekend: 'Fim de semana',
     preview: 'Prévia',
+    // Shown where the carousel would be when the chosen day has nothing on.
+    empty: {
+      today: 'Nada rolando hoje',
+      tomorrow: 'Nada marcado para amanhã',
+      weekend: 'Nada neste fim de semana',
+      body: 'Tente outro dia — ou crie o seu plano e chame quem está por perto.',
+    },
   },
 
   plan: {
@@ -343,6 +350,7 @@ export const ptBR = {
       chipArrival: 'Chego 19:15',
       privacyNote: '{{name}} vê seu perfil e sua selfie verificada, não seu endereço.',
       send: 'Enviar pedido',
+      sending: 'Enviando…',
     },
 
     sent: {
@@ -364,6 +372,7 @@ export const ptBR = {
       warning:
         'Você sai do chat do grupo. Se mudar de ideia, pode pedir para entrar de novo enquanto houver vaga.',
       confirm: 'Sair do plano',
+      leaving: 'Saindo…',
       keep: 'Continuo indo',
     },
 

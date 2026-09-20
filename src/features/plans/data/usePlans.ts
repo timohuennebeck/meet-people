@@ -6,11 +6,11 @@ import { dataSource } from '@shared/data/source';
 import { useViewer } from '@shared/data/useViewer';
 
 /**
- * Every plan on the map.
+ * Every plan on the map: upcoming, inside the radius, ordered by `starts_at`.
  *
- * The day filter above it is presentational for now — the mock source has no
- * day index to narrow by, so it is left out of both the key and the call rather
- * than pretending to filter. See `planKeys.list`.
+ * The day filter above it narrows this list in the screen rather than in the
+ * query — the rows are already here, so the chips are a `useMemo` and not a
+ * round trip, and the key stays one list. See `planKeys.list`.
  */
 export function usePlans() {
   return useQuery({

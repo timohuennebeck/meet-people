@@ -1,13 +1,14 @@
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Pressable, ScrollView, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { AVATARS, VIEWER } from '@shared/data/fixtures';
+import { isOnDayFilter, type DayFilter } from '@shared/lib/datetime';
 import { gradients, shadows } from '@shared/theme/tokens';
-import { Avatar, Chip, Glyph, Text } from '@shared/ui';
+import { Avatar, Chip, Glyph, GlowingMascot, Text } from '@shared/ui';
 
 import { usePlans } from '../data/usePlans';
 import { MapPin, UserDot } from '../ui/MapPin';
@@ -46,12 +47,36 @@ function BrandPill() {
 /**
  * The day filters: today, tomorrow, this weekend.
  *
- * Selection is local state only — the mock source has no day index to narrow
- * by, so the chips carry their selected state and nothing more until the query
- * behind them can filter. See `planKeys.list`.
+ * They narrow what the map draws rather than what it asks for. `nearby_plans()`
+ * already returns every upcoming plan inside the radius, ordered by
+ * `starts_at`, so the rows a chip wants are in memory the moment the list
+ * lands: a round trip per tap would be slower and no more correct. The rule
+ * each chip stands for lives in `isOnDayFilter`. See `planKeys.list`.
  */
-const FILTERS = ['today', 'tomorrow', 'weekend'] as const;
-type Filter = (typeof FILTERS)[number];
+const FILTERS: readonly DayFilter[] = ['today', 'tomorrow', 'weekend'];
+
+/** `300px` empty panel shown where the carousel would be on a day with nothing on. */
+function NothingOnThisDay({ filter }: { filter: DayFilter }) {
+  const { t } = useTranslation();
+
+  return (
+    <View
+      className="items-center gap-[8px] rounded-card bg-surface px-[18px] py-[22px]"
+      style={[{ width: PLAN_CARD_WIDTH }, shadows.planCard]}
+    >
+      <GlowingMascot />
+      <Text weight={600} className="text-[16px]">
+        {t(`map.empty.${filter}`)}
+      </Text>
+      <Text
+        weight={500}
+        className="max-w-[240px] text-center text-[13.5px] leading-[19.6px] text-ink-faint"
+      >
+        {t('map.empty.body')}
+      </Text>
+    </View>
+  );
+}
 
 /**
  * The Explore tab — the app's home screen.
@@ -64,10 +89,16 @@ export function ExploreScreen() {
   const { t } = useTranslation();
   const router = useRouter();
   const insets = useSafeAreaInsets();
-  const [filter, setFilter] = useState<Filter>('today');
+  const [filter, setFilter] = useState<DayFilter>('today');
   const { data: plans } = usePlans();
 
-  const cards = plans ?? [];
+  // One query, three views of it: the chips re-slice what is already here
+  // rather than re-keying the list. `startsAt` is the ISO instant the row
+  // carries alongside its pre-formatted label.
+  const cards = useMemo(
+    () => (plans ?? []).filter((plan) => isOnDayFilter(new Date(plan.startsAt), filter)),
+    [plans, filter],
+  );
 
   return (
     <View className="flex-1 overflow-hidden">
@@ -161,14 +192,18 @@ export function ExploreScreen() {
         contentContainerStyle={{ paddingLeft: 18, gap: CARD_GAP, paddingBottom: 30 }}
         style={{ marginBottom: insets.bottom }}
       >
-        {cards.map((plan, index) => (
-          <PlanCard
-            key={plan.id}
-            plan={plan}
-            variant={index === 0 ? 'full' : 'peek'}
-            onPress={() => router.push(`/plan/${plan.id}`)}
-          />
-        ))}
+        {cards.length === 0 ? (
+          <NothingOnThisDay filter={filter} />
+        ) : (
+          cards.map((plan, index) => (
+            <PlanCard
+              key={plan.id}
+              plan={plan}
+              variant={index === 0 ? 'full' : 'peek'}
+              onPress={() => router.push(`/plan/${plan.id}`)}
+            />
+          ))
+        )}
       </ScrollView>
     </View>
   );

@@ -98,6 +98,45 @@ export function isToday(date: Date): boolean {
   );
 }
 
+/** The three day filters the map draws above its carousel. */
+export type DayFilter = 'today' | 'tomorrow' | 'weekend';
+
+/** Whole calendar days from `now`'s day to `date`'s, in the device's zone. */
+function daysFromToday(date: Date, now: Date): number {
+  const day = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  // Rounded, so the hour a clock change adds or removes cannot shift a day.
+  return Math.round((day.getTime() - today.getTime()) / 86_400_000);
+}
+
+/**
+ * Whether a plan starting at `date` belongs on one of the map's day chips.
+ *
+ * Every boundary here is **local** midnight, not UTC. `startsAt` is an instant
+ * and the chips are calendar days, so the line between "today" and "tomorrow"
+ * has to be drawn where the person reading the map stands: a 21:00 plan in São
+ * Paulo is tonight's, and comparing UTC days — or the front of the ISO string
+ * — would file it under tomorrow. Reading the parts off the local `Date` is
+ * what keeps the two in the same zone.
+ *
+ * - `today` — anything before midnight tonight. A plan whose start has just
+ *   slipped past stays on today's chip rather than disappearing off every one.
+ * - `tomorrow` — the next calendar day.
+ * - `weekend` — the coming Saturday and Sunday. On a Saturday or a Sunday that
+ *   is *this* weekend, the one already under way, not the next.
+ */
+export function isOnDayFilter(date: Date, filter: DayFilter, now = new Date()): boolean {
+  const days = daysFromToday(date, now);
+  if (filter === 'today') return days <= 0;
+  if (filter === 'tomorrow') return days === 1;
+
+  // Saturday is 6 and Sunday 0, so on a Sunday the weekend's Saturday is the
+  // day behind us; every other day looks forward to the next one.
+  const weekday = now.getDay();
+  const saturday = weekday === 0 ? -1 : 6 - weekday;
+  return days === saturday || days === saturday + 1;
+}
+
 /**
  * How recently a date fell, as the "ontem 19:00" line under a finished plan
  * needs it. Anything older than yesterday is named by its date instead, which

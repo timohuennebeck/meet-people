@@ -298,6 +298,12 @@ export const en: Translation = {
     tomorrow: 'Tomorrow',
     weekend: 'Weekend',
     preview: 'Preview',
+    empty: {
+      today: 'Nothing on today',
+      tomorrow: 'Nothing on tomorrow',
+      weekend: 'Nothing on this weekend',
+      body: 'Try another day — or start your own plan and call whoever is nearby.',
+    },
   },
 
   plan: {
@@ -342,6 +348,7 @@ export const en: Translation = {
       chipArrival: "I'll arrive 19:15",
       privacyNote: '{{name}} sees your profile and verified selfie, not your address.',
       send: 'Send request',
+      sending: 'Sending…',
     },
 
     sent: {
@@ -363,6 +370,7 @@ export const en: Translation = {
       warning:
         "You'll leave the group chat. If you change your mind, you can ask to join again while seats are free.",
       confirm: 'Leave plan',
+      leaving: 'Leaving…',
       keep: "I'm still going",
     },
 

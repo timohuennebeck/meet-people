@@ -1,8 +1,10 @@
 import { useLocalSearchParams, useRouter } from 'expo-router';
+import type { ParseKeys } from 'i18next';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { View } from 'react-native';
 
+import { isDataError } from '@shared/data/errors';
 import {
   Avatar,
   Button,
@@ -25,7 +27,7 @@ export function JoinRequestScreen() {
   const router = useRouter();
   const { id } = useLocalSearchParams<{ id: string }>();
   const { data: plan } = usePlan(id ?? '');
-  const { mutate: setMembership } = useSetMembership(id ?? '');
+  const { mutate: setMembership, isPending, error } = useSetMembership(id ?? '');
 
   const host = plan?.host;
   const [message, setMessage] = useState('');
@@ -34,10 +36,34 @@ export function JoinRequestScreen() {
   const append = (phrase: string) =>
     setMessage((current) => (current.trim() ? `${current.trim()} ${phrase}.` : `${phrase}.`));
 
+  /**
+   * The sheet stays up until the server has answered. Dismissing on the tap
+   * would hide the only place the refusal can be said: the optimistic
+   * membership flips, the rollback quietly puts it back, and the plan reads as
+   * broken rather than as refused.
+   */
   const send = () => {
-    if (plan) setMembership({ membership: 'requested', note: message });
-    router.back();
+    if (!plan || isPending) return;
+    setMembership(
+      { membership: 'requested', note: message },
+      {
+        onSuccess: () => router.back(),
+        onError: (failure) => {
+          // A spent weekly quota is what Plus sells, so the paywall is the
+          // answer rather than a sentence explaining it. Every other refusal
+          // is read off the mutation below, and none of them dismiss.
+          if (isDataError(failure) && failure.code === 'NO_CREDITS') {
+            router.push('/(onboarding)/paywall');
+          }
+        },
+      },
+    );
   };
+
+  // `messageKey` is a plain string on `DataError`, which stays clear of the
+  // i18n types; every key it can hold is declared in `errors.*`.
+  const refusal =
+    isDataError(error) && error.code !== 'NO_CREDITS' ? t(error.messageKey as ParseKeys) : null;
 
   // No map backdrop and no scrim: the sheet is presented over the real map
   // now, and the system dims what is behind it.
@@ -74,7 +100,12 @@ export function JoinRequestScreen() {
 
       <SealNote>{t('plan.request.privacyNote', { name: host?.name ?? '' })}</SealNote>
 
-      <Button label={t('plan.request.send')} onPress={send} />
+      <Button
+        label={isPending ? t('plan.request.sending') : t('plan.request.send')}
+        disabled={isPending}
+        onPress={send}
+      />
+      {refusal ? <Text className="text-center text-[14px] text-ink-dim">{refusal}</Text> : null}
       <TextButton label={t('common.cancel')} tone="body" onPress={() => router.back()} />
     </SheetSurface>
   );

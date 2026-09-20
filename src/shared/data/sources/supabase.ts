@@ -846,9 +846,14 @@ export const supabaseSource: DataSource = {
       }
       if (patch.interests !== undefined) columns.interests = [...patch.interests];
       if (patch.spokenLanguages !== undefined) {
-        // The column is the `language_code` enum. The catalogue's codes are
-        // the enum's values, so this is a narrowing the database checks
-        // again on the way in: a code it does not know is refused there.
+        // The column is the `language_code` enum and `SpokenLanguage.code` is
+        // a validated `string` — it also carries codes read back out of the
+        // database and out of `nearby_plans()`' untyped JSON, so it cannot be
+        // the enum itself. What makes the narrowing sound is that every code a
+        // person can pick comes from the catalogue in `@shared/lib/languages`,
+        // and `LanguageCatalogueCode` there is checked against this same enum
+        // at compile time: a catalogue entry the enum lacks fails `typecheck`
+        // rather than reaching Postgres.
         columns.languages = patch.spokenLanguages.map((language) => language.code as LanguageCode);
       }
 

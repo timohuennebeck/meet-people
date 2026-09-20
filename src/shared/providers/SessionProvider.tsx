@@ -42,6 +42,27 @@ const SIGNED_OUT: SessionState = {
   isSubscribed: false,
 };
 
+/**
+ * What the flags read with no Supabase project configured.
+ *
+ * `hasSupabase` being false is the app's offline mode: `dataSource` resolves
+ * against the fixtures transcribed from the design, and everything renders
+ * without a network. Authentication is the one thing that cannot fall back
+ * that way — there is no account to sign into — so treating an unconfigured
+ * build as signed out made every screen past the welcome step unreachable and
+ * the entire fixture source dead code.
+ *
+ * So an unconfigured build is a signed-in demo: onboarded and verified, since
+ * those gate whole areas of the app, and **not** subscribed, because the free
+ * tier is what most people see and the paywall states should be the ones on
+ * screen by default. Nothing here touches a build that has credentials.
+ */
+const DEMO: Omit<SessionState, 'isAuthenticated'> = {
+  hasOnboarded: true,
+  isVerified: true,
+  isSubscribed: false,
+};
+
 const SessionContext = createContext<SessionContextValue | null>(null);
 
 /**
@@ -163,7 +184,8 @@ export function SessionProvider({ children }: { children: ReactNode }) {
    * `flags` — it does not have to, because a flag only counts while it belongs
    * to the session on screen.
    */
-  const derived = userId !== null && flagsFor === userId ? flags : SIGNED_OUT;
+  const derived =
+    supabase === null ? DEMO : userId !== null && flagsFor === userId ? flags : SIGNED_OUT;
 
   /**
    * Holds the tree until the app knows both whether someone is signed in and,
@@ -232,7 +254,9 @@ export function SessionProvider({ children }: { children: ReactNode }) {
   const value = useMemo<SessionContextValue>(
     () => ({
       ...derived,
-      isAuthenticated: Boolean(session),
+      // With no project configured there is no session to have, and the
+      // fixtures are the whole app — see `DEMO`.
+      isAuthenticated: supabase ? Boolean(session) : true,
       isReady,
       signIn,
       signOut,

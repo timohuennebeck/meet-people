@@ -5,10 +5,18 @@
  * here rather than in either feature. `name` is the display name in the app's
  * source locale and `endonym` is the language's own name — the design shows
  * both, one above the other.
+ *
+ * The language lists are `as const` so their codes stay literals rather than
+ * widening to `string`; `LanguageCatalogueCode` below is what that buys, and
+ * the guard beside it is what keeps the catalogue and the database's
+ * `language_code` enum from drifting apart.
  */
 
-export interface LanguageOption {
-  /** BCP-47 language code. */
+import type { LanguageCode } from '@shared/lib/supabase/mapping';
+
+/** The shape of a row in any of the catalogues: a code, a flag and two names. */
+export interface FlagOption {
+  /** BCP-47 language code, or ISO 3166-1 alpha-2 where the row is a country. */
   code: string;
   /** ISO 3166-1 alpha-2 code for the flag. */
   flag: string;
@@ -17,31 +25,31 @@ export interface LanguageOption {
 }
 
 /** Languages the app interface is available in. */
-export const APP_LANGUAGES: readonly LanguageOption[] = [
+export const APP_LANGUAGES = [
   { code: 'pt', flag: 'pt', name: 'Português', endonym: 'Português' },
   { code: 'en', flag: 'gb', name: 'English', endonym: 'Inglês' },
   { code: 'es', flag: 'es', name: 'Español', endonym: 'Espanhol' },
   { code: 'de', flag: 'de', name: 'Deutsch', endonym: 'Alemão' },
   { code: 'fr', flag: 'fr', name: 'Français', endonym: 'Francês' },
   { code: 'it', flag: 'it', name: 'Italiano', endonym: 'Italiano' },
-];
+] as const satisfies readonly FlagOption[];
 
 /** Languages a user can list as one they speak. */
-export const SPOKEN_LANGUAGES: readonly LanguageOption[] = [
+export const SPOKEN_LANGUAGES = [
   { code: 'de', flag: 'de', name: 'Alemão', endonym: 'Deutsch' },
   { code: 'en', flag: 'gb', name: 'Inglês', endonym: 'English' },
   { code: 'pt', flag: 'pt', name: 'Português', endonym: 'Português' },
   { code: 'tr', flag: 'tr', name: 'Turco', endonym: 'Türkçe' },
   { code: 'es', flag: 'es', name: 'Espanhol', endonym: 'Español' },
   { code: 'pl', flag: 'pl', name: 'Polonês', endonym: 'Polski' },
-];
+] as const satisfies readonly FlagOption[];
 
 /**
  * The full catalogue the "search another language" step looks through. The
  * shortlists above are the handful each screen offers up front; this is what
  * typing reaches.
  */
-export const SEARCHABLE_LANGUAGES: readonly LanguageOption[] = [
+export const SEARCHABLE_LANGUAGES = [
   { code: 'de', flag: 'de', name: 'Alemão', endonym: 'Deutsch' },
   { code: 'ar', flag: 'sa', name: 'Árabe', endonym: 'العربية' },
   { code: 'zh', flag: 'cn', name: 'Chinês', endonym: '中文' },
@@ -63,7 +71,36 @@ export const SEARCHABLE_LANGUAGES: readonly LanguageOption[] = [
   { code: 'sv', flag: 'se', name: 'Sueco', endonym: 'Svenska' },
   { code: 'tr', flag: 'tr', name: 'Turco', endonym: 'Türkçe' },
   { code: 'uk', flag: 'ua', name: 'Ucraniano', endonym: 'Українська' },
-];
+] as const satisfies readonly FlagOption[];
+
+/** Every code the three language catalogues above hold, as literals. */
+type CatalogueCode =
+  | (typeof APP_LANGUAGES)[number]['code']
+  | (typeof SPOKEN_LANGUAGES)[number]['code']
+  | (typeof SEARCHABLE_LANGUAGES)[number]['code'];
+
+/**
+ * Passes a code through unchanged, but only if the `language_code` Postgres
+ * enum admits it. The constraint is the whole point: it is where the catalogue
+ * is checked against the database, at compile time.
+ */
+type EnumMember<T extends LanguageCode> = T;
+
+/**
+ * The catalogue's codes, proven to be values the `languages` column will take.
+ *
+ * **Adding a language above means adding its value to the `language_code` enum
+ * in a migration too.** Skip that and this alias stops satisfying
+ * `EnumMember`'s constraint, so `npm run typecheck` fails here — instead of
+ * Postgres raising `22P02` the first time somebody saves that language, which
+ * is exactly how `pt-BR` got in once.
+ */
+export type LanguageCatalogueCode = EnumMember<CatalogueCode>;
+
+/** A row in one of the language catalogues. */
+export interface LanguageOption extends FlagOption {
+  code: LanguageCatalogueCode;
+}
 
 /**
  * Catalogue entries whose name or endonym contains the query, prefix matches
@@ -86,8 +123,8 @@ export function searchLanguages(query: string): LanguageOption[] {
   });
 }
 
-/** Countries a user can list as home. */
-export const COUNTRIES: readonly LanguageOption[] = [
+/** Countries a user can list as home — `code` is a country, not a language. */
+export const COUNTRIES: readonly FlagOption[] = [
   { code: 'es', flag: 'es', name: 'Espanha', endonym: 'España' },
   { code: 'de', flag: 'de', name: 'Alemanha', endonym: 'Deutschland' },
   { code: 'tr', flag: 'tr', name: 'Turquia', endonym: 'Türkiye' },
@@ -105,7 +142,10 @@ export function languageName(code: string): string {
  * The onboarding step and the settings page each show a different shortlist.
  */
 export function pickLanguages(codes: readonly string[]): LanguageOption[] {
+  // The predicate is inferred rather than written out: spelling it as
+  // `language is LanguageOption` would widen each row back to the interface,
+  // and the literal element types are the whole point of the `as const` above.
   return codes
     .map((code) => SEARCHABLE_LANGUAGES.find((language) => language.code === code))
-    .filter((language): language is LanguageOption => language !== undefined);
+    .filter((language) => language !== undefined);
 }
