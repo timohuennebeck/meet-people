@@ -1,5 +1,6 @@
 import { LinearGradient } from 'expo-linear-gradient';
 import { useLocalSearchParams, useRouter } from 'expo-router';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { View } from 'react-native';
 
@@ -18,9 +19,6 @@ import {
 
 import { usePlan, useSetMembership } from '../data/usePlans';
 
-/** The message the design shows already typed into the field. */
-const SAMPLE_MESSAGE = 'Jogo desde criança, moro a duas quadras. Levo meu relógio de xadrez.';
-
 /**
  * The join-request sheet: a note to the host, a few one-tap additions, and a
  * plain statement of what the host will and will not see.
@@ -33,6 +31,11 @@ export function JoinRequestScreen() {
   const { mutate: setMembership } = useSetMembership(id ?? '');
 
   const host = plan?.host;
+  const [message, setMessage] = useState('');
+
+  // The chips under the field are one-tap additions to the note, not filters.
+  const append = (phrase: string) =>
+    setMessage((current) => (current.trim() ? `${current.trim()} ${phrase}.` : `${phrase}.`));
 
   const send = () => {
     if (plan) setMembership('requested');
@@ -59,12 +62,22 @@ export function JoinRequestScreen() {
           </View>
         </View>
 
-        <NoteField value={SAMPLE_MESSAGE} />
+        <NoteField
+          value={message}
+          onChangeText={setMessage}
+          placeholder={t('plan.request.notePlaceholder')}
+        />
 
         <View className="flex-row flex-wrap gap-[8px]">
-          <Chip label={t('plan.request.chipBeginner')} size="soft" tone="fill" />
-          <Chip label={t('plan.request.chipBoard')} size="soft" tone="fill" />
-          <Chip label={t('plan.request.chipArrival')} size="soft" tone="fill" />
+          {(['chipBeginner', 'chipBoard', 'chipArrival'] as const).map((key) => (
+            <Chip
+              key={key}
+              label={t(`plan.request.${key}`)}
+              size="soft"
+              tone="fill"
+              onPress={() => append(t(`plan.request.${key}`))}
+            />
+          ))}
         </View>
 
         <SealNote>{t('plan.request.privacyNote', { name: host?.name ?? '' })}</SealNote>

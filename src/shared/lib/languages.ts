@@ -36,6 +36,56 @@ export const SPOKEN_LANGUAGES: readonly LanguageOption[] = [
   { code: 'pl', flag: 'pl', name: 'Polonês', endonym: 'Polski' },
 ];
 
+/**
+ * The full catalogue the "search another language" step looks through. The
+ * shortlists above are the handful each screen offers up front; this is what
+ * typing reaches.
+ */
+export const SEARCHABLE_LANGUAGES: readonly LanguageOption[] = [
+  { code: 'de', flag: 'de', name: 'Alemão', endonym: 'Deutsch' },
+  { code: 'ar', flag: 'sa', name: 'Árabe', endonym: 'العربية' },
+  { code: 'zh', flag: 'cn', name: 'Chinês', endonym: '中文' },
+  { code: 'ko', flag: 'kr', name: 'Coreano', endonym: '한국어' },
+  { code: 'da', flag: 'dk', name: 'Dinamarquês', endonym: 'Dansk' },
+  { code: 'es', flag: 'es', name: 'Espanhol', endonym: 'Español' },
+  { code: 'fr', flag: 'fr', name: 'Francês', endonym: 'Français' },
+  { code: 'el', flag: 'gr', name: 'Grego', endonym: 'Ελληνικά' },
+  { code: 'he', flag: 'il', name: 'Hebraico', endonym: 'עברית' },
+  { code: 'hi', flag: 'in', name: 'Híndi', endonym: 'हिन्दी' },
+  { code: 'nl', flag: 'nl', name: 'Holandês', endonym: 'Nederlands' },
+  { code: 'en', flag: 'gb', name: 'Inglês', endonym: 'English' },
+  { code: 'it', flag: 'it', name: 'Italiano', endonym: 'Italiano' },
+  { code: 'ja', flag: 'jp', name: 'Japonês', endonym: '日本語' },
+  { code: 'pl', flag: 'pl', name: 'Polonês', endonym: 'Polski' },
+  { code: 'pt', flag: 'pt', name: 'Português', endonym: 'Português' },
+  { code: 'pt-BR', flag: 'br', name: 'Português (Brasil)', endonym: 'Português do Brasil' },
+  { code: 'ru', flag: 'ru', name: 'Russo', endonym: 'Русский' },
+  { code: 'sv', flag: 'se', name: 'Sueco', endonym: 'Svenska' },
+  { code: 'tr', flag: 'tr', name: 'Turco', endonym: 'Türkçe' },
+  { code: 'uk', flag: 'ua', name: 'Ucraniano', endonym: 'Українська' },
+];
+
+/**
+ * Catalogue entries whose name or endonym contains the query, prefix matches
+ * first so typing "por" puts "Português" above "Português (Brasil)" rather than
+ * above whatever happens to sort first.
+ */
+export function searchLanguages(query: string): LanguageOption[] {
+  const needle = query.trim().toLowerCase();
+  if (!needle) return [];
+
+  const matches = SEARCHABLE_LANGUAGES.filter((language) =>
+    `${language.name} ${language.endonym}`.toLowerCase().includes(needle),
+  );
+
+  return matches.sort((a, b) => {
+    const aPrefix = a.name.toLowerCase().startsWith(needle);
+    const bPrefix = b.name.toLowerCase().startsWith(needle);
+    if (aPrefix !== bPrefix) return aPrefix ? -1 : 1;
+    return a.name.localeCompare(b.name);
+  });
+}
+
 /** Countries a user can list as home. */
 export const COUNTRIES: readonly LanguageOption[] = [
   { code: 'es', flag: 'es', name: 'Espanha', endonym: 'España' },
@@ -52,9 +102,9 @@ export const LEVEL_LABEL = {
   learning: 'Aprendendo',
 } as const;
 
-/** Looks up a spoken language's display name, falling back to its code. */
+/** Looks up a language's display name, falling back to its code. */
 export function languageName(code: string): string {
-  return SPOKEN_LANGUAGES.find((language) => language.code === code)?.name ?? code;
+  return SEARCHABLE_LANGUAGES.find((language) => language.code === code)?.name ?? code;
 }
 
 /**
@@ -63,6 +113,6 @@ export function languageName(code: string): string {
  */
 export function pickLanguages(codes: readonly string[]): LanguageOption[] {
   return codes
-    .map((code) => SPOKEN_LANGUAGES.find((language) => language.code === code))
+    .map((code) => SEARCHABLE_LANGUAGES.find((language) => language.code === code))
     .filter((language): language is LanguageOption => language !== undefined);
 }

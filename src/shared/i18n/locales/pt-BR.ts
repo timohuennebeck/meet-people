@@ -93,6 +93,8 @@ export const ptBR = {
     },
     languageSearch: {
       title: 'Procurar idioma',
+      placeholder: 'Buscar idioma',
+      noResults: 'Nenhum idioma para “{{query}}”.',
       nearbyCommon: 'COMUNS NO BAIRRO',
     },
     account: {
@@ -113,7 +115,12 @@ export const ptBR = {
     signUp: {
       title: 'Criar sua conta.',
       subtitle: 'Use um e-mail que você abre sempre. Ele confirma o seu selo.',
+      emailPlaceholder: 'voce@email.com',
+      togglePassword: 'Mostrar ou ocultar a senha',
       strength: 'Força da senha',
+      weak: 'Fraca',
+      fair: 'Média',
+      good: 'Boa',
       strong: 'Forte',
       haveAccount: 'Já tem conta?',
       signIn: 'Entrar',
@@ -137,6 +144,7 @@ export const ptBR = {
     name: {
       title: 'Como você se chama?',
       subtitle: 'Só o primeiro nome.',
+      placeholder: 'Seu nome',
     },
     birthday: {
       title: 'Quando é seu\naniversário?',
@@ -158,6 +166,7 @@ export const ptBR = {
     phone: {
       title: 'Seu telefone',
       subtitle: 'Um número, um perfil.',
+      placeholder: '151 23456789',
       sendCode: 'Enviar código',
     },
     code: {
@@ -302,6 +311,7 @@ export const ptBR = {
     request: {
       title: 'Diga oi para {{name}}',
       subtitle: 'Ele decide quem entra.',
+      notePlaceholder: 'Escreva uma mensagem curta.',
       chipBeginner: 'Sou iniciante',
       chipBoard: 'Levo tabuleiro',
       chipArrival: 'Chego 19:15',
@@ -322,6 +332,7 @@ export const ptBR = {
       subtitle: 'Sua vaga volta para o mapa e {{name}} recebe um aviso. Faltam 3 h para começar.',
       messageLabel: 'RECADO PARA O GRUPO · OPCIONAL',
       attendees: 'com {{names}} e você',
+      notePlaceholder: 'Desculpa, meu turno mudou. Fica para a próxima.',
       reasonWork: 'Imprevisto no trabalho',
       reasonSick: 'Estou doente',
       warning:
@@ -335,6 +346,7 @@ export const ptBR = {
     what: {
       title: 'Como se chama seu plano?',
       subtitle: 'Uma frase basta.',
+      placeholder: 'Tarde de jogos no Café Kotti',
       counter: '{{used}}/{{max}}',
       suggestions: 'SUGESTÕES',
     },
@@ -413,6 +425,7 @@ export const ptBR = {
     scopePlans: 'Planos',
     scopePlaces: 'Lugares',
     peopleCount: 'PESSOAS · {{count}}',
+    placeholder: 'Buscar pessoas',
     recent: 'BUSCAS RECENTES',
   },
 

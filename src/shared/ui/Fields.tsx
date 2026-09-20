@@ -1,17 +1,181 @@
-import { View } from 'react-native';
+import { type ReactNode, useState } from 'react';
+import { TextInput, View, type TextInputProps } from 'react-native';
 
 import { cn } from '@shared/lib/cn';
+import { colors } from '@shared/theme/tokens';
 
-import { Caret } from './Caret';
 import { Chip } from './Chip';
-import { Text } from './Text';
+import { FONT_FAMILY, Text, type FontWeight } from './Text';
+
+type FocusHandler = NonNullable<TextInputProps['onFocus']>;
+
+/**
+ * Every field in the design draws a `1px #E6EBF3` ring at rest and an inset
+ * `2px #2F7CF6` one while focused. A React Native border eats into the padding,
+ * so compensating by the border width in both states keeps the text on the same
+ * x and the field the same size as it gains its ring.
+ */
+function useFocusRing(onFocus?: FocusHandler, onBlur?: FocusHandler, enabled = true) {
+  const [focused, setFocused] = useState(false);
+
+  return {
+    border: enabled ? (focused ? 2 : 1) : 0,
+    className: enabled ? (focused ? 'border-2 border-brand' : 'border border-hair') : undefined,
+    handlers: {
+      onFocus: (event: Parameters<FocusHandler>[0]) => {
+        setFocused(true);
+        onFocus?.(event);
+      },
+      onBlur: (event: Parameters<FocusHandler>[0]) => {
+        setFocused(false);
+        onBlur?.(event);
+      },
+    },
+  };
+}
+
+/**
+ * React Native pads a `TextInput` on its own — Android reserves room around the
+ * glyphs and both platforms add vertical padding — which fights the design's
+ * exact field heights. Zeroing both lets the wrapper own the box.
+ */
+const INPUT_RESET = { padding: 0, margin: 0, includeFontPadding: false } as const;
+
+export interface TextFieldProps extends Omit<TextInputProps, 'style' | 'className'> {
+  value: string;
+  onChangeText: (next: string) => void;
+  /** Drawn before the input, e.g. the search glyph. */
+  leading?: ReactNode;
+  /** Drawn after the input, e.g. the password reveal eye. */
+  accessory?: ReactNode;
+  height?: number;
+  fontSize?: number;
+  radius?: number;
+  weight?: FontWeight;
+  /** The name step's field sits on a tinted card and the design gives it no ring. */
+  ring?: boolean;
+  /** Side padding before the ring is compensated for; the design's own value. */
+  paddingHorizontal?: number;
+  className?: string;
+}
+
+/** Single-line field — e-mail, password, plan title and search inputs. */
+export function TextField({
+  value,
+  onChangeText,
+  leading,
+  accessory,
+  height = 56,
+  fontSize = 16.5,
+  radius = 18,
+  weight = 400,
+  ring: showRing = true,
+  paddingHorizontal = 16,
+  className,
+  onFocus,
+  onBlur,
+  ...rest
+}: TextFieldProps) {
+  const ring = useFocusRing(onFocus, onBlur, showRing);
+
+  return (
+    <View
+      className={cn(
+        'shrink-0 flex-row items-center gap-[10px] bg-surface',
+        ring.className,
+        className,
+      )}
+      style={{ height, borderRadius: radius, paddingHorizontal: paddingHorizontal - ring.border }}
+    >
+      {leading}
+      <TextInput
+        {...rest}
+        {...ring.handlers}
+        value={value}
+        onChangeText={onChangeText}
+        placeholderTextColor={colors.inkGhost}
+        selectionColor={colors.brand}
+        style={[INPUT_RESET, { flex: 1, fontFamily: FONT_FAMILY[weight], fontSize, height }]}
+      />
+      {accessory}
+    </View>
+  );
+}
+
+export interface NoteFieldProps extends Omit<TextInputProps, 'style' | 'className' | 'multiline'> {
+  value: string;
+  onChangeText: (next: string) => void;
+  /** The design pads the request note 14px all round and the leave note 16/14. */
+  padding?: { vertical: number; horizontal: number };
+  /** Greys the text, as the optional leave note is drawn. */
+  muted?: boolean;
+  minHeight?: number;
+  fontSize?: number;
+  lineHeight?: number;
+  weight?: FontWeight;
+  className?: string;
+}
+
+/**
+ * `min-height:118px · 2px brand ring` — the multi-line note on the join-request
+ * and leave-plan sheets. Both sheets open with the keyboard already up, so the
+ * design draws it focused.
+ */
+export function NoteField({
+  value,
+  onChangeText,
+  padding = { vertical: 14, horizontal: 14 },
+  muted = false,
+  minHeight = 118,
+  fontSize = 17,
+  lineHeight = 24.65,
+  weight = 400,
+  className,
+  onFocus,
+  onBlur,
+  ...rest
+}: NoteFieldProps) {
+  const ring = useFocusRing(onFocus, onBlur);
+
+  return (
+    <View
+      className={cn('rounded-tile bg-surface', ring.className, className)}
+      style={{
+        minHeight,
+        paddingVertical: padding.vertical - ring.border,
+        paddingHorizontal: padding.horizontal - ring.border,
+      }}
+    >
+      <TextInput
+        {...rest}
+        {...ring.handlers}
+        multiline
+        value={value}
+        onChangeText={onChangeText}
+        placeholderTextColor={colors.inkGhost}
+        selectionColor={colors.brand}
+        textAlignVertical="top"
+        style={[
+          INPUT_RESET,
+          {
+            flex: 1,
+            fontFamily: FONT_FAMILY[weight],
+            fontSize,
+            lineHeight,
+            color: muted ? colors.inkTrace : colors.ink,
+          },
+        ]}
+      />
+    </View>
+  );
+}
 
 export interface TagInputProps {
   /** Committed tags, each rendered as a removable brand pill. */
   tags: readonly string[];
-  /** Text currently being typed, shown after the tags with a blinking caret. */
-  draft?: string;
-  onRemove?: (tag: string) => void;
+  onAdd: (tag: string) => void;
+  onRemove: (tag: string) => void;
+  placeholder?: string;
   /** Field height: 170 in onboarding, 190 on the settings page. */
   minHeight?: number;
   className?: string;
@@ -19,104 +183,82 @@ export interface TagInputProps {
 
 /**
  * `min-height:170px · radius:24px · inset 0 0 0 2px #2F7CF6 · padding:14px` —
- * the "type and press enter" interests field. The 2px ring is converted to a
- * border, so padding is reduced by 2 to keep the tags where the design puts them.
+ * the "type and press enter" interests field.
+ *
+ * Return commits the draft; backspace on an empty draft takes the last tag
+ * back, which is what every tag field people have used before them does.
  */
-export function TagInput({ tags, draft, onRemove, minHeight = 170, className }: TagInputProps) {
+export function TagInput({
+  tags,
+  onAdd,
+  onRemove,
+  placeholder,
+  minHeight = 170,
+  className,
+}: TagInputProps) {
+  const [draft, setDraft] = useState('');
+  const ring = useFocusRing();
+
+  const commit = () => {
+    const tag = draft.trim();
+    setDraft('');
+    if (tag && !tags.includes(tag)) onAdd(tag);
+  };
+
   return (
     <View
-      className={cn('shrink-0 rounded-panel border-2 border-brand bg-surface p-[12px]', className)}
-      style={{ minHeight }}
+      className={cn('shrink-0 rounded-panel bg-surface', ring.className, className)}
+      style={{ minHeight, padding: 14 - ring.border }}
     >
       <View className="flex-row flex-wrap items-center gap-[8px]">
         {tags.map((tag) => (
-          <Chip key={tag} label={tag} size="tag" tone="brand" onRemove={() => onRemove?.(tag)} />
+          <Chip key={tag} label={tag} size="tag" tone="brand" onRemove={() => onRemove(tag)} />
         ))}
-        {draft !== undefined ? (
-          <View className="flex-row items-center px-[2px] py-[9px]">
-            <Text className="text-[16px]">{draft}</Text>
-            <Caret height={20} gap={1} />
-          </View>
-        ) : null}
+        <TextInput
+          {...ring.handlers}
+          value={draft}
+          onChangeText={setDraft}
+          onSubmitEditing={commit}
+          onKeyPress={({ nativeEvent }) => {
+            if (nativeEvent.key === 'Backspace' && draft === '' && tags.length > 0) {
+              onRemove(tags[tags.length - 1]!);
+            }
+          }}
+          placeholder={tags.length === 0 ? placeholder : undefined}
+          placeholderTextColor={colors.inkGhost}
+          selectionColor={colors.brand}
+          blurOnSubmit={false}
+          returnKeyType="done"
+          autoCorrect={false}
+          style={[
+            INPUT_RESET,
+            {
+              minWidth: 80,
+              flexGrow: 1,
+              paddingVertical: 9,
+              fontFamily: FONT_FAMILY[400],
+              fontSize: 16,
+            },
+          ]}
+        />
       </View>
     </View>
   );
 }
 
-export interface TextFieldProps {
-  /** Sample content the design shows already typed into the field. */
-  value?: string;
-  /** Grey prompt shown when `value` is absent. */
-  placeholder?: string;
-  /** Draws the focused 2px brand ring instead of the resting hairline. */
-  focused?: boolean;
-  /** Appends a blinking caret after the value. */
-  caret?: boolean;
-  height?: number;
-  fontSize?: number;
-  radius?: number;
+export interface FieldLabelProps {
+  children: string;
   className?: string;
 }
 
-/** Single-line field — e-mail, password, plan title and search inputs. */
-export function TextField({
-  value,
-  placeholder,
-  focused = false,
-  caret = false,
-  height = 56,
-  fontSize = 16.5,
-  radius = 18,
-  className,
-}: TextFieldProps) {
-  // Focusing swaps a 1px ring for a 2px one. Compensating by the border width
-  // in both states keeps the text on the same x as the field gains its ring.
-  const border = focused ? 2 : 1;
-
+/** `12.5px/600 · .14em tracking` — the small-caps label above an input. */
+export function FieldLabel({ children, className }: FieldLabelProps) {
   return (
-    <View
-      className={cn(
-        'flex-row items-center bg-surface',
-        focused ? 'border-2 border-brand' : 'border border-hair',
-        className,
-      )}
-      style={{ height, borderRadius: radius, paddingHorizontal: 16 - border }}
+    <Text
+      weight={600}
+      className={cn('shrink-0 text-[12.5px] tracking-[1.75px] text-ink-dim', className)}
     >
-      <Text className={cn(value === undefined && 'text-ink-ghost')} style={{ fontSize }}>
-        {value ?? placeholder}
-      </Text>
-      {caret ? <Caret height={fontSize + 3.5} /> : null}
-    </View>
-  );
-}
-
-export interface NoteFieldProps {
-  /** Sample content the design shows already typed into the note. */
-  value: string;
-  /** The design pads the request note 14px all round and the leave note 16/14. */
-  padding?: { vertical: number; horizontal: number };
-  /** Greys the text, as the optional leave note is drawn. */
-  muted?: boolean;
-}
-
-/**
- * `min-height:118px · 2px brand ring` — the multi-line note on the join-request
- * and leave-plan sheets, focused with the keyboard already up.
- */
-export function NoteField({
-  value,
-  padding = { vertical: 14, horizontal: 14 },
-  muted = false,
-}: NoteFieldProps) {
-  return (
-    <View
-      className="min-h-[118px] rounded-tile border-2 border-brand bg-surface"
-      style={{ paddingVertical: padding.vertical, paddingHorizontal: padding.horizontal }}
-    >
-      <Text className={cn('text-[17px] leading-[24.65px]', muted && 'text-ink-trace')}>
-        {value}
-        <Caret height={20} />
-      </Text>
-    </View>
+      {children}
+    </Text>
   );
 }

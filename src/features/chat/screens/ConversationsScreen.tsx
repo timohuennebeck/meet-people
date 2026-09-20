@@ -1,10 +1,11 @@
 import { useRouter } from 'expo-router';
 import { MagnifyingGlass } from 'phosphor-react-native';
+import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ScrollView, View } from 'react-native';
 
 import { colors } from '@shared/theme/tokens';
-import { CircleButton, Glyph, Screen, SectionLabel, Text } from '@shared/ui';
+import { CircleButton, Glyph, Screen, SectionLabel, Text, TextField } from '@shared/ui';
 
 import { useConversations, useUnreadCount } from '../data/useChat';
 import { ConversationRow } from '../ui/ConversationRow';
@@ -16,6 +17,17 @@ export function ConversationsScreen() {
   const { data: conversations } = useConversations();
 
   const unreadMessages = useUnreadCount();
+  const [query, setQuery] = useState('');
+
+  // Title and last message both, so searching for a name finds the thread it
+  // was said in as well as the plan it belongs to.
+  const matches = useMemo(() => {
+    const needle = query.trim().toLowerCase();
+    if (!needle) return conversations ?? [];
+    return (conversations ?? []).filter((conversation) =>
+      `${conversation.title} ${conversation.preview}`.toLowerCase().includes(needle),
+    );
+  }, [conversations, query]);
 
   return (
     <Screen className="bg-surface">
@@ -32,10 +44,20 @@ export function ConversationsScreen() {
         </CircleButton>
       </View>
 
-      <View className="mt-[16px] h-[46px] shrink-0 flex-row items-center gap-[10px] rounded-pill bg-surface-fill px-[18px]">
-        <MagnifyingGlass size={20} color={colors.inkGhost} />
-        <Text className="text-[15.5px] text-ink-ghost">{t('chat.searchPlaceholder')}</Text>
-      </View>
+      <TextField
+        className="mt-[16px] rounded-pill bg-surface-fill"
+        ring={false}
+        height={46}
+        radius={999}
+        fontSize={15.5}
+        paddingHorizontal={18}
+        value={query}
+        onChangeText={setQuery}
+        placeholder={t('chat.searchPlaceholder')}
+        autoCorrect={false}
+        clearButtonMode="while-editing"
+        leading={<MagnifyingGlass size={20} color={colors.inkGhost} />}
+      />
 
       <View className="mt-[22px] shrink-0 flex-row items-center justify-between">
         <SectionLabel>{t('chat.yourPlans')}</SectionLabel>
@@ -47,7 +69,7 @@ export function ConversationsScreen() {
       </View>
 
       <ScrollView className="mt-[6px] min-h-0 flex-1" showsVerticalScrollIndicator={false}>
-        {(conversations ?? []).map((conversation) => (
+        {matches.map((conversation) => (
           <ConversationRow
             key={conversation.id}
             conversation={conversation}

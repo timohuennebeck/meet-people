@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import { View, type ViewProps } from 'react-native';
+import { KeyboardAvoidingView, Platform, View, type ViewProps } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { cn } from '@shared/lib/cn';
@@ -30,18 +30,34 @@ export interface ScreenProps extends ViewProps {
   children: ReactNode;
   /** Which padding preset from the design to apply. */
   padding?: ScreenPadding;
+  /**
+   * Shrinks the screen to sit above the keyboard. On for anything with a field
+   * in it, which is most screens; off for the map, whose sheets and carousel
+   * are positioned against the full height.
+   */
+  avoidKeyboard?: boolean;
   className?: string;
 }
 
 /**
  * Root container for a screen: sets the background, applies the design's
  * padding preset and clips overflow the way the design frame does.
+ *
+ * Android resizes the window itself, so only iOS needs the padding behaviour —
+ * applying it on both platforms would take the keyboard's height off twice.
  */
-export function Screen({ children, padding = 'step', className, style, ...rest }: ScreenProps) {
+export function Screen({
+  children,
+  padding = 'step',
+  avoidKeyboard = true,
+  className,
+  style,
+  ...rest
+}: ScreenProps) {
   const insets = useSafeAreaInsets();
   const pad = PADDING[padding];
 
-  return (
+  const frame = (
     <View
       {...rest}
       className={cn('flex-1 overflow-hidden bg-surface-app', className)}
@@ -57,5 +73,16 @@ export function Screen({ children, padding = 'step', className, style, ...rest }
     >
       {children}
     </View>
+  );
+
+  if (!avoidKeyboard) return frame;
+
+  return (
+    <KeyboardAvoidingView
+      className="flex-1"
+      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+    >
+      {frame}
+    </KeyboardAvoidingView>
   );
 }

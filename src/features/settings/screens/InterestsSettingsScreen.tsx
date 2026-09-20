@@ -30,7 +30,7 @@ export function InterestsSettingsScreen() {
         className="mt-[16px]"
         minHeight={190}
         tags={interests}
-        draft="mús"
+        onAdd={(tag) => update({ interests: [...interests, tag] })}
         onRemove={(tag) => update({ interests: interests.filter((entry) => entry !== tag) })}
       />
 

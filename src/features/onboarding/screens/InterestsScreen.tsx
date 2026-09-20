@@ -33,7 +33,7 @@ export function InterestsScreen() {
       <TagInput
         className="mt-[18px]"
         tags={tags}
-        draft="caf"
+        onAdd={(tag) => setTags((current) => [...current, tag])}
         onRemove={(tag) => setTags((current) => current.filter((entry) => entry !== tag))}
       />
 

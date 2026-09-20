@@ -1,11 +1,12 @@
 import { useRouter } from 'expo-router';
 import { MagnifyingGlass } from 'phosphor-react-native';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { View } from 'react-native';
 
+import type { Place } from '@shared/data/schemas';
 import { colors } from '@shared/theme/tokens';
-import { Button, Chip, SectionLabel, Text } from '@shared/ui';
+import { Button, Chip, SectionLabel, TextField } from '@shared/ui';
 
 import { useNearbyPlaces, useRecentPlaces } from '../../data/usePlaces';
 import { CreateStepLayout } from '../../ui/CreateStepLayout';
@@ -18,6 +19,17 @@ export function CreateWhereScreen() {
   const { data: recent } = useRecentPlaces();
   const { data: nearby } = useNearbyPlaces();
   const [selected, setSelected] = useState('p-kotti');
+  const [query, setQuery] = useState('');
+
+  // One filter over both lists: typing narrows what is already offered rather
+  // than replacing the sections with a flat result list.
+  const match = useMemo(() => {
+    const needle = query.trim().toLowerCase();
+    return (places: readonly Place[]) =>
+      needle
+        ? places.filter((place) => `${place.name} ${place.address}`.toLowerCase().includes(needle))
+        : places;
+  }, [query]);
 
   return (
     <CreateStepLayout
@@ -31,12 +43,18 @@ export function CreateWhereScreen() {
         </View>
       }
     >
-      <View className="mt-[18px] h-[56px] shrink-0 flex-row items-center gap-[10px] rounded-well border border-hair bg-surface px-[16px]">
-        <MagnifyingGlass size={21} color={colors.inkGhost} />
-        <Text className="flex-1 text-[16px] text-ink-ghost">
-          {t('create.where.searchPlaceholder')}
-        </Text>
-      </View>
+      <TextField
+        className="mt-[18px] rounded-well"
+        height={56}
+        radius={20}
+        fontSize={16}
+        value={query}
+        onChangeText={setQuery}
+        placeholder={t('create.where.searchPlaceholder')}
+        autoCorrect={false}
+        clearButtonMode="while-editing"
+        leading={<MagnifyingGlass size={21} color={colors.inkGhost} />}
+      />
 
       <View className="mt-[12px] shrink-0 flex-row flex-wrap gap-[8px]">
         <Chip label={t('create.where.filterNear')} size="place" tone="brand" />
@@ -45,7 +63,7 @@ export function CreateWhereScreen() {
 
       <SectionLabel className="mt-[18px] shrink-0">{t('create.where.recent')}</SectionLabel>
       <View className="mt-[8px] shrink-0 gap-[10px]">
-        {(recent ?? []).map((place) => (
+        {match(recent ?? []).map((place) => (
           <PlaceRow
             key={place.id}
             place={place}
@@ -57,7 +75,7 @@ export function CreateWhereScreen() {
 
       <SectionLabel className="mt-[18px] shrink-0">{t('create.where.nearYou')}</SectionLabel>
       <View className="mt-[8px] shrink-0 gap-[10px]">
-        {(nearby ?? []).map((place) => (
+        {match(nearby ?? []).map((place) => (
           <PlaceRow
             key={place.id}
             place={place}

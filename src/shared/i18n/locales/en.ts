@@ -94,6 +94,8 @@ export const en: Translation = {
     },
     languageSearch: {
       title: 'Search language',
+      placeholder: 'Search a language',
+      noResults: 'No language matches “{{query}}”.',
       nearbyCommon: 'COMMON NEARBY',
     },
     account: {
@@ -114,7 +116,12 @@ export const en: Translation = {
     signUp: {
       title: 'Create your account.',
       subtitle: 'Use an e-mail you check often. It confirms your badge.',
+      emailPlaceholder: 'you@email.com',
+      togglePassword: 'Show or hide the password',
       strength: 'Password strength',
+      weak: 'Weak',
+      fair: 'Fair',
+      good: 'Good',
       strong: 'Strong',
       haveAccount: 'Already have an account?',
       signIn: 'Sign in',
@@ -138,6 +145,7 @@ export const en: Translation = {
     name: {
       title: "What's your name?",
       subtitle: 'First name only.',
+      placeholder: 'Your name',
     },
     birthday: {
       title: "When's your\nbirthday?",
@@ -159,6 +167,7 @@ export const en: Translation = {
     phone: {
       title: 'Your phone',
       subtitle: 'One number, one profile.',
+      placeholder: '7700 900123',
       sendCode: 'Send code',
     },
     code: {
@@ -302,6 +311,7 @@ export const en: Translation = {
     request: {
       title: 'Say hi to {{name}}',
       subtitle: 'They decide who joins.',
+      notePlaceholder: 'Write a short message.',
       chipBeginner: "I'm a beginner",
       chipBoard: "I'll bring a board",
       chipArrival: "I'll arrive 19:15",
@@ -322,6 +332,7 @@ export const en: Translation = {
       subtitle: 'Your seat goes back on the map and {{name}} gets a heads-up. 3 h until it starts.',
       messageLabel: 'NOTE TO THE GROUP · OPTIONAL',
       attendees: 'with {{names}} and you',
+      notePlaceholder: 'Sorry, my shift changed. Next time.',
       reasonWork: 'Something came up at work',
       reasonSick: "I'm ill",
       warning:
@@ -335,6 +346,7 @@ export const en: Translation = {
     what: {
       title: "What's your plan called?",
       subtitle: 'One sentence is enough.',
+      placeholder: 'Board games at Café Kotti',
       counter: '{{used}}/{{max}}',
       suggestions: 'SUGGESTIONS',
     },
@@ -413,6 +425,7 @@ export const en: Translation = {
     scopePlans: 'Plans',
     scopePlaces: 'Places',
     peopleCount: 'PEOPLE · {{count}}',
+    placeholder: 'Search people',
     recent: 'RECENT SEARCHES',
   },
 

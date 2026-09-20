@@ -36,14 +36,30 @@ const CHIPS = {
 
 export type ChipSize = keyof typeof CHIPS;
 
-/** Fill treatments, independent of size. */
+/**
+ * Fill treatments, independent of size.
+ *
+ * Only the outlined tones have a ring in the design, but a React Native border
+ * takes its width out of the element, so a chip that swaps an outlined tone for
+ * a filled one would shrink by 2px and shunt its row. Every tone therefore
+ * carries a 1px border in its own fill colour, which is invisible and keeps all
+ * chips the same size whichever tone they are wearing.
+ */
 const TONES = {
   /** `#2F7CF6` on white text — selected. */
-  brand: { container: 'bg-brand', text: 'text-white', selectedWeight: true },
+  brand: { container: 'border border-brand bg-brand', text: 'text-white', selectedWeight: true },
   /** `#F1F4F9` — the default resting fill. */
-  fill: { container: 'bg-surface-fill', text: 'text-ink-body', selectedWeight: false },
+  fill: {
+    container: 'border border-surface-fill bg-surface-fill',
+    text: 'text-ink-body',
+    selectedWeight: false,
+  },
   /** `#EEF2F8` — the slightly cooler resting fill used by time chips. */
-  chip: { container: 'bg-surface-chip', text: 'text-ink-body', selectedWeight: false },
+  chip: {
+    container: 'border border-surface-chip bg-surface-chip',
+    text: 'text-ink-body',
+    selectedWeight: false,
+  },
   /** White with a `0 0 0 1px #E6EBF3` ring — suggestion chips. */
   outline: {
     container: 'bg-surface border border-hair',
@@ -57,7 +73,7 @@ const TONES = {
     selectedWeight: false,
   },
   /** White with a soft drop shadow — the resting map filter chips. */
-  raised: { container: 'bg-surface', text: 'text-ink', selectedWeight: true },
+  raised: { container: 'border border-surface bg-surface', text: 'text-ink', selectedWeight: true },
 } as const;
 
 export type ChipTone = keyof typeof TONES;

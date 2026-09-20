@@ -7,7 +7,6 @@ import { Pressable, ScrollView, View } from 'react-native';
 import type { User } from '@shared/data/schemas';
 import { colors } from '@shared/theme/tokens';
 import {
-  Caret,
   Chip,
   Glyph,
   NavHeader,
@@ -15,7 +14,7 @@ import {
   PersonRow,
   Screen,
   SectionLabel,
-  Text,
+  TextField,
 } from '@shared/ui';
 
 import { useRecentSearches, useUserSearch } from '../data/useUsers';
@@ -63,7 +62,7 @@ function ResultGroup({
 export function PeopleSearchScreen() {
   const { t } = useTranslation();
   const router = useRouter();
-  const [term, setTerm] = useState('sara');
+  const [term, setTerm] = useState('');
   const [scope, setScope] = useState<Scope>('people');
 
   const { data: results } = useUserSearch(term);
@@ -75,21 +74,33 @@ export function PeopleSearchScreen() {
     <Screen className="bg-surface">
       <NavHeader title={t('search.title')} onBack={() => router.back()} />
 
-      <View className="mt-[16px] h-[48px] shrink-0 flex-row items-center gap-[10px] rounded-[14px] bg-surface-fill px-[14px]">
-        <MagnifyingGlass size={20} color={colors.inkGhost} />
-        <View className="flex-1 flex-row items-center">
-          <Text className="text-[16px]">{term}</Text>
-          <Caret height={19} />
-        </View>
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel={t('common.cancel')}
-          onPress={() => setTerm('')}
-          className="h-[22px] w-[22px] items-center justify-center rounded-full bg-hair-stone"
-        >
-          <Glyph.CloseClear size={10} />
-        </Pressable>
-      </View>
+      <TextField
+        className="mt-[16px] bg-surface-fill"
+        ring={false}
+        height={48}
+        radius={14}
+        fontSize={16}
+        paddingHorizontal={14}
+        value={term}
+        onChangeText={setTerm}
+        placeholder={t('search.placeholder')}
+        autoFocus
+        autoCorrect={false}
+        autoCapitalize="none"
+        leading={<MagnifyingGlass size={20} color={colors.inkGhost} />}
+        accessory={
+          term ? (
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={t('common.cancel')}
+              onPress={() => setTerm('')}
+              className="h-[22px] w-[22px] shrink-0 items-center justify-center rounded-full bg-hair-stone active:opacity-60"
+            >
+              <Glyph.CloseClear size={10} />
+            </Pressable>
+          ) : null
+        }
+      />
 
       <View className="mt-[14px] shrink-0 flex-row gap-[8px]">
         {SCOPES.map((option) => (

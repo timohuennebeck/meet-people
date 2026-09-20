@@ -1,5 +1,6 @@
 import { LinearGradient } from 'expo-linear-gradient';
 import { useLocalSearchParams, useRouter } from 'expo-router';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { View } from 'react-native';
 
@@ -19,9 +20,6 @@ import {
 
 import { usePlan, useSetMembership } from '../data/usePlans';
 
-/** The note the design shows already drafted, in placeholder grey. */
-const SAMPLE_NOTE = 'Desculpa, meu turno mudou. Fica para a próxima.';
-
 /**
  * Leaving a plan. The confirmation is honest about the consequences — the seat
  * returns to the map, the host is told, the group chat closes — and keeps the
@@ -33,6 +31,7 @@ export function LeavePlanScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { data: plan } = usePlan(id ?? '');
   const { mutate: setMembership } = useSetMembership(id ?? '');
+  const [note, setNote] = useState('');
 
   const leave = () => {
     if (plan) setMembership('guest');
@@ -75,10 +74,23 @@ export function LeavePlanScreen() {
 
         <View className="gap-[8px]">
           <SectionLabel sheet>{t('plan.leave.messageLabel')}</SectionLabel>
-          <NoteField value={SAMPLE_NOTE} muted padding={{ vertical: 14, horizontal: 16 }} />
+          <NoteField
+            value={note}
+            onChangeText={setNote}
+            placeholder={t('plan.leave.notePlaceholder')}
+            muted
+            padding={{ vertical: 14, horizontal: 16 }}
+          />
           <View className="flex-row flex-wrap gap-[8px]">
-            <Chip label={t('plan.leave.reasonWork')} size="reason" tone="fill" />
-            <Chip label={t('plan.leave.reasonSick')} size="reason" tone="fill" />
+            {(['reasonWork', 'reasonSick'] as const).map((key) => (
+              <Chip
+                key={key}
+                label={t(`plan.leave.${key}`)}
+                size="reason"
+                tone="fill"
+                onPress={() => setNote(t(`plan.leave.${key}`))}
+              />
+            ))}
           </View>
         </View>
 

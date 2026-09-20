@@ -1,15 +1,17 @@
 import { useRouter } from 'expo-router';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { View } from 'react-native';
 
 import { StepScaffold } from '@shared/components/StepScaffold';
 import { STEPS } from '@shared/lib/steps';
-import { Button, Caret, Mascot, Spacer, Text } from '@shared/ui';
+import { Button, Mascot, Spacer, TextField } from '@shared/ui';
 
 /** Step 11 — first name only. */
 export function NameScreen() {
   const { t } = useTranslation();
   const router = useRouter();
+  const [name, setName] = useState('');
 
   return (
     <StepScaffold
@@ -27,12 +29,21 @@ export function NameScreen() {
         <View className="h-[212px] items-center justify-center">
           <Mascot size={190} />
         </View>
-        <View className="flex-row items-center rounded-field bg-surface px-[16px] py-[18px]">
-          <Text weight={500} className="text-[19px]">
-            Mara
-          </Text>
-          <Caret height={22} />
-        </View>
+        {/* `radius:18px · padding:18px 16px · 19px/500`, on the tinted card and
+            so without a ring of its own. */}
+        <TextField
+          value={name}
+          onChangeText={setName}
+          placeholder={t('onboarding.name.placeholder')}
+          ring={false}
+          height={60}
+          fontSize={19}
+          weight={500}
+          autoFocus
+          autoCapitalize="words"
+          autoComplete="given-name"
+          returnKeyType="next"
+        />
       </View>
 
       <Spacer />

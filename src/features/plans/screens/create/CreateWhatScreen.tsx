@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { View } from 'react-native';
 
-import { Button, Caret, Chip, SectionLabel, Spacer, Text } from '@shared/ui';
+import { Button, Chip, NoteField, SectionLabel, Spacer, Text } from '@shared/ui';
 
 import { CreateStepLayout } from '../../ui/CreateStepLayout';
 
@@ -16,7 +16,7 @@ const SUGGESTIONS = ['Café da tarde', 'Corrida leve', 'Cinema ao ar livre', 'Ca
 export function CreateWhatScreen() {
   const { t } = useTranslation();
   const router = useRouter();
-  const [title, setTitle] = useState('Tarde de jogos no Café Kotti');
+  const [title, setTitle] = useState('');
 
   return (
     <CreateStepLayout
@@ -26,12 +26,21 @@ export function CreateWhatScreen() {
       subtitle={t('create.what.subtitle')}
       footer={<Button label={t('common.continue')} onPress={() => router.push('/create/where')} />}
     >
-      <View className="mt-[20px] shrink-0 flex-row flex-wrap items-center rounded-tile border-2 border-brand bg-surface p-[16px]">
-        <Text weight={500} className="text-[20px] leading-[27px]">
-          {title}
-        </Text>
-        <Caret height={22} />
-      </View>
+      {/* `radius:22px · padding:16px · 20px/500`, wrapping onto a second line
+          rather than scrolling sideways. */}
+      <NoteField
+        className="mt-[20px] shrink-0"
+        value={title}
+        onChangeText={setTitle}
+        placeholder={t('create.what.placeholder')}
+        padding={{ vertical: 16, horizontal: 16 }}
+        minHeight={0}
+        fontSize={20}
+        lineHeight={27}
+        weight={500}
+        maxLength={MAX_TITLE}
+        autoFocus
+      />
 
       <Text className="mt-[10px] shrink-0 text-right text-[13px] text-ink-dim">
         {t('create.what.counter', { used: String(title.length), max: String(MAX_TITLE) })}
@@ -45,7 +54,7 @@ export function CreateWhatScreen() {
             key={suggestion}
             label={suggestion}
             size="suggestion"
-            tone="outline"
+            tone={title === suggestion ? 'brand' : 'outline'}
             onPress={() => setTitle(suggestion)}
           />
         ))}

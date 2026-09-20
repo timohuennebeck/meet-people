@@ -1,4 +1,5 @@
 import { useRouter } from 'expo-router';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { View } from 'react-native';
 
@@ -29,6 +30,8 @@ function FieldLabel({ children }: { children: string }) {
 export function AccountInlineScreen() {
   const { t } = useTranslation();
   const router = useRouter();
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
 
   return (
     <StepScaffold
@@ -50,12 +53,27 @@ export function AccountInlineScreen() {
       <View className="mt-[22px] shrink-0 gap-[14px]">
         <View className="gap-[7px]">
           <FieldLabel>{t('onboarding.account.emailLabel')}</FieldLabel>
-          <TextField value="sara@" focused caret />
+          <TextField
+            value={email}
+            onChangeText={setEmail}
+            placeholder={t('onboarding.signUp.emailPlaceholder')}
+            autoCapitalize="none"
+            autoComplete="email"
+            keyboardType="email-address"
+            returnKeyType="next"
+          />
         </View>
 
         <View className="gap-[7px]">
           <FieldLabel>{t('onboarding.account.passwordLabel')}</FieldLabel>
-          <TextField placeholder={t('onboarding.account.passwordPlaceholder')} />
+          <TextField
+            value={password}
+            onChangeText={setPassword}
+            placeholder={t('onboarding.account.passwordPlaceholder')}
+            secureTextEntry
+            autoCapitalize="none"
+            autoComplete="new-password"
+          />
         </View>
       </View>
 
