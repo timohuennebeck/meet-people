@@ -18,12 +18,19 @@ export function ConfirmationScreen() {
       titleBlock={
         // `padding:2px 10px 4px · radius:10px` around the name, centred with
         // the words either side of it.
+        //
+        // The band is taller than the line it sits on, because CSS paints an
+        // inline background over the font's whole content area — about 1.21em,
+        // or 38.7px at 32px — not over the 34.56px line box. A `View` cannot
+        // overflow its row that way, so it would push the subtitle and
+        // everything under it 6px down the screen. The negative margin gives
+        // the extra height back to the layout while the band keeps it.
         <View className="flex-row flex-wrap items-center justify-center gap-x-[9px]">
           <StepTitle>{t('onboarding.confirmation.titleLead')}</StepTitle>
           <View className="flex-row items-center">
             <Highlight
-              className="rounded-[10px] bg-brand-tint px-[10px] pb-[4px] pt-[2px]"
-              textClassName="text-[32px] leading-[34.56px] tracking-[-1.024px] text-brand"
+              className="-my-[5px] rounded-[10px] bg-brand-tint px-[10px] pb-[4px] pt-[2px]"
+              textClassName="text-[32px] leading-[38.7px] tracking-[-1.024px] text-brand"
             >
               {VIEWER.name}
             </Highlight>

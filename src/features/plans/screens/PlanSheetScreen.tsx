@@ -214,12 +214,13 @@ function HostState({ plan }: { plan: Plan }) {
 }
 
 /**
- * The × over the map, at the top left of the plan-on-map screen.
+ * The × over the map, for the case where no sheet has rendered yet.
  *
- * The sheet states that open with a photo carry their own × in its top-right
- * corner, but the ones that do not — and the map behind the sheet — left no way
- * out but the system back gesture. This sits where the wordmark does on the map
- * itself, so it lands in the same place on every state.
+ * Every real state goes through `PlanSheetHeader`, whose photo carries the
+ * design's own × in its top-right corner — drawing this one over those as well
+ * put two close buttons on screen, in a spot the design gives to the `treff`
+ * wordmark. It is left for the not-yet-loaded branch, which otherwise offers
+ * nothing but the system back gesture.
  */
 function CloseOverlay({ onPress }: { onPress: () => void }) {
   const { t } = useTranslation();
@@ -276,10 +277,6 @@ export function PlanSheetScreen() {
       ) : (
         <OpenState plan={plan} onJoin={() => router.push(`/plan/${plan.id}/join`)} />
       )}
-
-      {/* Last, so a sheet tall enough to reach the top of the screen cannot
-          bury the only control that closes it. */}
-      <CloseOverlay onPress={() => router.back()} />
     </View>
   );
 }

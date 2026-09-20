@@ -3,6 +3,7 @@ import { useRouter } from 'expo-router';
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { gradients, gradientStops } from '@shared/theme/tokens';
 import {
@@ -33,6 +34,7 @@ function ShareAction({ icon, label }: { icon: ReactNode; label: string }) {
 export function PlanPublishedScreen() {
   const { t } = useTranslation();
   const router = useRouter();
+  const insets = useSafeAreaInsets();
 
   return (
     <Screen padding="hero">
@@ -44,8 +46,12 @@ export function PlanPublishedScreen() {
 
       {/* The plan is already published by the time this screen is reached, so
           the × is a way out of the flow rather than a cancel — it lands on the
-          map, the same place "Concluído" does. */}
-      <View className="shrink-0 flex-row">
+          map, the same place "Concluído" does.
+
+          Absolutely positioned: the design frame has no such control, and
+          giving it a row of its own pushed the mascot and the whole heading
+          block 20px down the screen. */}
+      <View className="absolute left-[24px] z-10" style={{ top: Math.max(62, insets.top) }}>
         <CircleButton
           size={40}
           accessibilityLabel={t('common.close')}
