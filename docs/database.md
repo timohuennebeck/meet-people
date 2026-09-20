@@ -204,6 +204,7 @@ Seed:
 | `selfie_retention_days`    | `7`       | the retention job (§3.8)                    |
 | `plan_seats_max`           | `20`      | the create flow's seat stepper              |
 | `free_radius_max_mi`       | `3`       | radius clamp for non-Plus users (§3.7)      |
+| `max_interests`            | `10`      | the interests trigger (§3.3)                |
 
 Three properties matter. It is readable by **`anon` as well as `authenticated`** — a version gate
 that only works after sign-in cannot lock out a broken build. It has **no write policies**, so only
@@ -213,7 +214,13 @@ Secrets go to Supabase Vault.
 
 Prices, plans and the trial are **not** in the database: RevenueCat offerings own them (§3.7).
 
-Interests are free text (the design's tag input), not a reference table. Spoken languages and
+Interests are free text (the design's tag input), not a reference table, and **capped at
+`max_interests` per profile** — ten to start. A `check` cannot count rows, so a `before insert`
+trigger on `profile_interests` does, reading the number from `app_config` like the other tunables.
+The client enforces the same cap politely (`TagInput` stops at the limit and shows "7/10"; the
+suggestion chips hide once full), so nobody meets it as a database error. Ten because the fixtures
+show two to five, the profile draws them as a wrapped chip row, and past about ten they stop saying
+anything about the person. Spoken languages and
 countries are client constants in `src/shared/lib/languages.ts` today; they stay there until a
 second surface needs them.
 
@@ -289,9 +296,11 @@ step 12, six steps after the account exists.
 ```sql
 create table public.profile_interests (
   profile_id  uuid not null references public.profiles(id) on delete cascade,
-  interest    text not null check (char_length(interest) between 1 and 40),
+  interest    text not null check (interest = btrim(interest) and char_length(interest) between 1 and 30),
   primary key (profile_id, interest)
 );
+-- "Café" and "café" are one interest, or the cap below is dodged with near-duplicates.
+create unique index on public.profile_interests (profile_id, lower(interest));
 
 create table public.profile_languages (
   profile_id     uuid not null references public.profiles(id) on delete cascade,
