@@ -43,7 +43,7 @@ function OpenState({ plan, onJoin }: { plan: Plan; onJoin: () => void }) {
             filled: String(plan.participants.length),
             total: String(plan.capacity),
           })}
-          open={open === 1 ? t('plan.seatsFreeOne') : t('plan.seatsFree', { count: open })}
+          open={t('plan.seatsFree', { count: open })}
         />
         <SeatList
           seats={seatsFor(plan, t('common.freeSeat'), t('common.you'))}
@@ -98,7 +98,7 @@ function RequestedState({ plan, onWithdraw }: { plan: Plan; onWithdraw: () => vo
         detail={`${t('plan.participating', {
           filled: String(plan.participants.length),
           total: String(plan.capacity),
-        })} · ${open === 1 ? t('plan.seatsFreeOne') : t('plan.seatsFree', { count: open })}`}
+        })} · ${t('plan.seatsFree', { count: open })}`}
         action={t('common.profile')}
       />
 
@@ -128,7 +128,7 @@ function JoinedState({ plan, onLeave }: { plan: Plan; onLeave: () => void }) {
             filled: String(plan.participants.length),
             total: String(plan.capacity),
           })}
-          open={open === 1 ? t('plan.seatsFreeOne') : t('plan.seatsFree', { count: open })}
+          open={t('plan.seatsFree', { count: open })}
         />
         <SeatList
           seats={seatsFor(plan, t('common.freeSeat'), t('common.you'))}
@@ -201,7 +201,7 @@ function HostState({ plan }: { plan: Plan }) {
               {t('plan.seatsLabel')}
             </Text>
             <Text weight={600} className="text-[13px] text-category-games">
-              {open === 1 ? t('plan.seatsFreeOne') : t('plan.seatsFree', { count: open })}
+              {t('plan.seatsFree', { count: open })}
             </Text>
           </View>
           {seatRow}

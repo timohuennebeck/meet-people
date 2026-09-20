@@ -42,7 +42,7 @@ function ResultGroup({
 
   return (
     <View className="gap-[10px]">
-      <SectionLabel className="tracking-[1.125px]">{label}</SectionLabel>
+      <SectionLabel>{label}</SectionLabel>
       {people.map(({ user, detail }) => (
         <PersonRow
           key={user.id}

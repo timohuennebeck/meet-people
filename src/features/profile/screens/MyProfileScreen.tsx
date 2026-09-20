@@ -73,7 +73,7 @@ export function MyProfileScreen() {
         showsVerticalScrollIndicator={false}
       >
         <View className="gap-[10px]">
-          <SectionLabel className="tracking-[1.125px]">{t('profile.interests')}</SectionLabel>
+          <SectionLabel>{t('profile.interests')}</SectionLabel>
           <View className="flex-row flex-wrap gap-[8px]">
             {(preferences?.interests ?? me.interests).map((interest) => (
               <Chip key={interest} label={interest} size="soft" tone="fill" />

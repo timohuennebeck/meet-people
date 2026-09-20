@@ -48,7 +48,7 @@ function RootNavigator() {
         <Stack.Screen name="people/[id]" />
         <Stack.Screen name="search" />
         <Stack.Screen name="settings" />
-        <Stack.Screen name="paywall" options={{ presentation: 'modal' }} />
+        <Stack.Screen name="verification-badge" />
       </Stack.Protected>
     </Stack>
   );

@@ -1,6 +1,6 @@
 import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
-import { Pressable, ScrollView, View } from 'react-native';
+import { ScrollView, View } from 'react-native';
 
 import { languageName } from '@shared/lib/languages';
 import { useSession } from '@shared/providers/SessionProvider';
@@ -13,6 +13,7 @@ import {
   Screen,
   SectionLabel,
   Text,
+  TextButton,
 } from '@shared/ui';
 
 import { usePreferences } from '../data/usePreferences';
@@ -32,7 +33,7 @@ function VerifiedPill({ label }: { label: string }) {
 function Group({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <View className="gap-[10px]">
-      <SectionLabel className="tracking-[1.125px]">{label}</SectionLabel>
+      <SectionLabel>{label}</SectionLabel>
       <ListGroup>{children}</ListGroup>
     </View>
   );
@@ -49,6 +50,7 @@ export function SettingsScreen() {
   const languageNames = (preferences?.spokenLanguages ?? [])
     .map((language) => languageName(language.code))
     .join(', ');
+  const range = preferences?.ageRange ?? [21, 34];
 
   return (
     <Screen>
@@ -85,6 +87,12 @@ export function SettingsScreen() {
             })}
             onPress={() => router.push('/settings/interests')}
           />
+          <ListRow
+            divided
+            label={t('settings.audiencePage.title')}
+            value={`${range[0]}–${range[1]}`}
+            onPress={() => router.push('/settings/audience')}
+          />
         </Group>
 
         <Group label={t('settings.groupApp')}>
@@ -108,20 +116,18 @@ export function SettingsScreen() {
             divided
             label={t('settings.verificationBadge')}
             accessory={<VerifiedPill label={t('settings.verified')} />}
+            onPress={() => router.push('/verification-badge')}
           />
           <ListRow divided label={t('settings.privacyHelp')} />
           <ListRow divided destructive label={t('settings.deleteAccount')} />
         </Group>
 
-        <Pressable
-          accessibilityRole="button"
+        <TextButton
+          label={t('settings.signOut')}
+          tone="bodyBold"
+          className="pb-[2px] pt-[4px]"
           onPress={signOut}
-          className="items-center pb-[2px] pt-[4px]"
-        >
-          <Text weight={600} className="text-[15.5px] text-ink-body">
-            {t('settings.signOut')}
-          </Text>
-        </Pressable>
+        />
       </ScrollView>
     </Screen>
   );

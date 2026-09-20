@@ -28,9 +28,7 @@ export function AppLanguageSettingsScreen() {
         contentContainerStyle={{ gap: 10 }}
         showsVerticalScrollIndicator={false}
       >
-        <SectionLabel className="tracking-[1.125px]">
-          {t('settings.appLanguagePage.sectionLabel')}
-        </SectionLabel>
+        <SectionLabel>{t('settings.appLanguagePage.sectionLabel')}</SectionLabel>
 
         <View className="gap-[10px]">
           {APP_LANGUAGES.map((language) => (

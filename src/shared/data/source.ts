@@ -1,5 +1,7 @@
 import type { z } from 'zod';
 
+import { i18n } from '@shared/i18n';
+
 import * as fixtures from './fixtures';
 import {
   conversationSchema,
@@ -151,7 +153,7 @@ export const dataSource = {
         authorId: fixtures.VIEWER.id,
         body,
         createdAt: new Date().toISOString(),
-        receipt: 'Enviada',
+        receipt: i18n.t('chat.sent'),
       };
       const existing = threads.get(conversationId) ?? [];
       // Only the newest own message carries a receipt, as in the design.
@@ -189,5 +191,3 @@ export const dataSource = {
     },
   },
 };
-
-export type DataSource = typeof dataSource;

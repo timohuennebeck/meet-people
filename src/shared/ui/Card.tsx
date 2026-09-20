@@ -27,8 +27,6 @@ const RINGS = {
   brand: { className: 'border-2 border-brand', padCompensation: 2 },
   /** `0 0 0 1px #E0E7F2` — the paywall's unselected plan tile, outset. */
   cool: { className: 'border border-hair-cool', padCompensation: 0 },
-  /** No outline. */
-  none: { className: '', padCompensation: 0 },
 } as const;
 
 export type CardRing = keyof typeof RINGS;
@@ -67,8 +65,6 @@ export function Card({ children, ring = 'hair', padding, className, style, ...re
 export interface SelectableCardProps extends Omit<CardProps, 'ring'> {
   selected?: boolean;
   onPress?: () => void;
-  /** Ring to use when not selected. */
-  restingRing?: CardRing;
 }
 
 /** A `Card` that swaps to the brand ring when chosen. */
@@ -76,12 +72,11 @@ export function SelectableCard({
   children,
   selected = false,
   onPress,
-  restingRing = 'hair',
   className,
   padding,
   ...rest
 }: SelectableCardProps) {
-  const ring: CardRing = selected ? 'brand' : restingRing;
+  const ring: CardRing = selected ? 'brand' : 'hair';
   const recipe = RINGS[ring];
 
   return (

@@ -1,9 +1,11 @@
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
+import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { View } from 'react-native';
 
 import { AVATARS } from '@shared/data/fixtures';
+import { useSession } from '@shared/providers/SessionProvider';
 import { gradients, gradientStops } from '@shared/theme/tokens';
 import { Avatar, Button, CheckLine, Mascot, Screen, Text, VerifiedSeal } from '@shared/ui';
 
@@ -11,7 +13,11 @@ import { Avatar, Button, CheckLine, Mascot, Screen, Text, VerifiedSeal } from '@
 export function VerificationSuccessScreen() {
   const { t } = useTranslation();
   const router = useRouter();
+  const { setVerified } = useSession();
   const name = t('verification.success.badgeName');
+
+  // Reaching this screen means the review cleared, so the badge is now held.
+  useEffect(() => setVerified(true), [setVerified]);
 
   return (
     <Screen padding="hero">

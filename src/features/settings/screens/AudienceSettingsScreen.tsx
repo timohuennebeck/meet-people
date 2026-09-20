@@ -39,9 +39,7 @@ export function AudienceSettingsScreen() {
       </Text>
 
       <View className="mt-[20px] shrink-0 gap-[10px]">
-        <SectionLabel className="tracking-[1.125px]">
-          {t('settings.audiencePage.genderLabel')}
-        </SectionLabel>
+        <SectionLabel>{t('settings.audiencePage.genderLabel')}</SectionLabel>
         <View className="gap-[12px]">
           <View className="flex-row gap-[12px]">
             {options.slice(0, 2).map((option) => (
@@ -68,9 +66,7 @@ export function AudienceSettingsScreen() {
       </View>
 
       <View className="mt-[22px] shrink-0 gap-[10px]">
-        <SectionLabel className="tracking-[1.125px]">
-          {t('settings.audiencePage.ageLabel')}
-        </SectionLabel>
+        <SectionLabel>{t('settings.audiencePage.ageLabel')}</SectionLabel>
         <AgeRangeControl
           range={range}
           onChange={(next) => update({ ageRange: [next[0], next[1]] })}

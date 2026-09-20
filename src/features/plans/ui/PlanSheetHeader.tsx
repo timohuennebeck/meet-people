@@ -2,8 +2,9 @@ import { useTranslation } from 'react-i18next';
 import { View } from 'react-native';
 
 import type { Plan } from '@shared/data/schemas';
-import { cn } from '@shared/lib/cn';
 import { Badge, CATEGORY_STYLE, PlanPhoto, Text } from '@shared/ui';
+
+import { categoryLabel } from '../lib/category';
 
 export interface PlanSheetHeaderProps {
   plan: Plan;
@@ -44,8 +45,6 @@ export function PlanSheetHeader({
 }: PlanSheetHeaderProps) {
   const { t } = useTranslation();
 
-  const categoryLabel =
-    plan.category === 'sport' ? t('plan.categorySport') : t('plan.categoryGames');
   const meta = showDistance ? `${plan.whenLabel} · ${plan.place.distanceLabel}` : plan.whenLabel;
 
   return (
@@ -60,7 +59,10 @@ export function PlanSheetHeader({
           ) : (
             <>
               {showCategory ? (
-                <Badge label={categoryLabel} className={cn(CATEGORY_STYLE[plan.category])} />
+                <Badge
+                  label={categoryLabel(t, plan.category)}
+                  className={CATEGORY_STYLE[plan.category]}
+                />
               ) : null}
               {hosting ? (
                 <Badge

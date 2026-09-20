@@ -119,8 +119,6 @@ export const messageSchema = z.object({
   createdAt: z.string(),
   /** Receipt line under the bubble, e.g. "Visto 9:24" or "Enviada". */
   receipt: z.string().optional(),
-  /** Marks a message that has not yet been confirmed by the server. */
-  pending: z.boolean().optional(),
 });
 export type Message = z.infer<typeof messageSchema>;
 
@@ -173,15 +171,3 @@ export const searchResultSchema = z.object({
 export type SearchResult = z.infer<typeof searchResultSchema>;
 
 export const searchResultsSchema = z.array(searchResultSchema);
-
-/** The draft a user builds while stepping through the create-plan flow. */
-export const planDraftSchema = z.object({
-  title: z.string().max(60),
-  placeId: z.string().nullable(),
-  startsAt: z.string().nullable(),
-  durationMinutes: z.number().int().positive().nullable(),
-  joinMode: joinModeSchema,
-  capacity: z.number().int().min(2).max(20),
-  ageRange: z.tuple([z.number().int(), z.number().int()]).nullable(),
-});
-export type PlanDraft = z.infer<typeof planDraftSchema>;

@@ -5,6 +5,7 @@ import { View } from 'react-native';
 import { Button, Caret, Glyph, Spacer, Text, TextField } from '@shared/ui';
 
 import { STEPS } from '../lib/steps';
+import { LegalNote } from '../ui/LegalNote';
 import { StepLayout } from '../ui/StepLayout';
 
 /** `13px/600 · .06em tracking` — the label above each field on this variant. */
@@ -34,19 +35,7 @@ export function AccountInlineScreen() {
       step={STEPS.account}
       title={t('onboarding.account.title')}
       subtitle={t('onboarding.account.subtitle')}
-      footer={
-        <Text className="text-center text-[13.5px] leading-[20.25px] text-ink-ghost">
-          {t('onboarding.account.legalPrefix')}{' '}
-          <Text weight={500} className="text-[13.5px] text-ink-body underline">
-            {t('onboarding.account.terms')}
-          </Text>{' '}
-          {t('onboarding.account.legalJoin')}{' '}
-          <Text weight={500} className="text-[13.5px] text-ink-body underline">
-            {t('onboarding.account.privacy')}
-          </Text>
-          {t('onboarding.account.legalSuffix')}
-        </Text>
-      }
+      footer={<LegalNote />}
     >
       <Button
         label={t('onboarding.account.withGoogle')}

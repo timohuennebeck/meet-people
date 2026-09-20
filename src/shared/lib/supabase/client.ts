@@ -22,13 +22,3 @@ export const supabase: SupabaseClient | null = hasSupabase
       },
     })
   : null;
-
-/** Throws a clear error when a code path needs Supabase before it is configured. */
-export function requireSupabase(): SupabaseClient {
-  if (!supabase) {
-    throw new Error(
-      'Supabase is not configured. Run `npm run db:start` and copy the printed URL and anon key into .env.',
-    );
-  }
-  return supabase;
-}

@@ -4,9 +4,6 @@ import Purchases, { LOG_LEVEL } from 'react-native-purchases';
 
 import { env } from '@shared/lib/env';
 
-/** The RevenueCat entitlement that unlocks Nearby Plus. */
-export const PLUS_ENTITLEMENT = 'plus';
-
 /**
  * Configures RevenueCat once, with the platform's API key.
  *

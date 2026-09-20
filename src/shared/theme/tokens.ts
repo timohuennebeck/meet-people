@@ -231,25 +231,3 @@ export const shadows = {
     elevation: 4,
   },
 } as const;
-
-/**
- * Type scale. The design uses half-pixel sizes (16.5, 14.5, 12.5) and tight
- * tracking on display text; both are reproduced exactly.
- */
-export const type = {
-  /** 32px / 1.08 / -.032em — the standard onboarding step question. */
-  stepTitle: { fontSize: 32, lineHeight: 34.56, letterSpacing: -1.024 },
-  /** 34px / 1.18 / -.035em — the welcome headline. */
-  welcomeTitle: { fontSize: 34, lineHeight: 40.12, letterSpacing: -1.19 },
-  /** 30px / 1.1 / -.032em — the photo-step headline. */
-  photoTitle: { fontSize: 30, lineHeight: 33, letterSpacing: -0.96 },
-  /** 29px / 1.12 / -.032em — the paywall headline. */
-  paywallTitle: { fontSize: 29, lineHeight: 32.48, letterSpacing: -0.928 },
-  /** 24px / 1.15 / -0.5px — the plan title inside a sheet. */
-  sheetTitle: { fontSize: 24, lineHeight: 27.6, letterSpacing: -0.5 },
-  /** 38px / 1 / -.04em — big numeric readouts (radius, seat count, age range). */
-  readout: { fontSize: 38, lineHeight: 38, letterSpacing: -1.52 },
-} as const;
-
-/** iOS frame geometry the design was composed against. */
-export const frame = { width: 402, height: 874 } as const;

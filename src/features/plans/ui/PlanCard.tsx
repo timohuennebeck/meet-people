@@ -7,6 +7,9 @@ import { cn } from '@shared/lib/cn';
 import { colors, shadows } from '@shared/theme/tokens';
 import { Avatar, Badge, CATEGORY_STYLE, PlanPhoto, Text } from '@shared/ui';
 
+import { categoryLabel } from '../lib/category';
+import { openSeatCount } from '../lib/seats';
+
 /** One detail line under a plan's title: icon, then a single line of copy. */
 function DetailLine({ icon, children }: { icon: React.ReactNode; children: string }) {
   return (
@@ -60,9 +63,7 @@ export interface PlanCardProps {
 /** `300px · radius:26px · padding:12px` — a plan in the map's bottom carousel. */
 export function PlanCard({ plan, variant, onPress }: PlanCardProps) {
   const { t } = useTranslation();
-  const openSeats = plan.capacity - plan.participants.length;
-  const categoryLabel =
-    plan.category === 'sport' ? t('plan.categorySport') : t('plan.categoryGames');
+  const openSeats = openSeatCount(plan);
 
   return (
     <Pressable
@@ -79,7 +80,12 @@ export function PlanCard({ plan, variant, onPress }: PlanCardProps) {
         mascotSize={100}
         radius={18}
         leadingInset={10}
-        leading={<Badge label={categoryLabel} className={CATEGORY_STYLE[plan.category]} />}
+        leading={
+          <Badge
+            label={categoryLabel(t, plan.category)}
+            className={CATEGORY_STYLE[plan.category]}
+          />
+        }
         trailing={
           variant === 'full' && openSeats > 0 ? (
             <View

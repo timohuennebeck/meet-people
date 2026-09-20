@@ -22,8 +22,6 @@ const PADDING = {
   form: { top: 56, horizontal: 20, bottom: 20 },
   /** `56px 20px 30px` — the paywall. */
   paywall: { top: 56, horizontal: 20, bottom: 30 },
-  /** No padding — full-bleed screens (map, chat, camera, profile header). */
-  none: { top: 0, horizontal: 0, bottom: 0 },
 } as const;
 
 export type ScreenPadding = keyof typeof PADDING;
@@ -74,5 +72,3 @@ export function Screen({
     </View>
   );
 }
-
-export { PADDING as SCREEN_PADDING };

@@ -79,19 +79,22 @@ function PriceTile({
 export function PaywallScreen() {
   const { t } = useTranslation();
   const router = useRouter();
-  const { completeOnboarding, signIn } = useSession();
+  const { completeOnboarding, signIn, setSubscribed } = useSession();
   const [selected, setSelected] = useState<PlanId>('yearly');
 
-  const finish = () => {
+  const finish = (subscribed: boolean) => {
     signIn();
     completeOnboarding();
+    // The real purchase runs through RevenueCat; until then, starting the trial
+    // is what grants the entitlement.
+    if (subscribed) setSubscribed(true);
     router.replace('/(tabs)');
   };
 
   return (
     <Screen padding="paywall" className="bg-surface-alt">
       <View className="h-[34px] shrink-0 flex-row items-center">
-        <CircleButton size={34} className="bg-surface-dusk" onPress={finish}>
+        <CircleButton size={34} className="bg-surface-dusk" onPress={() => finish(false)}>
           <Glyph.CloseHeader size={12} />
         </CircleButton>
       </View>
@@ -157,7 +160,7 @@ export function PaywallScreen() {
 
       <Spacer min={10} />
 
-      <Button label={t('paywall.trial')} onPress={finish} />
+      <Button label={t('paywall.trial')} onPress={() => finish(true)} />
 
       <Text className="mt-[11px] shrink-0 text-center text-[13.5px] leading-[19.6px] text-ink-ghost">
         {t('paywall.trialTerms')}

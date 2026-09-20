@@ -18,7 +18,7 @@ export { GlowingMascot, Mascot } from './Mascot';
 export { CheckLine, InfoNote, Note, SealNote, WarningNote } from './Note';
 export { ActionPill, HostCard, OutlinePill, PersonRow } from './PersonRow';
 export { CATEGORY_STYLE, PlanPhoto, type PlanCategory } from './PlanPhoto';
-export { Screen, SCREEN_PADDING, type ScreenPadding } from './Screen';
+export { Screen, type ScreenPadding } from './Screen';
 export { SeatList, SeatSummary, type Seat } from './Seats';
 export { SheetGrabber, SheetScrim, SheetSurface } from './Sheet';
 export { RangeSlider, SegmentedControl, Slider, SliderBounds, SliderReadout } from './Slider';

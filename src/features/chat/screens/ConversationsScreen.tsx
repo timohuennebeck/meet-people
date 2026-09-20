@@ -6,7 +6,7 @@ import { ScrollView, View } from 'react-native';
 import { colors } from '@shared/theme/tokens';
 import { CircleButton, Glyph, Screen, SectionLabel, Text } from '@shared/ui';
 
-import { useConversations } from '../data/useChat';
+import { useConversations, useUnreadCount } from '../data/useChat';
 import { ConversationRow } from '../ui/ConversationRow';
 
 /** The Chats tab: every plan conversation the user is part of. */
@@ -15,11 +15,7 @@ export function ConversationsScreen() {
   const router = useRouter();
   const { data: conversations } = useConversations();
 
-  // "3 novas" counts unread messages, not the threads holding them.
-  const unreadMessages = (conversations ?? []).reduce(
-    (total, conversation) => total + conversation.unreadCount,
-    0,
-  );
+  const unreadMessages = useUnreadCount();
 
   return (
     <Screen className="bg-surface">
@@ -38,7 +34,7 @@ export function ConversationsScreen() {
       </View>
 
       <View className="mt-[22px] shrink-0 flex-row items-center justify-between">
-        <SectionLabel className="tracking-[1.125px]">{t('chat.yourPlans')}</SectionLabel>
+        <SectionLabel>{t('chat.yourPlans')}</SectionLabel>
         {unreadMessages > 0 ? (
           <Text weight={600} className="text-[13.5px] text-brand">
             {t('chat.unreadCount', { count: unreadMessages })}

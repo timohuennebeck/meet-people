@@ -4,6 +4,7 @@ import { VIEWER } from '@shared/data/fixtures';
 import { chatKeys } from '@shared/data/queryKeys';
 import type { Message } from '@shared/data/schemas';
 import { dataSource } from '@shared/data/source';
+import { i18n } from '@shared/i18n';
 
 /** The conversations list shown on the Chats tab. */
 export function useConversations() {
@@ -11,6 +12,12 @@ export function useConversations() {
     ...chatKeys.conversations(),
     queryFn: () => dataSource.chats.conversations(),
   });
+}
+
+/** Unread messages across every conversation — the tab badge and "3 novas". */
+export function useUnreadCount(): number {
+  const { data: conversations } = useConversations();
+  return (conversations ?? []).reduce((total, conversation) => total + conversation.unreadCount, 0);
 }
 
 /** Messages in one thread. */
@@ -41,8 +48,7 @@ export function useSendMessage(conversationId: string) {
         authorId: VIEWER.id,
         body,
         createdAt: new Date().toISOString(),
-        receipt: 'Enviada',
-        pending: true,
+        receipt: i18n.t('chat.sent'),
       };
       // The design only shows a receipt under the newest own message.
       queryClient.setQueryData<Message[]>(key, [

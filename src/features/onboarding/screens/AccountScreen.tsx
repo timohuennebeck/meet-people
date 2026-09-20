@@ -4,29 +4,11 @@ import { useTranslation } from 'react-i18next';
 import { View } from 'react-native';
 
 import { gradients } from '@shared/theme/tokens';
-import { Button, Glyph, Mascot, Spacer, Text } from '@shared/ui';
+import { Button, Glyph, Mascot, Spacer } from '@shared/ui';
 
 import { STEPS } from '../lib/steps';
+import { LegalNote } from '../ui/LegalNote';
 import { StepLayout } from '../ui/StepLayout';
-
-/** The legal line pinned to the foot of both account screens. */
-function LegalNote() {
-  const { t } = useTranslation();
-
-  return (
-    <Text className="text-center text-[13.5px] leading-[20.25px] text-ink-ghost">
-      {t('onboarding.account.legalPrefix')}{' '}
-      <Text weight={500} className="text-[13.5px] text-ink-body underline">
-        {t('onboarding.account.terms')}
-      </Text>{' '}
-      {t('onboarding.account.legalJoin')}{' '}
-      <Text weight={500} className="text-[13.5px] text-ink-body underline">
-        {t('onboarding.account.privacy')}
-      </Text>
-      {t('onboarding.account.legalSuffix')}
-    </Text>
-  );
-}
 
 /** Step 7 — create or restore an account. Mascot card, e-mail first, Google below. */
 export function AccountScreen() {

@@ -19,10 +19,6 @@ export const planKeys = {
   list: (filter: string) => key([...planKeys.lists(), filter] as const),
   details: () => [...planKeys.all, 'detail'] as const,
   detail: (planId: string) => key([...planKeys.details(), planId] as const),
-  /** Join requests the host still has to answer. */
-  requests: (planId: string) => key([...planKeys.all, 'requests', planId] as const),
-  /** Plans the signed-in user hosts or has joined. */
-  mine: () => key([...planKeys.all, 'mine'] as const),
 } as const;
 
 export const userKeys = {
@@ -57,13 +53,4 @@ export const placeKeys = {
   recent: () => key([...placeKeys.all, 'recent'] as const),
   /** Suggested places near the user. */
   nearby: () => key([...placeKeys.all, 'nearby'] as const),
-  search: (term: string) => key([...placeKeys.all, 'search', term] as const),
-} as const;
-
-export const billingKeys = {
-  all: ['billing'] as const,
-  /** RevenueCat entitlements for the signed-in user. */
-  entitlements: () => key([...billingKeys.all, 'entitlements'] as const),
-  /** Available subscription packages. */
-  offerings: () => key([...billingKeys.all, 'offerings'] as const),
 } as const;

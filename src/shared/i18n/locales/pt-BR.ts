@@ -262,8 +262,8 @@ export const ptBR = {
   },
 
   plan: {
-    seatsFree: '{{count}} vagas livres',
-    seatsFreeOne: '1 vaga livre',
+    seatsFree_one: '{{count}} vaga livre',
+    seatsFree_other: '{{count}} vagas livres',
     seatsLabel: 'VAGAS',
     requestsLabel: 'PEDIDOS',
     requestsCount: 'PEDIDOS · {{count}}',
@@ -290,6 +290,8 @@ export const ptBR = {
       'Seu plano acabou de entrar no mapa. Quem está a até 2 mi vê nas próximas horas.',
     categorySport: 'ESPORTE',
     categoryGames: 'JOGOS',
+    categoryWalk: 'CAMINHADA',
+    categoryCoffee: 'CAFÉ',
 
     request: {
       title: 'Diga oi para {{name}}',

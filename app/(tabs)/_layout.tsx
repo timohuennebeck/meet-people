@@ -1,7 +1,7 @@
 import { NativeTabs } from 'expo-router/unstable-native-tabs';
 import { useTranslation } from 'react-i18next';
 
-import { useConversations } from '@features/chat/data/useChat';
+import { useUnreadCount } from '@features/chat/data/useChat';
 import { colors } from '@shared/theme/tokens';
 
 /**
@@ -14,12 +14,7 @@ import { colors } from '@shared/theme/tokens';
  */
 export default function TabsLayout() {
   const { t } = useTranslation();
-  const { data: conversations } = useConversations();
-
-  const unread = (conversations ?? []).reduce(
-    (total, conversation) => total + conversation.unreadCount,
-    0,
-  );
+  const unread = useUnreadCount();
 
   return (
     <NativeTabs tintColor={colors.brand}>

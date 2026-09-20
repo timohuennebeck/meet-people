@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Pressable, View } from 'react-native';
 
 import { cn } from '@shared/lib/cn';
@@ -23,10 +24,12 @@ export function CircleButton({
   className,
   accessibilityLabel,
 }: CircleButtonProps) {
+  const { t } = useTranslation();
+
   return (
     <Pressable
       accessibilityRole="button"
-      accessibilityLabel={accessibilityLabel}
+      accessibilityLabel={accessibilityLabel ?? t('common.back')}
       onPress={onPress}
       className={cn('shrink-0 items-center justify-center rounded-full bg-surface-chip', className)}
       style={({ pressed }) => [{ width: size, height: size }, pressed ? { opacity: 0.6 } : null]}
@@ -64,9 +67,11 @@ export function ProgressHeader({
   onBack,
   className,
 }: ProgressHeaderProps) {
+  const { t } = useTranslation();
+
   return (
     <View className={cn('h-[34px] shrink-0 flex-row items-center gap-[12px]', className)}>
-      <CircleButton size={34} onPress={onBack} accessibilityLabel="Back">
+      <CircleButton size={34} onPress={onBack}>
         {dismissible ? <CloseHeader size={11} /> : <ChevronLeft size={11} strokeWidth={1.9} />}
       </CircleButton>
       <View className="h-[6px] flex-1 overflow-hidden rounded-[4px] bg-hair-rail">
@@ -76,7 +81,7 @@ export function ProgressHeader({
         />
       </View>
       <Text weight={500} className="shrink-0 text-[14.5px] text-ink-dim">
-        {step} de {total}
+        {t('common.stepOf', { step: String(step), total: String(total) })}
       </Text>
     </View>
   );
@@ -98,7 +103,7 @@ export interface NavHeaderProps {
 export function NavHeader({ title, onBack, trailing, className }: NavHeaderProps) {
   return (
     <View className={cn('relative h-[40px] shrink-0 flex-row items-center', className)}>
-      <CircleButton size={40} onPress={onBack} accessibilityLabel="Back">
+      <CircleButton size={40} onPress={onBack}>
         <ChevronLeft size={13} />
       </CircleButton>
       <Text
@@ -125,7 +130,7 @@ export interface SearchHeaderProps {
 export function SearchHeader({ title, onBack }: SearchHeaderProps) {
   return (
     <View className="h-[34px] shrink-0 flex-row items-center gap-[12px]">
-      <CircleButton size={34} onPress={onBack} accessibilityLabel="Back">
+      <CircleButton size={34} onPress={onBack}>
         <ChevronLeft size={11} strokeWidth={1.9} />
       </CircleButton>
       <Text weight={600} className="flex-1 text-center text-[16px]">

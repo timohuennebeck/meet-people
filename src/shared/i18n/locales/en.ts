@@ -262,8 +262,8 @@ export const en: Translation = {
   },
 
   plan: {
-    seatsFree: '{{count}} seats free',
-    seatsFreeOne: '1 seat free',
+    seatsFree_one: '{{count}} seat free',
+    seatsFree_other: '{{count}} seats free',
     seatsLabel: 'SEATS',
     requestsLabel: 'REQUESTS',
     requestsCount: 'REQUESTS · {{count}}',
@@ -290,6 +290,8 @@ export const en: Translation = {
       'Your plan just landed on the map. People within 2 mi will see it over the next few hours.',
     categorySport: 'SPORT',
     categoryGames: 'GAMES',
+    categoryWalk: 'WALK',
+    categoryCoffee: 'COFFEE',
 
     request: {
       title: 'Say hi to {{name}}',

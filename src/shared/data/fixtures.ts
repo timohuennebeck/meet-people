@@ -30,12 +30,7 @@ export const AVATARS = {
   noah: portrait('req-noah'),
   elif: portrait('req-elif'),
   tom: portrait('req-tom'),
-  philSeat: portrait('p-jonas'),
-  inJonas: portrait('in-jonas'),
-  inSara: portrait('in-sara'),
   pinRun: portrait('pin-lauf', 600),
-  pinChess: portrait('pin-schach', 600),
-  pinWalk: portrait('pin-walk', 600),
   pinCoffee: portrait('pin-kaffee', 600),
 } as const;
 
