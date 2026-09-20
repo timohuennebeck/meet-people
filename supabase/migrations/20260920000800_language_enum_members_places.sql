@@ -162,7 +162,7 @@ comment on column public.places.provider_place_id is
 --
 -- What a client may write is decided by column grants, not by a trigger
 -- guessing who called: a client can insert its own row with a status and a
--- message and can change the status, and nothing else. `is_host`, `outcome`
+-- message, can change the status and its own note, and nothing else. `is_host`, `outcome`
 -- and the timestamps are set by the triggers and the jobs, which run as the
 -- owner.
 -- ---------------------------------------------------------------------------
@@ -220,7 +220,7 @@ alter table public.plan_members enable row level security;
 revoke all on public.plan_members from anon, authenticated;
 grant select on public.plan_members to authenticated;
 grant insert (plan_id, profile_id, status, message) on public.plan_members to authenticated;
-grant update (status) on public.plan_members to authenticated;
+grant update (status, message) on public.plan_members to authenticated;
 grant delete on public.plan_members to authenticated;
 
 -- A seat is public, minus blocks. A request, a decline or a departure is the
@@ -345,6 +345,12 @@ declare
   taken integer;
 begin
   new.updated_at = now();
+
+  -- The note to the host is the requester's own words; the host may read it,
+  -- not rewrite it.
+  if from_api and new.message is distinct from old.message and actor is distinct from new.profile_id then
+    raise exception 'NOT_THE_MEMBER' using errcode = 'insufficient_privilege';
+  end if;
 
   if new.status = old.status then
     return new;
@@ -628,3 +634,7 @@ drop type public.request_status;
 -- no pinned search_path is still resolved against whatever the caller has set.
 alter function private.folded_unique(text[]) set search_path = '';
 alter function private.unique_elements(anyarray) set search_path = '';
+
+-- `SEARCHABLE_LANGUAGES` also offers "Português (Brasil)" as its own entry, and
+-- the enum was built from the shorter spoken list. A label may carry a hyphen.
+alter type public.language_code add value 'pt-BR';

@@ -298,7 +298,7 @@ export function PlanSheetScreen() {
   if (plan.membership === 'host') return <HostState plan={plan} />;
 
   if (plan.membership === 'requested') {
-    return <RequestedState plan={plan} onWithdraw={() => setMembership('guest')} />;
+    return <RequestedState plan={plan} onWithdraw={() => setMembership({ membership: 'guest' })} />;
   }
 
   if (plan.membership === 'joined') {

@@ -72,8 +72,12 @@ export const fixtureSource: DataSource = {
       return settle(planSchema, plan);
     },
 
-    /** Moves the viewer between guest / requested / joined states on a plan. */
-    setMembership: (planId: string, membership: Membership): Promise<Plan> => {
+    /**
+     * Moves the viewer between guest / requested / joined states on a plan. The
+     * note is accepted for the interface's sake and dropped: no fixture screen
+     * renders the viewer's own request row, so there is nowhere to show it.
+     */
+    setMembership: (planId: string, membership: Membership, _note?: string): Promise<Plan> => {
       let updated: Plan | undefined;
       plans = plans.map((plan) => {
         if (plan.id !== planId) return plan;

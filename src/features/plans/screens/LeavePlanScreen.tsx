@@ -31,7 +31,7 @@ export function LeavePlanScreen() {
   const [note, setNote] = useState('');
 
   const leave = () => {
-    if (plan) setMembership('guest');
+    if (plan) setMembership({ membership: 'guest' });
     // Both this sheet and the plan sheet under it have to go — going back once
     // would land on the sheet for the plan just left — so name the map as the
     // target rather than popping a step at a time.

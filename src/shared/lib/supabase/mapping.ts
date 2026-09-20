@@ -24,12 +24,23 @@ import { formatPlanDate, formatTime, isToday, relativeDay } from '@shared/lib/da
 import { SEARCHABLE_LANGUAGES } from '@shared/lib/languages';
 
 import { supabase } from './client';
+import type { Database } from './database.types';
+
+/** A code the `language_code` enum admits — the catalogue, as the database sees it. */
+export type LanguageCode = Database['public']['Enums']['language_code'];
 
 // ---------------------------------------------------------------------------
 // Row shapes
 // ---------------------------------------------------------------------------
 
-/** A row of `public_profiles`, and the object `nearby_plans` embeds for a person. */
+/**
+ * A row of `public_profiles`, and the object `nearby_plans` embeds for a person.
+ *
+ * `languages` is the `language_code` enum on the view and plain strings in the
+ * embedded JSON — the same 20 codes either way, since the enum is what the
+ * column holds. It is typed as the enum so a caller cannot widen it by
+ * accident; the JSON side is a subtype in practice.
+ */
 export interface PublicProfileRow {
   id: string;
   name: string | null;
@@ -43,7 +54,7 @@ export interface PublicProfileRow {
   joined_at: string;
   verified: boolean | null;
   interests: string[] | null;
-  languages: string[] | null;
+  languages: LanguageCode[] | null;
 }
 
 /** The `place` object on a `nearby_plans` row. */
@@ -121,7 +132,13 @@ export function avatarUrlFor(path: string | null | undefined, profileId: string)
   return publicUrl ?? placeholderPortrait(profileId);
 }
 
-/** Language codes to the code-and-flag pairs the rows render. */
+/**
+ * Language codes to the code-and-flag pairs the rows render.
+ *
+ * Takes any string rather than `LanguageCode` on purpose: the codes also
+ * arrive inside `nearby_plans()`' JSON, where nothing types them, and the
+ * fallback below is the honest answer to a code the catalogue lacks.
+ */
 export function spokenLanguagesFor(codes: readonly string[]): SpokenLanguage[] {
   return codes.map((code) => {
     const known = SEARCHABLE_LANGUAGES.find((language) => language.code === code);

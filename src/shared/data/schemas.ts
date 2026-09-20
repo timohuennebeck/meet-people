@@ -53,6 +53,13 @@ export const placeSchema = z.object({
   address: z.string(),
   /** Pre-formatted for display, e.g. "400 m" or "1,1 mi". */
   distanceLabel: z.string(),
+  /**
+   * The maps provider's own id for this place, so a search result and the row
+   * it was upserted from are recognisably the same place. Absent for a place
+   * someone added by hand, and for a place embedded on a plan, which only
+   * carries what the card shows.
+   */
+  providerPlaceId: z.string().optional(),
 });
 export type Place = z.infer<typeof placeSchema>;
 

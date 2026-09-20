@@ -24,8 +24,12 @@ export interface DataSource {
     list(): Promise<Plan[]>;
     /** One plan, with its participants, its requests and its waitlist. */
     detail(planId: string): Promise<Plan>;
-    /** Moves the viewer between guest / requested / joined on a plan. */
-    setMembership(planId: string, membership: Membership): Promise<Plan>;
+    /**
+     * Moves the viewer between guest / requested / joined on a plan. `note` is
+     * the message to the host that goes with a request, and means nothing on
+     * any other move.
+     */
+    setMembership(planId: string, membership: Membership, note?: string): Promise<Plan>;
     /** Host accepts a pending request; the applicant takes the next open seat. */
     acceptRequest(planId: string, requestId: string): Promise<Plan>;
   };

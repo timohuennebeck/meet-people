@@ -35,7 +35,7 @@ export function JoinRequestScreen() {
     setMessage((current) => (current.trim() ? `${current.trim()} ${phrase}.` : `${phrase}.`));
 
   const send = () => {
-    if (plan) setMembership('requested');
+    if (plan) setMembership({ membership: 'requested', note: message });
     router.back();
   };
 

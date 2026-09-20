@@ -305,58 +305,6 @@ export type Database = {
           },
         ]
       }
-      join_requests: {
-        Row: {
-          created_at: string
-          id: string
-          message: string | null
-          plan_id: string
-          profile_id: string
-          resolved_at: string | null
-          status: Database["public"]["Enums"]["request_status"]
-        }
-        Insert: {
-          created_at?: string
-          id?: string
-          message?: string | null
-          plan_id: string
-          profile_id: string
-          resolved_at?: string | null
-          status?: Database["public"]["Enums"]["request_status"]
-        }
-        Update: {
-          created_at?: string
-          id?: string
-          message?: string | null
-          plan_id?: string
-          profile_id?: string
-          resolved_at?: string | null
-          status?: Database["public"]["Enums"]["request_status"]
-        }
-        Relationships: [
-          {
-            foreignKeyName: "join_requests_plan_id_fkey"
-            columns: ["plan_id"]
-            isOneToOne: false
-            referencedRelation: "plans"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "join_requests_profile_id_fkey"
-            columns: ["profile_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "join_requests_profile_id_fkey"
-            columns: ["profile_id"]
-            isOneToOne: false
-            referencedRelation: "public_profiles"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       legal_acceptances: {
         Row: {
           accepted_at: string
@@ -497,6 +445,7 @@ export type Database = {
           name: string
           point: unknown
           profile_id: string | null
+          provider_place_id: string | null
         }
         Insert: {
           address: string
@@ -505,6 +454,7 @@ export type Database = {
           name: string
           point: unknown
           profile_id?: string | null
+          provider_place_id?: string | null
         }
         Update: {
           address?: string
@@ -513,6 +463,7 @@ export type Database = {
           name?: string
           point?: unknown
           profile_id?: string | null
+          provider_place_id?: string | null
         }
         Relationships: [
           {
@@ -531,51 +482,63 @@ export type Database = {
           },
         ]
       }
-      plan_participants: {
+      plan_members: {
         Row: {
+          created_at: string
           is_host: boolean
-          joined_at: string
           left_at: string | null
+          message: string | null
           outcome: Database["public"]["Enums"]["attendance_outcome"] | null
           plan_id: string
           profile_id: string
           recorded_at: string | null
+          seated_at: string | null
+          status: Database["public"]["Enums"]["member_status"]
+          updated_at: string
         }
         Insert: {
+          created_at?: string
           is_host?: boolean
-          joined_at?: string
           left_at?: string | null
+          message?: string | null
           outcome?: Database["public"]["Enums"]["attendance_outcome"] | null
           plan_id: string
           profile_id: string
           recorded_at?: string | null
+          seated_at?: string | null
+          status: Database["public"]["Enums"]["member_status"]
+          updated_at?: string
         }
         Update: {
+          created_at?: string
           is_host?: boolean
-          joined_at?: string
           left_at?: string | null
+          message?: string | null
           outcome?: Database["public"]["Enums"]["attendance_outcome"] | null
           plan_id?: string
           profile_id?: string
           recorded_at?: string | null
+          seated_at?: string | null
+          status?: Database["public"]["Enums"]["member_status"]
+          updated_at?: string
         }
         Relationships: [
           {
-            foreignKeyName: "plan_participants_plan_id_fkey"
+            foreignKeyName: "plan_members_plan_id_fkey"
             columns: ["plan_id"]
             isOneToOne: false
             referencedRelation: "plans"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "plan_participants_profile_id_fkey"
+            foreignKeyName: "plan_members_profile_id_fkey"
             columns: ["profile_id"]
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "plan_participants_profile_id_fkey"
+            foreignKeyName: "plan_members_profile_id_fkey"
             columns: ["profile_id"]
             isOneToOne: false
             referencedRelation: "public_profiles"
@@ -590,7 +553,7 @@ export type Database = {
           duration_minutes: number | null
           id: string
           join_mode: Database["public"]["Enums"]["join_mode"]
-          languages: string[]
+          languages: Database["public"]["Enums"]["language_code"][]
           place_id: string
           repeats_on: number
           seats: number | null
@@ -603,7 +566,7 @@ export type Database = {
           duration_minutes?: number | null
           id?: string
           join_mode?: Database["public"]["Enums"]["join_mode"]
-          languages?: string[]
+          languages?: Database["public"]["Enums"]["language_code"][]
           place_id: string
           repeats_on: number
           seats?: number | null
@@ -616,7 +579,7 @@ export type Database = {
           duration_minutes?: number | null
           id?: string
           join_mode?: Database["public"]["Enums"]["join_mode"]
-          languages?: string[]
+          languages?: Database["public"]["Enums"]["language_code"][]
           place_id?: string
           repeats_on?: number
           seats?: number | null
@@ -643,7 +606,7 @@ export type Database = {
           host_id: string | null
           id: string
           join_mode: Database["public"]["Enums"]["join_mode"]
-          languages: string[]
+          languages: Database["public"]["Enums"]["language_code"][]
           place_id: string
           seats: number | null
           series_id: string | null
@@ -660,7 +623,7 @@ export type Database = {
           host_id?: string | null
           id?: string
           join_mode?: Database["public"]["Enums"]["join_mode"]
-          languages?: string[]
+          languages?: Database["public"]["Enums"]["language_code"][]
           place_id: string
           seats?: number | null
           series_id?: string | null
@@ -677,7 +640,7 @@ export type Database = {
           host_id?: string | null
           id?: string
           join_mode?: Database["public"]["Enums"]["join_mode"]
-          languages?: string[]
+          languages?: Database["public"]["Enums"]["language_code"][]
           place_id?: string
           seats?: number | null
           series_id?: string | null
@@ -765,7 +728,7 @@ export type Database = {
           gender: Database["public"]["Enums"]["gender"] | null
           id: string
           interests: string[]
-          languages: string[]
+          languages: Database["public"]["Enums"]["language_code"][]
           name: string
           neighbourhood: string | null
           notifications_enabled: boolean
@@ -789,7 +752,7 @@ export type Database = {
           gender?: Database["public"]["Enums"]["gender"] | null
           id: string
           interests?: string[]
-          languages?: string[]
+          languages?: Database["public"]["Enums"]["language_code"][]
           name?: string
           neighbourhood?: string | null
           notifications_enabled?: boolean
@@ -813,7 +776,7 @@ export type Database = {
           gender?: Database["public"]["Enums"]["gender"] | null
           id?: string
           interests?: string[]
-          languages?: string[]
+          languages?: Database["public"]["Enums"]["language_code"][]
           name?: string
           neighbourhood?: string | null
           notifications_enabled?: boolean
@@ -969,7 +932,7 @@ export type Database = {
           id: string | null
           interests: string[] | null
           joined_at: string | null
-          languages: string[] | null
+          languages: Database["public"]["Enums"]["language_code"][] | null
           name: string | null
           neighbourhood: string | null
           pronouns: Database["public"]["Enums"]["pronouns"] | null
@@ -984,7 +947,7 @@ export type Database = {
           id?: string | null
           interests?: string[] | null
           joined_at?: string | null
-          languages?: string[] | null
+          languages?: Database["public"]["Enums"]["language_code"][] | null
           name?: string | null
           neighbourhood?: string | null
           pronouns?: Database["public"]["Enums"]["pronouns"] | null
@@ -999,7 +962,7 @@ export type Database = {
           id?: string | null
           interests?: string[] | null
           joined_at?: string | null
-          languages?: string[] | null
+          languages?: Database["public"]["Enums"]["language_code"][] | null
           name?: string | null
           neighbourhood?: string | null
           pronouns?: Database["public"]["Enums"]["pronouns"] | null
@@ -1074,7 +1037,29 @@ export type Database = {
         | "refunded"
       gender: "woman" | "man" | "non_binary"
       join_mode: "open" | "approval"
+      language_code:
+        | "ar"
+        | "da"
+        | "de"
+        | "el"
+        | "en"
+        | "es"
+        | "fr"
+        | "he"
+        | "hi"
+        | "it"
+        | "ja"
+        | "ko"
+        | "nl"
+        | "pl"
+        | "pt"
+        | "ru"
+        | "sv"
+        | "tr"
+        | "uk"
+        | "zh"
       legal_doc_kind: "terms" | "privacy"
+      member_status: "requested" | "declined" | "seated" | "left"
       platform: "ios" | "android"
       pronouns: "she" | "he" | "they" | "unspecified"
       report_reason:
@@ -1083,7 +1068,6 @@ export type Database = {
         | "fake_profile"
         | "inappropriate"
         | "other"
-      request_status: "pending" | "accepted" | "declined"
       verification_status: "none" | "pending" | "verified" | "rejected"
     }
     CompositeTypes: {
@@ -1226,7 +1210,30 @@ export const Constants = {
       ],
       gender: ["woman", "man", "non_binary"],
       join_mode: ["open", "approval"],
+      language_code: [
+        "ar",
+        "da",
+        "de",
+        "el",
+        "en",
+        "es",
+        "fr",
+        "he",
+        "hi",
+        "it",
+        "ja",
+        "ko",
+        "nl",
+        "pl",
+        "pt",
+        "ru",
+        "sv",
+        "tr",
+        "uk",
+        "zh",
+      ],
       legal_doc_kind: ["terms", "privacy"],
+      member_status: ["requested", "declined", "seated", "left"],
       platform: ["ios", "android"],
       pronouns: ["she", "he", "they", "unspecified"],
       report_reason: [
@@ -1236,7 +1243,6 @@ export const Constants = {
         "inappropriate",
         "other",
       ],
-      request_status: ["pending", "accepted", "declined"],
       verification_status: ["none", "pending", "verified", "rejected"],
     },
   },

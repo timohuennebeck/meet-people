@@ -715,6 +715,7 @@ export const en: Translation = {
     planFull: 'This plan just filled up',
     blocked: 'You cannot join this plan',
     tooManyInterests: 'You have reached the interest limit',
+    badTransition: "That couldn't be done right now.",
   },
 
   tabs: {

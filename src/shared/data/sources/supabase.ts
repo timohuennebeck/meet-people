@@ -11,6 +11,7 @@ import {
   spokenLanguagesFor,
   toPlan,
   toUser,
+  type LanguageCode,
   type NearbyPlanRow,
   type PlanContext,
   type PublicProfileRow,
@@ -163,7 +164,7 @@ type PreferencesUpdate = Partial<{
   app_language: string;
   notifications_enabled: boolean;
   interests: string[];
-  languages: string[];
+  languages: LanguageCode[];
 }>;
 
 const AUDIENCE_TO_DB: Record<AudienceGender, 'everyone' | 'women' | 'men' | 'non_binary'> = {
@@ -202,9 +203,29 @@ async function viewerPlanIds(): Promise<string[]> {
   const db = client();
   const uid = await viewerId();
   const rows = unwrap(
-    await db.from('plan_participants').select('plan_id').eq('profile_id', uid).is('left_at', null),
+    await db.from('plan_members').select('plan_id').eq('profile_id', uid).eq('status', 'seated'),
   );
   return (rows ?? []).map((row) => row.plan_id);
+}
+
+/**
+ * The viewer's own `plan_members` row on a plan, or null when there is none.
+ *
+ * One primary-key lookup, readable under the "own row" arm of the select
+ * policy whatever its status. `setMembership` reads this rather than the
+ * `membership` on the `nearby_plans()` row because that value folds `left` and
+ * `declined` into `guest`, and a plan the viewer is leaving may already have
+ * dropped out of that list (it stops three hours after the start).
+ */
+async function ownMembershipRow(planId: string, uid: string) {
+  return unwrap(
+    await client()
+      .from('plan_members')
+      .select('status')
+      .eq('plan_id', planId)
+      .eq('profile_id', uid)
+      .maybeSingle(),
+  );
 }
 
 // ---------------------------------------------------------------------------
@@ -247,11 +268,11 @@ async function sharedPlanCounts(profileIds: string[]): Promise<Map<string, numbe
 
   const rows = unwrap(
     await client()
-      .from('plan_participants')
+      .from('plan_members')
       .select('profile_id')
       .in('plan_id', planIds)
       .in('profile_id', profileIds)
-      .is('left_at', null),
+      .eq('status', 'seated'),
   );
   for (const row of rows ?? []) {
     counts.set(row.profile_id, (counts.get(row.profile_id) ?? 0) + 1);
@@ -396,7 +417,7 @@ function withSentReceipt(messages: Message[], uid: string): Message[] {
  * replaces it.
  */
 async function placesWithDistance(
-  rows: { id: string; name: string; address: string }[],
+  rows: { id: string; name: string; address: string; provider_place_id: string | null }[],
   unit: DistanceUnit,
 ): Promise<Place[]> {
   const db = client();
@@ -414,6 +435,7 @@ async function placesWithDistance(
       name: row.name,
       address: row.address,
       distanceLabel: distanceLabel(metres, unit),
+      providerPlaceId: row.provider_place_id ?? undefined,
     }));
 }
 
@@ -430,45 +452,72 @@ export const supabaseSource: DataSource = {
     /**
      * Moves the viewer between guest / requested / joined.
      *
-     * Leaving is two idempotent writes rather than a read-then-branch: a
-     * pending request is deleted, a taken seat is stamped `left_at`, and
-     * whichever of the two the viewer does not have is a no-op. The seat row
-     * is never deleted — it is the one fact attendance is derived from.
+     * Everything is one row of `plan_members`, keyed by `(plan_id, profile_id)`,
+     * and the triggers decide which moves are legal — a request only on an
+     * approval plan, a direct seat only on an open one, and either may be
+     * refused with NO_CREDITS, PLAN_FULL or BLOCKED. This just picks the verb.
+     *
+     * Asking for a seat is an update first and an insert second. The viewer's
+     * row does not go away when they leave or are declined — `left` and
+     * `declined` are statuses on the same primary key, kept because attendance
+     * is derived from them — so asking again has to move that row rather than
+     * add one beside it, which the key would refuse. The update reports how
+     * many rows it touched; zero means there was no row, and only then is one
+     * inserted. Read-then-branch would open a window between the two calls;
+     * this way the second write only runs when the first found nothing.
+     *
+     * Leaving is the one move that needs to know where the viewer stands: a
+     * request is withdrawn by deleting the row (the delete policy allows
+     * exactly that), a seat is given up by updating it to `left`. The row's
+     * own status decides which.
      */
-    setMembership: async (planId: string, membership: Membership): Promise<Plan> => {
+    setMembership: async (planId: string, membership: Membership, note?: string): Promise<Plan> => {
       const db = client();
       const uid = await viewerId();
 
       switch (membership) {
         case 'requested':
-          // May be refused with NO_CREDITS (the weekly free quota) or BLOCKED.
-          unwrap(await db.from('join_requests').insert({ plan_id: planId, profile_id: uid }));
+        case 'joined': {
+          const status = membership === 'requested' ? 'requested' : 'seated';
+          // The note travels with a request and is cleared by a plain join, so
+          // a host never reads a message written for a plan the person later
+          // walked straight into.
+          const message = status === 'requested' ? note?.trim() || null : null;
+          const moved = await db
+            .from('plan_members')
+            .update({ status, message }, { count: 'exact' })
+            .eq('plan_id', planId)
+            .eq('profile_id', uid);
+          unwrap(moved);
+          if ((moved.count ?? 0) === 0) {
+            unwrap(
+              await db
+                .from('plan_members')
+                .insert({ plan_id: planId, profile_id: uid, status, message }),
+            );
+          }
           break;
+        }
 
-        case 'joined':
-          // Only an open plan can be joined directly; an approval plan is
-          // seated by the trigger on the accepted request. May raise PLAN_FULL.
-          unwrap(await db.from('plan_participants').insert({ plan_id: planId, profile_id: uid }));
+        case 'guest': {
+          const own = await ownMembershipRow(planId, uid);
+          if (own?.status === 'requested') {
+            unwrap(
+              await db.from('plan_members').delete().eq('plan_id', planId).eq('profile_id', uid),
+            );
+          } else if (own?.status === 'seated') {
+            unwrap(
+              await db
+                .from('plan_members')
+                .update({ status: 'left' })
+                .eq('plan_id', planId)
+                .eq('profile_id', uid),
+            );
+          }
+          // No row, or one already `left`/`declined`: the viewer is a guest
+          // already, and there is nothing to write.
           break;
-
-        case 'guest':
-          await Promise.all([
-            db
-              .from('join_requests')
-              .delete()
-              .eq('plan_id', planId)
-              .eq('profile_id', uid)
-              .eq('status', 'pending')
-              .then((result) => unwrap(result)),
-            db
-              .from('plan_participants')
-              .update({ left_at: new Date().toISOString() })
-              .eq('plan_id', planId)
-              .eq('profile_id', uid)
-              .is('left_at', null)
-              .then((result) => unwrap(result)),
-          ]);
-          break;
+        }
 
         default:
           // `host` is decided when the plan is created and `waitlisted` is a
@@ -480,17 +529,18 @@ export const supabaseSource: DataSource = {
     },
 
     /**
-     * Host accepts a request. The trigger on the update seats the applicant in
-     * the same transaction, so nothing here inserts a participant — doing both
-     * would race the trigger against the seat cap.
+     * Host accepts a request: the applicant's row moves from `requested` to
+     * `seated`. `requestId` is the applicant's profile id — a request has no
+     * id of its own now that it is the same row as the seat it becomes. The
+     * trigger stamps `seated_at` and may refuse with PLAN_FULL.
      */
     acceptRequest: async (planId: string, requestId: string): Promise<Plan> => {
       unwrap(
         await client()
-          .from('join_requests')
-          .update({ status: 'accepted' })
-          .eq('id', requestId)
-          .eq('plan_id', planId),
+          .from('plan_members')
+          .update({ status: 'seated' })
+          .eq('plan_id', planId)
+          .eq('profile_id', requestId),
       );
       return planDetail(planId);
     },
@@ -555,10 +605,10 @@ export const supabaseSource: DataSource = {
           .then((result) => unwrap(result)),
         db.rpc('attendance_rate_of', { uid: userId }).then((result) => unwrap(result)),
         db
-          .from('plan_participants')
+          .from('plan_members')
           .select('plan_id', { count: 'exact', head: true })
           .eq('profile_id', userId)
-          .is('left_at', null)
+          .eq('status', 'seated')
           .then((result) => {
             if (result.error) throwAsDataError(result.error);
             return result.count ?? 0;
@@ -651,7 +701,7 @@ export const supabaseSource: DataSource = {
       const rows = unwrap(
         await db
           .from('places')
-          .select('id, name, address')
+          .select('id, name, address, provider_place_id')
           .eq('profile_id', uid)
           .order('created_at', { ascending: false })
           .limit(8),
@@ -662,7 +712,9 @@ export const supabaseSource: DataSource = {
     nearby: async (): Promise<Place[]> => {
       const db = client();
       const { unit } = await planContext();
-      const rows = unwrap(await db.from('places').select('id, name, address').limit(12));
+      const rows = unwrap(
+        await db.from('places').select('id, name, address, provider_place_id').limit(12),
+      );
       return validate(placeSchema.array(), await placesWithDistance(rows ?? [], unit));
     },
   },
@@ -740,7 +792,10 @@ export const supabaseSource: DataSource = {
       }
       if (patch.interests !== undefined) columns.interests = [...patch.interests];
       if (patch.spokenLanguages !== undefined) {
-        columns.languages = patch.spokenLanguages.map((language) => language.code);
+        // The column is the `language_code` enum. The catalogue's codes are
+        // the enum's values, so this is a narrowing the database checks
+        // again on the way in: a code it does not know is refused there.
+        columns.languages = patch.spokenLanguages.map((language) => language.code as LanguageCode);
       }
 
       if (Object.keys(columns).length > 0) {

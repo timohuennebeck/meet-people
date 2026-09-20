@@ -3,7 +3,8 @@
  *
  * Three of the database's rules are enforced by `raise exception` in a trigger
  * — the free-tier request quota, the seat count and the block gate (see
- * `supabase/migrations/20260920000100_functions_and_triggers.sql`). PostgREST
+ * `supabase/migrations/20260920000100_functions_and_triggers.sql` and, for
+ * membership, `…000800_language_enum_members_places.sql`). PostgREST
  * hands those back as a `PostgrestError` whose `message` is the bare word the
  * trigger raised, which is not something a person should ever read.
  *
@@ -24,12 +25,28 @@
  * pretending we recognised it.
  */
 
-/** The rules the schema refuses by name. */
+/**
+ * The rules the schema refuses by name.
+ *
+ * The first four are things a person can run into and each has its own
+ * sentence. The rest are raised by the `plan_members` triggers when a client
+ * asks for a move the table does not allow — requesting a seat on an open
+ * plan, accepting a request on somebody else's plan, a host leaving their own
+ * plan. A correct client never sends those, so they are not four more
+ * sentences; they are recognised so a screen can tell "the server said no" from
+ * "the network fell over", and they all show the same generic line.
+ */
 export const DATA_ERROR_CODES = [
   'NO_CREDITS',
   'PLAN_FULL',
   'BLOCKED',
   'TOO_MANY_INTERESTS',
+  'PLAN_IS_OPEN',
+  'PLAN_NEEDS_APPROVAL',
+  'NOT_THE_HOST',
+  'NOT_THE_MEMBER',
+  'HOST_CANNOT_LEAVE',
+  'BAD_TRANSITION',
 ] as const;
 
 export type DataErrorCode = (typeof DATA_ERROR_CODES)[number];
@@ -46,6 +63,12 @@ const MESSAGE_KEYS: Record<DataErrorCode, string> = {
   PLAN_FULL: 'errors.planFull',
   BLOCKED: 'errors.blocked',
   TOO_MANY_INTERESTS: 'errors.tooManyInterests',
+  PLAN_IS_OPEN: 'errors.badTransition',
+  PLAN_NEEDS_APPROVAL: 'errors.badTransition',
+  NOT_THE_HOST: 'errors.badTransition',
+  NOT_THE_MEMBER: 'errors.badTransition',
+  HOST_CANNOT_LEAVE: 'errors.badTransition',
+  BAD_TRANSITION: 'errors.badTransition',
 };
 
 /**

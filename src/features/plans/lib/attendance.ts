@@ -5,7 +5,7 @@ import type { Plan } from '@shared/data/schemas';
  *
  * The check-list is drawn after the end time has passed, so everything here is
  * derived from the plan the viewer already holds — no attendance is stored yet
- * (`plan_participants.outcome` is written by the server, never by a screen), which is why nothing below writes.
+ * (`plan_members.outcome` is written by the server, never by a screen), which is why nothing below writes.
  */
 
 export type Attendee = Plan['participants'][number];

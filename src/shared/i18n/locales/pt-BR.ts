@@ -738,6 +738,7 @@ export const ptBR = {
     planFull: 'Esse plano acabou de lotar',
     blocked: 'Não dá para entrar nesse plano',
     tooManyInterests: 'Você chegou ao limite de interesses',
+    badTransition: 'Não foi possível fazer isso agora.',
   },
 
   tabs: {

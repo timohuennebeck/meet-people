@@ -90,15 +90,22 @@ function usePlanMutation<TVariables>(
 export function useSetMembership(planId: string) {
   const { data: viewer } = useViewer();
 
-  return usePlanMutation<Membership>(
+  return usePlanMutation<MembershipChange>(
     planId,
-    (membership) => dataSource.plans.setMembership(planId, membership),
-    (plan, membership) => ({
+    ({ membership, note }) => dataSource.plans.setMembership(planId, membership, note),
+    (plan, { membership }) => ({
       ...plan,
       membership,
       participants: seatViewer(plan, membership, viewer),
     }),
   );
+}
+
+/** What `useSetMembership` is told: where to move, and the note if it is a request. */
+export interface MembershipChange {
+  membership: Membership;
+  /** The message to the host. Only a request carries one. */
+  note?: string;
 }
 
 /** The participant list as it will read once this membership change lands. */
@@ -112,7 +119,14 @@ function seatViewer(plan: Plan, membership: Membership, viewer: User | undefined
   return [...plan.participants, { user: viewer, isHost: false, isViewer: true }];
 }
 
-/** Host accepts a request; the applicant takes the next open seat immediately. */
+/**
+ * Host accepts a request; the applicant takes the next open seat immediately.
+ *
+ * `requestId` is the applicant's profile id — a request is the `plan_members`
+ * row keyed by `(plan_id, profile_id)`, and `Plan.requests[].id` carries that
+ * same id — so the lookup below is by the person, and the seat it appends is
+ * theirs.
+ */
 export function useAcceptRequest(planId: string) {
   return usePlanMutation<string>(
     planId,
