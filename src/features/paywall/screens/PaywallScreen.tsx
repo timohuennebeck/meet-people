@@ -1,17 +1,17 @@
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Pressable, View } from 'react-native';
+import { View } from 'react-native';
 
 import { useSession } from '@shared/providers/SessionProvider';
 import {
   Button,
-  Card,
   CheckLine,
   CircleButton,
   Glyph,
   Mascot,
   Screen,
+  SelectableCard,
   SelectionDot,
   Spacer,
   Text,
@@ -36,14 +36,13 @@ function PriceTile({
   onPress: () => void;
 }) {
   return (
-    <Pressable
-      accessibilityRole="radio"
-      accessibilityState={{ selected }}
-      onPress={onPress}
-      className="relative flex-1"
-    >
-      <Card
-        ring={selected ? 'brand' : 'cool'}
+    // The wrapper exists so the "melhor valor" badge can hang above the tile's
+    // top edge; the tile itself owns the press and the ring swap.
+    <View className="relative flex-1">
+      <SelectableCard
+        selected={selected}
+        onPress={onPress}
+        restingRing="cool"
         padding={{ vertical: 16, horizontal: 16 }}
         className="rounded-tile"
       >
@@ -59,7 +58,7 @@ function PriceTile({
           </Text>
           <Text className="text-[14px] text-ink-ghost">{period}</Text>
         </View>
-      </Card>
+      </SelectableCard>
       {badge ? (
         <View className="absolute -top-[13px] left-1/2 -translate-x-1/2 rounded-pill bg-brand px-[12px] py-[5px]">
           <Text weight={600} className="text-[13px] text-white">
@@ -67,7 +66,7 @@ function PriceTile({
           </Text>
         </View>
       ) : null}
-    </Pressable>
+    </View>
   );
 }
 

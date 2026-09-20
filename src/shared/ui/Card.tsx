@@ -22,11 +22,11 @@ import { Text, type TextProps } from './Text';
  */
 const RINGS = {
   /** `0 0 0 1px #E6EBF3` — resting, outset. */
-  hair: { className: 'border border-hair', padCompensation: 0 },
+  hair: { className: 'border border-hair', padCompensation: 0, width: 1 },
   /** `inset 0 0 0 2px #2F7CF6` — selected, inset. */
-  brand: { className: 'border-2 border-brand', padCompensation: 2 },
+  brand: { className: 'border-2 border-brand', padCompensation: 2, width: 2 },
   /** `0 0 0 1px #E0E7F2` — the paywall's unselected plan tile, outset. */
-  cool: { className: 'border border-hair-cool', padCompensation: 0 },
+  cool: { className: 'border border-hair-cool', padCompensation: 0, width: 1 },
 } as const;
 
 export type CardRing = keyof typeof RINGS;
@@ -65,6 +65,8 @@ export function Card({ children, ring = 'hair', padding, className, style, ...re
 export interface SelectableCardProps extends Omit<CardProps, 'ring'> {
   selected?: boolean;
   onPress?: () => void;
+  /** Ring drawn while unselected — the paywall's plan tiles use the cooler one. */
+  restingRing?: CardRing;
 }
 
 /** A `Card` that swaps to the brand ring when chosen. */
@@ -74,11 +76,18 @@ export function SelectableCard({
   onPress,
   className,
   padding,
+  restingRing = 'hair',
   ...rest
 }: SelectableCardProps) {
-  const ring: CardRing = selected ? 'brand' : 'hair';
+  const ring: CardRing = selected ? 'brand' : restingRing;
   const recipe = RINGS[ring];
 
+  // A selectable card swaps a 1px ring for a 2px one, so compensating only the
+  // inset ring would make the box 2px smaller the moment it is picked and shunt
+  // everything below it. Compensating by the border width in *both* states
+  // keeps the outer box at the design's layout size — which is what the CSS
+  // does anyway, since an outset ring paints outside the box and consumes no
+  // space.
   return (
     <Pressable
       accessibilityRole="radio"
@@ -88,8 +97,8 @@ export function SelectableCard({
       style={
         padding
           ? {
-              paddingVertical: padding.vertical - recipe.padCompensation,
-              paddingHorizontal: padding.horizontal - recipe.padCompensation,
+              paddingVertical: padding.vertical - recipe.width,
+              paddingHorizontal: padding.horizontal - recipe.width,
             }
           : undefined
       }

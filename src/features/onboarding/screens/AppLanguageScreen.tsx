@@ -23,7 +23,12 @@ export function AppLanguageScreen() {
       footer={
         <Button
           label={t('common.continue')}
-          onPress={() => router.push('/(onboarding)/location')}
+          onPress={() => {
+            // Committing the locale here rather than on tap keeps this step's
+            // own copy stable while the choice is being made.
+            setLocale(selected);
+            router.push('/(onboarding)/location');
+          }}
         />
       }
     >
@@ -34,12 +39,7 @@ export function AppLanguageScreen() {
             title={language.name}
             flag={language.flag}
             selected={selected === language.code}
-            onPress={() => {
-              setSelected(language.code);
-              // The rest of onboarding is already translated, so the switch
-              // takes effect on the next step rather than after sign-up.
-              setLocale(language.code);
-            }}
+            onPress={() => setSelected(language.code)}
           />
         ))}
       </View>

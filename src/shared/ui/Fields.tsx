@@ -69,8 +69,9 @@ export function TextField({
   radius = 18,
   className,
 }: TextFieldProps) {
-  // The focus ring is inset and overlaps the padding; the resting one is not.
-  const padCompensation = focused ? 2 : 0;
+  // Focusing swaps a 1px ring for a 2px one. Compensating by the border width
+  // in both states keeps the text on the same x as the field gains its ring.
+  const border = focused ? 2 : 1;
 
   return (
     <View
@@ -79,7 +80,7 @@ export function TextField({
         focused ? 'border-2 border-brand' : 'border border-hair',
         className,
       )}
-      style={{ height, borderRadius: radius, paddingHorizontal: 16 - padCompensation }}
+      style={{ height, borderRadius: radius, paddingHorizontal: 16 - border }}
     >
       <Text className={cn(value === undefined && 'text-ink-ghost')} style={{ fontSize }}>
         {value ?? placeholder}

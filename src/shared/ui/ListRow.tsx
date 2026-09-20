@@ -98,9 +98,9 @@ export function SelectableRow({
   highlightPrefix,
   onPress,
 }: SelectableRowProps) {
-  // Selected rows carry an inset ring, which overlaps the padding; resting rows
-  // carry an outset one, which does not.
-  const padCompensation = selected ? 2 : 0;
+  // Compensated by the border width in both states, so picking a row does not
+  // make it 2px shorter than its neighbours and shunt the list.
+  const border = selected ? 2 : 1;
   const rest = highlightPrefix ? title.slice(highlightPrefix.length) : null;
 
   return (
@@ -112,7 +112,7 @@ export function SelectableRow({
         'rounded-well bg-surface',
         selected ? 'border-2 border-brand' : 'border border-hair',
       )}
-      style={{ paddingVertical: 12 - padCompensation, paddingHorizontal: 14 - padCompensation }}
+      style={{ paddingVertical: 12 - border, paddingHorizontal: 14 - border }}
     >
       <View className="flex-row items-center gap-[14px]">
         {flag ? <Flag code={flag} size={42} /> : null}
