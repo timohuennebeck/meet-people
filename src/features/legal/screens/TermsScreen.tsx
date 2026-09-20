@@ -5,6 +5,7 @@ import { ScrollView, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { resolveLegalDoc } from '@shared/lib/legal';
+import { useSession } from '@shared/providers/SessionProvider';
 import { gradients, gradientStops } from '@shared/theme/tokens';
 import { Button, CircleButton, Glyph, Text } from '@shared/ui';
 
@@ -25,14 +26,28 @@ export function TermsScreen() {
   const { t } = useTranslation();
   const router = useRouter();
   const insets = useSafeAreaInsets();
+  const { isAuthenticated, hasOnboarded } = useSession();
 
   const { doc } = useLocalSearchParams<{ doc?: string }>();
   const document = LEGAL_DOCUMENTS[resolveLegalDoc(doc)];
 
+  // This screen is reachable from the welcome page, from the account step and
+  // from settings, so it normally has something to go back to. It sits outside
+  // both route guards, though, which means a deep link or a guard flip can land
+  // on it with an empty stack — and a dismiss that only calls `back()` would
+  // strand the person here with no way out.
+  const dismiss = () => {
+    if (router.canGoBack()) {
+      router.back();
+      return;
+    }
+    router.replace(isAuthenticated && hasOnboarded ? '/(tabs)' : '/');
+  };
+
   return (
     <View className="flex-1 overflow-hidden bg-surface-app">
       <View className="shrink-0 px-[20px]" style={{ paddingTop: Math.max(56, insets.top) }}>
-        <CircleButton size={40} accessibilityLabel={t('common.back')} onPress={() => router.back()}>
+        <CircleButton size={40} accessibilityLabel={t('common.back')} onPress={dismiss}>
           <Glyph.ChevronLeft size={13} />
         </CircleButton>
       </View>
@@ -71,11 +86,7 @@ export function TermsScreen() {
         style={{ paddingBottom: Math.max(34, insets.bottom) }}
         pointerEvents="box-none"
       >
-        <Button
-          label={t('legal.understood')}
-          variant="primaryCompact"
-          onPress={() => router.back()}
-        />
+        <Button label={t('legal.understood')} variant="primaryCompact" onPress={dismiss} />
       </LinearGradient>
     </View>
   );
