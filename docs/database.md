@@ -234,7 +234,6 @@ create table public.profiles (
   neighbourhood           text,                                  -- never a street address
   country_code            char(2),
   verification_status     public.verification_status not null default 'none',
-  verified_at             timestamptz,
   onboarding_completed_at timestamptz,
   deleted_at              timestamptz,                           -- anonymised, see §3.9
   created_at              timestamptz not null default now(),
@@ -360,6 +359,7 @@ create table public.plan_participants (
   profile_id uuid not null references public.profiles(id) on delete cascade,
   is_host    boolean not null default false,
   joined_at  timestamptz not null default now(),
+  left_at    timestamptz,                     -- leaving keeps the row; see attendance below
   primary key (plan_id, profile_id)
 );
 create index on public.plan_participants (profile_id);
@@ -370,12 +370,12 @@ create table public.join_requests (
   profile_id   uuid not null references public.profiles(id) on delete cascade,
   message      text check (char_length(message) <= 300),
   status       public.request_status not null default 'pending',
-  waitlist_position smallint,        -- null until the plan is full
   created_at   timestamptz not null default now(),
   resolved_at  timestamptz,
   unique (plan_id, profile_id)
 );
 create index on public.join_requests (plan_id) where status = 'pending';
+create index on public.join_requests (profile_id, created_at desc);   -- the weekly quota count
 
 create table public.plan_attendance (
   plan_id      uuid not null references public.plans(id) on delete cascade,
@@ -388,18 +388,34 @@ create table public.plan_attendance (
 ```
 
 **The capacity trigger.** Nothing in the current migration stops a full plan being over-seated. A
-`before insert on plan_participants` trigger counts seats against `plans.capacity` in the same
-transaction and raises when it would overflow. The race is not theoretical: a host tapping Accept
+`before insert on plan_participants` trigger counts seats (`left_at is null`) against
+`plans.capacity` in the same transaction and raises when it would overflow. The race is not theoretical: a host tapping Accept
 on two requests in quick succession is exactly the concurrency case already fixed on the client, and
 the database has no equivalent guard.
 
-**Waitlist ordering.** `waitlisted boolean` in the current migration cannot express "next in line",
-so the host sheet's "+1 vaga" has no defined person to admit. A `waitlist_position` fixes that.
+**The waitlist is derived, not stored.** `waitlisted boolean` in the current migration cannot
+express "next in line", and an earlier draft of this plan stored a `waitlist_position` instead.
+That was wrong in the other direction: a stored position has to be renumbered by a trigger every
+time someone ahead withdraws or is declined, and the first version of that trigger is where the
+off-by-one lives. Once a plan is full, the queue simply _is_ the pending requests in `created_at`
+order — `row_number() over (partition by plan_id order by created_at)` — and the host sheet's
+"+1 vaga" admits the lowest row number. Nothing to maintain, nothing to drift.
+
+**What counts as a request.** The free tier caps `join_requests`, and only `approval` plans create
+one — joining an `open` plan seats the person directly. As written, a free user therefore gets
+three approval requests a week _plus unlimited open joins_. That is defensible ("Pedidos
+ilimitados" is literally about requests) and it favours open plans, which is probably what the
+product wants; but it is a decision, not an accident, and the plan had made it silently. If the
+intent was three _joins_ a week, the trigger moves to `plan_participants` and counts both. Open
+question 9.
 
 **Attendance is derived from cancellations.** Rule 1 is "Combinado é combinado — avise a tempo se
-não puder", so the thing worth measuring is cancellation discipline, and the app already records
-both leave time and start time. No new UI, nothing a hostile host can weaponise, nothing gameable
-by faking a location.
+não puder", so the thing worth measuring is cancellation discipline. Leaving a plan stamps
+`plan_participants.left_at` rather than deleting the row — an earlier draft deleted it, which
+erased the one fact attendance is derived from. `close-stale-plans` then reads every seat once the
+plan's end time has passed: no `left_at` is `attended`, a `left_at` well before `starts_at` is
+`cancelled_early`, one close to it is `cancelled_late`. No new UI, nothing a hostile host can
+weaponise, nothing gameable by faking a location.
 
 Its weakness is worth naming: someone who silently fails to turn up, without ever tapping leave,
 keeps a perfect score. `source` exists from day one so host confirmation can be added later as a
@@ -429,7 +445,7 @@ create table public.messages (
   id              uuid primary key default gen_random_uuid(),
   conversation_id uuid not null references public.conversations(id) on delete cascade,
   author_id       uuid not null references public.profiles(id) on delete restrict,
-  body            text not null check (char_length(body) between 1 and 2000),
+  content         text not null check (char_length(content) between 1 and 2000),
   created_at      timestamptz not null default now()
 );
 create index on public.messages (conversation_id, created_at desc);
@@ -530,6 +546,26 @@ ledger table: `join_requests` already answers the question.
 Deliberately not stored: receipts and purchase tokens. RevenueCat holds those; copying them buys
 nothing and adds a liability.
 
+**The mirror can drift, and the plan has to say what happens when it does.** A webhook can be
+delayed, dropped or delivered out of order, and `TRANSFER` and `REFUND` are the events most often
+mishandled. Three things bound it:
+
+1. `sync-entitlement` runs right after every purchase and every restore, so the common path never
+   waits for a webhook at all.
+2. On every cold start the app compares the SDK's `CustomerInfo` with `has_plus()` and calls
+   `sync-entitlement` when they disagree. The client cannot _set_ the entitlement — it can only ask
+   the server to re-read RevenueCat — so a stale row survives at most one app open.
+3. When the two disagree at the moment of a gated action, the server's answer stands. That is the
+   whole point of the mirror.
+
+The alternative is no mirror: gate in the client on `CustomerInfo` and let the database trust the
+app. It is a legitimate choice for an app this size and it is what most subscription apps do. It
+trades the drift problem for a bypass problem — the four promises in the table above then hold only
+in the UI, and anyone calling PostgREST with their own JWT walks past them. This plan keeps the
+mirror because the quota is a per-request cost: "3 pedidos por semana" is worth exactly nothing if
+it only holds on the phone. If that trade ever flips, `entitlements`, `has_plus()` and the quota
+trigger are the three things to delete, and nothing else references them.
+
 ### 3.8 Verification and legal documents
 
 ```sql
@@ -538,12 +574,27 @@ create table public.verification_submissions (
   profile_id    uuid not null references public.profiles(id) on delete cascade,
   storage_path  text not null,                 -- private `verification` bucket
   submitted_at  timestamptz not null default now(),
-  reviewed_at   timestamptz,
-  reviewed_by   uuid,                          -- → Moderação
-  outcome       public.verification_status,
+  outcome       public.verification_status,    -- set by hand in Studio; null while pending
+  reviewed_at   timestamptz,                   -- stamped by the trigger below, not by hand
   purged_at     timestamptz                    -- set by the retention job
 );
+create index on public.verification_submissions (profile_id, submitted_at desc);
 ```
+
+**Review is manual, in Studio, and the schema is shaped around that.** No `reviewed_by` and no
+reviewer console: a person opens the row, looks at the selfie, sets `outcome`. The one thing the
+schema must guarantee is that this is a _single_ edit. A trigger on `verification_submissions`
+keeps `profiles.verification_status` in step — `pending` when a row is inserted, and whatever
+`outcome` becomes when it is set, stamping `reviewed_at` in the same statement. Two tables are never
+edited by hand for one decision, so they can never disagree, and the profile column stays the only
+thing a client reads: `verification_submissions` has no client read policy at all.
+
+That is also why `profiles.verified_at` is gone. The date of the accepting review is `reviewed_at`
+on the submission whose `outcome` is `verified`; nothing in the design shows it — the pill says
+"Verificado", not since when — and if a screen ever needs it, it is one query away.
+`verification_status` stays on `profiles`, though, and the distinction matters: status is read on
+every profile card, every `nearby_plans` row and the "verificados" filter, so it has to be where
+those reads already are, and moderation may one day revoke it with no submission involved.
 
 The capture screen promises "Apagamos a selfie depois da conferência". That is a retention
 obligation, not a nicety: a `pg_cron` job deletes the storage object `selfie_retention_days` after
@@ -551,28 +602,24 @@ a decision and stamps `purged_at`. The bucket is already `public = false` in `co
 
 ```sql
 create table public.legal_documents (
-  id                    uuid primary key default gen_random_uuid(),
-  kind                  public.legal_doc_kind not null,
-  locale                text not null,                  -- pt-BR, en
-  version               text not null,                  -- '2026-09-20'
-  title                 text not null,
-  content_md            text not null,
-  content_sha256        text not null,                  -- set on insert by trigger
-  url                   text,                           -- store listing, e-mails
-  requires_reacceptance boolean not null default false,
-  effective_at          timestamptz not null,
+  id                     uuid primary key default gen_random_uuid(),
+  kind                   public.legal_doc_kind not null,
+  locale                 text not null default 'pt-BR',
+  version                text not null,                  -- '2026-09-15'
+  content_md             text not null,                  -- rendered as sections in TermsScreen
+  effective_at           timestamptz not null,
+  requires_reacceptance  boolean not null default false, -- true → app shows a consent sheet
   unique (kind, locale, version)
 );
-create index on public.legal_documents (kind, locale, effective_at desc);
 
 create table public.legal_acceptances (
-  profile_id      uuid not null references public.profiles(id) on delete cascade,
-  document_id     uuid not null references public.legal_documents(id) on delete restrict,
-  content_sha256  text not null,
-  accepted_at     timestamptz not null default now(),
-  app_version     text,
-  platform        public.platform,
-  primary key (profile_id, document_id)
+  id           uuid primary key default gen_random_uuid(),
+  profile_id   uuid not null references public.profiles(id) on delete cascade,
+  document_id  uuid not null references public.legal_documents(id),
+  accepted_at  timestamptz not null default now(),
+  app_version  text,
+  platform     public.platform,
+  unique (profile_id, document_id)
 );
 ```
 
@@ -583,6 +630,12 @@ the text in an immutable row, the accepted version is the artifact.
 Rows are append-only: a `before update or delete` trigger rejects every mutation, so a new version
 is a new row. That is the right enforcement point because `service_role` bypasses RLS but **not**
 triggers — even our own admin tooling cannot quietly rewrite a published document.
+
+**That trigger is what lets the tables be this small.** An earlier draft also stored a
+`content_sha256` on both tables so an acceptance could prove the text even if the row were altered.
+With alteration rejected at the database, `document_id` alone is the proof and the hash was a
+second lock on the same door. `title` is `kind` rendered through i18n, `url` had no reader, and a
+six-row table does not need an index.
 
 Readable by `anon` as well as `authenticated`: the welcome screen shows these links before sign-in.
 The prose lives in the repo as `legal/*.md` and a migration publishes it, so the text is
@@ -599,13 +652,14 @@ limit 1;
 ```
 
 Acceptance is written when the anonymous user taps "Começar" and again at account creation, each
-time with the version on screen; the second write for the same version hits the primary key, so the
-app uses `upsert(…, { ignoreDuplicates: true })`.
+time with the version on screen; the second write for the same version hits the unique constraint,
+so the app uses `upsert(…, { ignoreDuplicates: true })`.
 
-**This also makes two dead links work.** "Termos" and "Privacidade" currently render as styled text
-with no `onPress`, and `app/` has no legal route at all. Rendering `content_md` needs a small
-in-house Markdown renderer — six node types is enough for legal prose — rather than a dependency
-that renders its own text components and bypasses `@shared/ui`'s `Text`.
+**The screen already exists.** `TermsScreen` is reached from the welcome page, the account step and
+settings, and today reads its sections from i18n. Moving it onto `content_md` is a parser, not a
+renderer: each document is `## heading` lines followed by paragraphs, which is exactly the
+`{ heading, body }[]` the screen renders now, so a dozen lines splitting on headings does it and
+nothing bypasses `@shared/ui`'s `Text`.
 
 ### 3.9 Safety, deletion and export
 
@@ -617,10 +671,11 @@ create table public.blocks (
   primary key (blocker_id, blocked_id),
   constraint no_self_block check (blocker_id <> blocked_id)
 );
+create index on public.blocks (blocked_id);   -- the reverse direction is looked up as often
 
 create table public.reports (
   id           uuid primary key default gen_random_uuid(),
-  reporter_id  uuid not null references public.profiles(id) on delete set null,
+  reporter_id  uuid references public.profiles(id) on delete set null,   -- nullable, or `set null` can never fire
   subject_id   uuid not null references public.profiles(id) on delete cascade,
   plan_id      uuid references public.plans(id) on delete set null,
   reason       public.report_reason not null,
@@ -632,12 +687,48 @@ create table public.reports (
 Neither exists today, in the app or the schema. For a product whose premise is meeting strangers in
 person, both are table stakes.
 
-The part that matters is not the tables but **where they are joined**. A block has to be invisible
-and total: neither person sees the other in `nearby_plans`, in people search, in a participant
-list, or in a conversation. That means the exclusion belongs in the RPC and in the read policies,
-not in client-side filtering — otherwise a blocked person still appears in any response the client
-renders differently. Reports are readable only by their author; resolution is out of band
-(→ Moderação).
+**A block is stored in one direction and applied in both.** One row, `blocker → blocked`, and one
+predicate used everywhere:
+
+```sql
+create function public.is_blocked(a uuid, b uuid) returns boolean
+  language sql stable security definer set search_path = ''
+  as $$ select exists (select 1 from public.blocks
+                       where (blocker_id = a and blocked_id = b)
+                          or (blocker_id = b and blocked_id = a)) $$;
+```
+
+Symmetric on purpose. If only the blocker's view changed, the blocked person could still open their
+profile, request their plans and message them, and every one of those would fail in a way that
+announces the block. Both sides simply stop existing for each other. And the exclusion lives in the
+RPC and the read policies, never in client filtering — otherwise a blocked person is still present
+in every response the client merely renders differently.
+
+| Surface                          | Rule                                                                              | Enforced in                                |
+| -------------------------------- | --------------------------------------------------------------------------------- | ------------------------------------------ |
+| Map, "Planos da cidade inteira"  | plans hosted by either side are not returned                                      | `nearby_plans()`                           |
+| Plan sheet, seat list            | a blocked participant is not listed; the seat reads as taken                      | `plan_participants` read policy            |
+| Join requests                    | neither side can request the other's plan                                         | `before insert` trigger on `join_requests` |
+| People search, `public_profiles` | not returned                                                                      | the view's `where`                         |
+| Conversations list               | a direct conversation with them is not listed                                     | `conversation_list` view                   |
+| Messages                         | a direct thread is unreadable; **group messages stay visible**                    | `messages` read policy (direct only)       |
+| Realtime                         | the client subscribes per conversation, so a hidden thread is never subscribed to | —                                          |
+
+Group messages stay visible deliberately. Hiding one member's lines out of a plan's chat leaves
+everyone else's replies answering nothing, and the person who blocked chose to be in that plan; the
+way out of a shared plan is to leave it. What a block _does_ do to a shared plan is limited to one
+thing: an `after insert` trigger declines any pending request between the two, in either direction.
+It does not un-seat anyone from a plan they are already in — silently removing someone, possibly
+the host, is a bigger surprise than the block was, and the leave screen already exists. The client
+can offer it in the block sheet: "Vocês dois estão em _Tarde de jogos_ — sair do plano?" This
+closes open question 5.
+
+Cost: `is_blocked` runs inside policies on the hottest reads. `blocks` is tiny and indexed on both
+columns, so each check is two index probes; at any size this app reaches in its first year it is
+not measurable. If it ever is, the fix is a `blocked_pairs` table holding both orderings, kept by
+trigger — an optimisation, not a redesign.
+
+Reports are readable only by their author; resolution is out of band (→ Moderação).
 
 **Account deletion anonymises rather than deletes.** `delete-account` sets `profiles.deleted_at`,
 scrubs name, avatar, bio, birthdate, gender, interests and languages, drops the
@@ -658,26 +749,26 @@ create policy "own preferences: write" on public.preferences for all
   using (auth.uid() = profile_id) with check (auth.uid() = profile_id);
 ```
 
-| Table                                        | read                        | client write                |
-| -------------------------------------------- | --------------------------- | --------------------------- |
-| `app_config`, `legal_documents`              | everyone (incl. `anon`)     | none (secret key only)      |
-| `profiles`                                   | own                         | insert / update own         |
-| `public_profiles` (view)                     | any signed-in, minus blocks | —                           |
-| `profile_locations`                          | **nobody**                  | insert / update own         |
-| `profile_interests`, `profile_languages`     | any signed-in               | own                         |
-| `preferences`                                | own                         | own                         |
-| `places`                                     | any signed-in               | insert (author recorded)    |
-| `plans`                                      | live plans, minus blocks    | insert / update own as host |
-| `plan_participants`                          | any signed-in, minus blocks | delete own (leaving)        |
-| `join_requests`                              | author or host              | insert own, host resolves   |
-| `plan_attendance`                            | own                         | none (derived server-side)  |
-| `conversations`, `conversation_members`      | members                     | update own `last_read_at`   |
-| `messages`                                   | members                     | insert own                  |
-| `blocks`                                     | own                         | insert / delete own         |
-| `reports`                                    | own                         | insert own                  |
-| `entitlements`                               | own                         | **none** (webhook only)     |
-| `billing_events`, `verification_submissions` | none                        | none (edge functions)       |
-| `legal_acceptances`                          | own                         | insert own                  |
+| Table                                        | read                                  | client write                   |
+| -------------------------------------------- | ------------------------------------- | ------------------------------ |
+| `app_config`, `legal_documents`              | everyone (incl. `anon`)               | none (secret key only)         |
+| `profiles`                                   | own                                   | insert / update own            |
+| `public_profiles` (view)                     | any signed-in, minus blocks           | —                              |
+| `profile_locations`                          | **nobody**                            | insert / update own            |
+| `profile_interests`, `profile_languages`     | any signed-in                         | own                            |
+| `preferences`                                | own                                   | own                            |
+| `places`                                     | any signed-in                         | insert (author recorded)       |
+| `plans`                                      | live plans, minus blocks              | insert / update own as host    |
+| `plan_participants`                          | any signed-in, minus blocks           | update own `left_at` (leaving) |
+| `join_requests`                              | author or host                        | insert own, host resolves      |
+| `plan_attendance`                            | own                                   | none (derived server-side)     |
+| `conversations`, `conversation_members`      | members                               | update own `last_read_at`      |
+| `messages`                                   | members, minus blocked direct threads | insert own                     |
+| `blocks`                                     | own                                   | insert / delete own            |
+| `reports`                                    | own                                   | insert own                     |
+| `entitlements`                               | own                                   | **none** (webhook only)        |
+| `billing_events`, `verification_submissions` | none                                  | none (edge functions)          |
+| `legal_acceptances`                          | own                                   | insert own                     |
 
 Anonymous users (`(auth.jwt() ->> 'is_anonymous')::boolean`) get the same policies. They can
 complete steps 1–6 and nothing else: creating a plan, sending a request and opening a chat all
@@ -727,7 +818,7 @@ membership value the client has to compute.
 | 17 Paywall · 30a aufgebraucht         | RevenueCat offerings + `entitlements`  | purchase via the SDK                               |
 | 0 Prévia (Home)                       | `nearby_plans()`                       | —                                                  |
 | 1 Offen · 2 Beitritt anfragen         | `nearby_plans()` / plan detail         | `join_requests` (quota trigger applies)            |
-| 3 Anfrage gesendet · 5 Absagen        | plan detail                            | delete `join_requests` / `plan_participants`       |
+| 3 Anfrage gesendet · 5 Absagen        | plan detail                            | delete `join_requests` / set `left_at`             |
 | 1–3 Host-Sheets                       | plan detail, `join_requests`           | resolve requests, `plan_participants`              |
 | Create 1–6 · Veröffentlicht           | `places` (recent, nearby)              | `places`, `plans` (+ host seat trigger)            |
 | 12a Conversas                         | `conversation_list` view               | —                                                  |
@@ -747,11 +838,12 @@ supabase/migrations/
   002_privacy_split.sql                  public_profiles view, profile_locations, tightened
                                             profile policies, gender, deleted_at,
                                             handle_new_user, missing indexes
-  003_safety_and_capacity.sql            blocks, reports, capacity trigger, waitlist_position,
-                                            plan_attendance, messages FK restrict
-  004_trust_legal_billing.sql            verification_submissions, legal_documents +
-                                            acceptances, entitlements, billing_events,
-                                            app_config, storage policies
+  003_safety_and_capacity.sql            blocks + is_blocked(), reports, capacity trigger,
+                                            participants.left_at, plan_attendance,
+                                            messages FK restrict, messages.body → content
+  004_trust_legal_billing.sql            verification_submissions + status trigger,
+                                            legal_documents + acceptances, entitlements,
+                                            billing_events, app_config, storage policies
   005_derived_reads.sql                  conversation_list, nearby_plans(), has_plus(),
                                             export_my_data(), quota trigger, realtime publication
 supabase/seed.sql                        app_config (eight keys), terms + privacy in pt-BR and
@@ -805,8 +897,10 @@ Not database work, but the schema above assumes them:
 - `enable_anonymous_sign_ins = true` in `config.toml`, plus `signInAnonymously()` on first launch
   and the profile upsert on every cold start (§2).
 - Sign in with Apple on the account screen beside Google (§2), which is a design change too.
-- A `/legal/[kind]` route and a small Markdown renderer, so "Termos" and "Privacidade" stop being
-  inert text (§3.8).
+- `TermsScreen` reading `content_md` through the section parser instead of i18n (§3.8); the route
+  and the links already exist.
+- The cold-start reconcile: compare `CustomerInfo` with `has_plus()` and call `sync-entitlement`
+  when they disagree (§3.7).
 - A gender field in settings, and the audience filter reading it (§3.3).
 - Block and report actions on a profile and in a chat — the overflow menus exist and do nothing.
 - `source.ts` gains the RPC calls; the fourteen method signatures do not change.
@@ -826,11 +920,14 @@ Not database work, but the schema above assumes them:
 3. Sign in with Apple is required on iOS alongside Google. OK to add it to the account screen?
 4. Where does `gender` get asked — settings only, or a new onboarding step once fill rates
    matter?
-5. When two people who share a live plan block each other, does the plan keep both and hide the
-   chat, or drop one of them? The first is simpler; the second is safer.
+5. ~~When two people who share a live plan block each other, does the plan keep both and hide the
+   chat, or drop one of them?~~ Decided in §3.9: the plan keeps both, group chat stays visible,
+   pending requests between them are declined, and the block sheet offers to leave.
 6. Email confirmation at sign-up: off at launch (simpler, no recovery from typos) or on, with a
    confirmation state in onboarding (§2)?
 7. Do sandbox purchases grant real Plus in TestFlight? `is_sandbox` is on the row either way;
    `has_plus()` needs to know which answer.
 8. Should transcripts of a plan's chat be kept indefinitely, or trimmed after N days — the
    data-minimisation argument for the Política de privacidade?
+9. Is the free tier three _requests_ a week (as the trigger counts — joining an `open` plan is
+   unlimited) or three _joins_ a week? §3.5 explains the difference; the copy says "pedidos".
