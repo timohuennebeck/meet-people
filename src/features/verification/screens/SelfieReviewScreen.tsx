@@ -1,4 +1,5 @@
-import { useRouter } from 'expo-router';
+import { Image } from 'expo-image';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { View } from 'react-native';
 
@@ -10,10 +11,16 @@ import { CameraButton, CameraFrame } from '../ui/CameraFrame';
 export function SelfieReviewScreen() {
   const { t } = useTranslation();
   const router = useRouter();
+  // The shot the capture step just took. Reached any other way — a deep link,
+  // a reload — there is no selfie to show, and none is invented.
+  const { uri } = useLocalSearchParams<{ uri?: string }>();
 
   return (
     // Heavier at the bottom than the capture scrim, to carry the primary button.
     <CameraFrame
+      background={
+        uri ? <Image source={{ uri }} className="absolute inset-0" contentFit="cover" /> : null
+      }
       scrimOpacity={[0.4, 0.8]}
       scrimStops={[0, 0.24, 0.52, 1]}
       // The × abandons verification; Retake, beside it, is the one that goes back.

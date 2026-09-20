@@ -14,7 +14,11 @@ export interface ComposerProps {
   /** One-tap replies above the input; tapping one sends it immediately. */
   quickReplies: readonly string[];
   onQuickReply: (reply: string) => void;
-  /** Bottom inset, so the composer clears the home indicator. */
+  /**
+   * Padding under the composer. The caller resolves it, because what it has to
+   * clear changes: the home indicator at rest, the keyboard's top edge once the
+   * field has focus.
+   */
   bottomInset: number;
 }
 
@@ -62,7 +66,7 @@ export function Composer({
 
       <View
         className="shrink-0 flex-row items-center gap-[10px] px-[16px] pt-[10px]"
-        style={{ paddingBottom: Math.max(30, bottomInset) }}
+        style={{ paddingBottom: bottomInset }}
       >
         <Pressable
           accessibilityRole="button"

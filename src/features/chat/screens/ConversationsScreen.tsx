@@ -35,10 +35,12 @@ export function ConversationsScreen() {
         <Text weight={600} className="text-[30px] tracking-[-0.96px]">
           {t('chat.tabTitle')}
         </Text>
+        {/* A new conversation starts with a person, not a plan, so the + opens
+            people search rather than the create-plan flow. */}
         <CircleButton
           size={40}
-          accessibilityLabel={t('common.newPlan')}
-          onPress={() => router.push('/create')}
+          accessibilityLabel={t('search.title')}
+          onPress={() => router.push('/search')}
         >
           <Glyph.PlusGlyph size={17} color={colors.brand} strokeWidth={2.2} />
         </CircleButton>

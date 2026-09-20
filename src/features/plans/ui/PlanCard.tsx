@@ -53,6 +53,13 @@ function AttendeeCluster({ plan }: { plan: Plan }) {
   );
 }
 
+/**
+ * `300px` — the carousel card's width, as the design draws it. Exported because
+ * the map's carousel derives its snap interval from it; keeping the number in
+ * one place stops the two drifting apart.
+ */
+export const PLAN_CARD_WIDTH = 300;
+
 export interface PlanCardProps {
   plan: Plan;
   /** The focused card shows full detail; the peeking one is title-only. */
@@ -70,10 +77,10 @@ export function PlanCard({ plan, variant, onPress }: PlanCardProps) {
       accessibilityRole="button"
       onPress={onPress}
       className={cn(
-        'w-[300px] shrink-0 gap-[12px] rounded-card bg-surface p-[12px]',
+        'shrink-0 gap-[12px] rounded-card bg-surface p-[12px]',
         variant === 'peek' && 'opacity-90',
       )}
-      style={shadows.planCard}
+      style={[{ width: PLAN_CARD_WIDTH }, shadows.planCard]}
     >
       <PlanPhoto
         height={140}

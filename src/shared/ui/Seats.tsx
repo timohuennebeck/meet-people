@@ -37,6 +37,13 @@ export interface SeatListProps {
 /**
  * The row or grid of participant avatars shown in a plan sheet, with dashed
  * placeholders for the seats still open.
+ *
+ * A row at its natural width wraps: six 52px seats and their 14px gaps come to
+ * 382px, which is wider than the sheet's 366px of content, so without wrapping
+ * the sixth seat is clipped by the sheet's edge. Wrapping leaves a row that
+ * does fit untouched, so the design's single-row spacing is unchanged. The
+ * `even` layout is a fixed set of columns that share the width between them
+ * and so never overflows — wrapping it would put one seat per line.
  */
 export function SeatList({
   seats,
@@ -48,7 +55,7 @@ export function SeatList({
   tintedEmpty = false,
 }: SeatListProps) {
   return (
-    <View className="flex-row" style={{ gap }}>
+    <View className={cn('flex-row', !even && 'flex-wrap')} style={{ gap }}>
       {seats.map((seat, index) => (
         <View
           key={`${seat.label}-${index}`}

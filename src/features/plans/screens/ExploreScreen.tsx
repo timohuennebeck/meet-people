@@ -11,7 +11,16 @@ import { Avatar, Chip, Glyph, Text } from '@shared/ui';
 
 import { usePlans } from '../data/usePlans';
 import { MapPin, UserDot } from '../ui/MapPin';
-import { PlanCard } from '../ui/PlanCard';
+import { PLAN_CARD_WIDTH, PlanCard } from '../ui/PlanCard';
+
+/** Gap between two cards in the carousel, as the design spaces them. */
+const CARD_GAP = 12;
+
+/**
+ * One card plus its gutter — the distance the carousel travels between two
+ * cards, and so the offset it settles on when a swipe ends.
+ */
+const CARD_INTERVAL = PLAN_CARD_WIDTH + CARD_GAP;
 
 /** The pill-shaped wordmark that floats over the top-left of the map. */
 function BrandPill() {
@@ -137,10 +146,18 @@ export function ExploreScreen() {
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}
+        // Settle card-to-card rather than drifting: every card starts one
+        // `CARD_INTERVAL` after the last, so the snap offsets are the multiples
+        // of that interval. `disableIntervalMomentum` keeps a hard flick from
+        // flying past several cards at once.
+        snapToInterval={CARD_INTERVAL}
+        snapToAlignment="start"
+        disableIntervalMomentum
+        decelerationRate="fast"
         className="absolute bottom-0 left-0 right-0"
         // The design insets the carousel on the left only, so the last card can
         // scroll flush to the right edge.
-        contentContainerStyle={{ paddingLeft: 18, gap: 12, paddingBottom: 30 }}
+        contentContainerStyle={{ paddingLeft: 18, gap: CARD_GAP, paddingBottom: 30 }}
         style={{ marginBottom: insets.bottom }}
       >
         {cards.map((plan, index) => (

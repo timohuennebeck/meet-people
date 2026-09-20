@@ -2,11 +2,14 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import type { Plan } from '@shared/data/schemas';
-import { gradients } from '@shared/theme/tokens';
+import { gradients, shadows } from '@shared/theme/tokens';
 import {
   Button,
+  CircleButton,
+  Glyph,
   HostCard,
   SeatList,
   SeatSummary,
@@ -211,6 +214,35 @@ function HostState({ plan }: { plan: Plan }) {
 }
 
 /**
+ * The × over the map, at the top left of the plan-on-map screen.
+ *
+ * The sheet states that open with a photo carry their own × in its top-right
+ * corner, but the ones that do not — and the map behind the sheet — left no way
+ * out but the system back gesture. This sits where the wordmark does on the map
+ * itself, so it lands in the same place on every state.
+ */
+function CloseOverlay({ onPress }: { onPress: () => void }) {
+  const { t } = useTranslation();
+  const insets = useSafeAreaInsets();
+
+  return (
+    <View
+      className="absolute left-[18px] rounded-full"
+      style={[{ top: Math.max(70, insets.top + 11) }, shadows.chip]}
+    >
+      <CircleButton
+        size={40}
+        className="bg-surface"
+        accessibilityLabel={t('common.close')}
+        onPress={onPress}
+      >
+        <Glyph.CloseHeader size={13} />
+      </CircleButton>
+    </View>
+  );
+}
+
+/**
  * The plan detail sheet. Which state renders follows the viewer's membership,
  * so the same route serves the guest and host flows.
  */
@@ -225,6 +257,7 @@ export function PlanSheetScreen() {
       <View className="flex-1">
         <LinearGradient colors={gradients.map} className="absolute inset-0" />
         <SheetScrim />
+        <CloseOverlay onPress={() => router.back()} />
       </View>
     );
   }
@@ -243,6 +276,10 @@ export function PlanSheetScreen() {
       ) : (
         <OpenState plan={plan} onJoin={() => router.push(`/plan/${plan.id}/join`)} />
       )}
+
+      {/* Last, so a sheet tall enough to reach the top of the screen cannot
+          bury the only control that closes it. */}
+      <CloseOverlay onPress={() => router.back()} />
     </View>
   );
 }

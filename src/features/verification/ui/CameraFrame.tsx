@@ -1,4 +1,3 @@
-import { Image } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -6,8 +5,6 @@ import { Pressable, View } from 'react-native';
 
 import { cn } from '@shared/lib/cn';
 import { Glyph } from '@shared/ui';
-
-const SAMPLE = require('../../../../assets/images/selfie-sample.png');
 
 /** The translucent fill every control over the camera sits on. */
 const CONTROL_FILL = 'rgba(14,18,25,0.45)';
@@ -54,6 +51,12 @@ export function CameraButton({
 }
 
 export interface CameraFrameProps {
+  /**
+   * What fills the frame behind the scrim: the live preview while shooting, the
+   * shot just taken while reviewing it. Nothing leaves the bare camera surface,
+   * which is what a refused or missing camera has to show.
+   */
+  background?: ReactNode;
   /** Opacity of the top and bottom scrim stops. */
   scrimOpacity: readonly [top: number, bottom: number];
   /** Where the four stops fall, as fractions of the height. */
@@ -67,15 +70,21 @@ export interface CameraFrameProps {
 }
 
 /**
- * The selfie camera behind both verification steps: the preview, the scrim over
- * it, and the × that abandons verification.
+ * The frame both verification steps share: whatever fills it, the scrim over
+ * that, and the × that abandons verification.
  */
-export function CameraFrame({ scrimOpacity, scrimStops, onClose, children }: CameraFrameProps) {
+export function CameraFrame({
+  background,
+  scrimOpacity,
+  scrimStops,
+  onClose,
+  children,
+}: CameraFrameProps) {
   const { t } = useTranslation();
 
   return (
     <View className="flex-1 overflow-hidden bg-surface-camera">
-      <Image source={SAMPLE} style={{ position: 'absolute', inset: 0 }} contentFit="cover" />
+      {background}
       <LinearGradient
         colors={scrim(scrimOpacity[0], scrimOpacity[1])}
         locations={scrimStops}

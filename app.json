@@ -19,7 +19,37 @@
       "bundler": "metro",
       "output": "single"
     },
-    "plugins": ["expo-router", "expo-localization", "expo-font"],
+    "locales": {
+      "pt-BR": {
+        "NSCameraUsageDescription": "O treff usa a câmera para você tirar sua foto de perfil e a selfie da verificação.",
+        "NSPhotoLibraryUsageDescription": "O treff abre suas fotos para você escolher uma foto de perfil."
+      },
+      "en": {
+        "NSCameraUsageDescription": "treff uses the camera so you can take your profile photo and the selfie that verifies your account.",
+        "NSPhotoLibraryUsageDescription": "treff opens your photos so you can choose a profile photo."
+      }
+    },
+    "plugins": [
+      "expo-router",
+      "expo-localization",
+      "expo-font",
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "treff opens your photos so you can choose a profile photo.",
+          "cameraPermission": "treff uses the camera so you can take your profile photo and the selfie that verifies your account.",
+          "microphonePermission": false
+        }
+      ],
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "treff uses the camera so you can take your profile photo and the selfie that verifies your account.",
+          "microphonePermission": false,
+          "recordAudioAndroid": false
+        }
+      ]
+    ],
     "experiments": {
       "typedRoutes": true
     }
