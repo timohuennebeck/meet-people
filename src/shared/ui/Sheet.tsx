@@ -18,7 +18,7 @@ export function SheetScrim({ strong = false }: { strong?: boolean }) {
 }
 
 /** `40×5 · #E1E4EA` — the drag handle centred at the top of a sheet. */
-export function SheetGrabber() {
+function SheetGrabber() {
   return <View className="mx-auto h-[5px] w-[40px] rounded-[3px] bg-hair-bar" />;
 }
 

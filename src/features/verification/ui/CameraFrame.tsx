@@ -1,6 +1,5 @@
 import { Image } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
-import { useRouter } from 'expo-router';
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Pressable, View } from 'react-native';
@@ -62,16 +61,20 @@ export interface CameraFrameProps {
   scrimOpacity: readonly [top: number, bottom: number];
   /** Where the four stops fall, as fractions of the height. */
   scrimStops: readonly [number, number, number, number];
+  /**
+   * Where the × goes. It leaves verification entirely, which is not the same
+   * as going back — on the review step, back is the retake button beside it.
+   */
+  onClose: () => void;
   children: ReactNode;
 }
 
 /**
  * The selfie camera behind both verification steps: the preview, the scrim over
- * it, and the close button that backs out of the flow.
+ * it, and the × that abandons verification.
  */
-export function CameraFrame({ scrimOpacity, scrimStops, children }: CameraFrameProps) {
+export function CameraFrame({ scrimOpacity, scrimStops, onClose, children }: CameraFrameProps) {
   const { t } = useTranslation();
-  const router = useRouter();
 
   return (
     <View className="flex-1 overflow-hidden bg-surface-camera">
@@ -84,7 +87,7 @@ export function CameraFrame({ scrimOpacity, scrimStops, children }: CameraFrameP
 
       <CameraButton
         accessibilityLabel={t('common.cancel')}
-        onPress={() => router.back()}
+        onPress={onClose}
         className="left-[20px] w-[38px] rounded-full"
       >
         <Glyph.CloseCamera size={14} />

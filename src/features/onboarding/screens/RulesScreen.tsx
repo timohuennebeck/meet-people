@@ -71,7 +71,10 @@ export function RulesScreen() {
                   ? t('onboarding.rules.confirmAll')
                   : t('onboarding.rules.agree')
             }
-            disabled={allDone}
+            // The design greys this button once all three are confirmed but
+            // keeps it clickable — it is what carries the user on to the
+            // paywall, so it takes the resting style, not the disabled state.
+            variant={allDone ? 'disabled' : 'primary'}
             onPress={advance}
           />
           <TextButton

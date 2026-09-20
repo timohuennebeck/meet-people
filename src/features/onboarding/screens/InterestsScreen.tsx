@@ -38,7 +38,9 @@ export function InterestsScreen() {
       />
 
       <View className="mt-[14px] shrink-0 flex-row flex-wrap gap-[8px]">
-        {SUGGESTIONS.map((suggestion) => (
+        {/* Already-added tags drop out of the suggestions: two chips under one
+            key would collide, and removing either would take both. */}
+        {SUGGESTIONS.filter((suggestion) => !tags.includes(suggestion)).map((suggestion) => (
           <Chip
             key={suggestion}
             label={`+ ${suggestion}`}

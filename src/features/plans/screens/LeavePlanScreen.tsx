@@ -5,7 +5,7 @@ import { View } from 'react-native';
 
 import { gradients } from '@shared/theme/tokens';
 import {
-  Avatar,
+  HostCard,
   Button,
   NoteField,
   Chip,
@@ -64,19 +64,14 @@ export function LeavePlanScreen() {
           </Text>
         </View>
 
-        <View className="flex-row items-center gap-[12px] rounded-field bg-surface-sunken p-[12px]">
-          {plan ? <Avatar uri={plan.host.avatarUrl} size={44} /> : null}
-          <View className="flex-1 gap-[2px]">
-            <Text weight={600} className="text-[15px] leading-[18px]">
-              {plan?.title}
-            </Text>
-            <Text weight={600} className="text-[12px] text-ink-faint">
-              {`${plan?.whenLabel.split(' · ')[0] ?? ''} · ${t('plan.leave.attendees', {
-                names: attendees,
-              })}`}
-            </Text>
-          </View>
-        </View>
+        <HostCard
+          avatarUri={plan?.host.avatarUrl ?? ''}
+          name={plan?.title ?? ''}
+          detail={`${plan?.whenLabel.split(' · ')[0] ?? ''} · ${t('plan.leave.attendees', {
+            names: attendees,
+          })}`}
+          verified={false}
+        />
 
         <View className="gap-[8px]">
           <SectionLabel sheet>{t('plan.leave.messageLabel')}</SectionLabel>

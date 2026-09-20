@@ -1,4 +1,5 @@
 import { Plus } from 'phosphor-react-native';
+import { useTranslation } from 'react-i18next';
 import { Pressable, ScrollView, TextInput, View } from 'react-native';
 
 import { cn } from '@shared/lib/cn';
@@ -27,6 +28,7 @@ export function Composer({
   onQuickReply,
   bottomInset,
 }: ComposerProps) {
+  const { t } = useTranslation();
   const canSend = value.trim().length > 0;
 
   return (
@@ -57,7 +59,7 @@ export function Composer({
       >
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel="Attach"
+          accessibilityLabel={t('chat.attach')}
           className="h-[42px] w-[42px] shrink-0 items-center justify-center rounded-full bg-surface-fill"
         >
           <Plus size={19} color={colors.inkBody} />
@@ -76,7 +78,7 @@ export function Composer({
 
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel="Send"
+          accessibilityLabel={t('chat.send')}
           disabled={!canSend}
           onPress={onSend}
           className={cn(

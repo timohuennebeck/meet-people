@@ -374,28 +374,28 @@ export const CONVERSATIONS: Conversation[] = [
 export const DIRECT_MESSAGES: Message[] = [
   {
     id: 'm1',
-    conversationId: 'c-sara',
+    conversationId: 'c-mara',
     authorId: SARA.id,
     body: 'Oi! Vi que você entrou na corrida de amanhã.',
     createdAt: '2026-09-20T09:20:00.000Z',
   },
   {
     id: 'm2',
-    conversationId: 'c-sara',
+    conversationId: 'c-mara',
     authorId: VIEWER.id,
     body: 'Entrei sim. Você vai desde o começo?',
     createdAt: '2026-09-20T09:21:00.000Z',
   },
   {
     id: 'm3',
-    conversationId: 'c-sara',
+    conversationId: 'c-mara',
     authorId: SARA.id,
     body: 'Vou. Encontro na ponte às 18h50?',
     createdAt: '2026-09-20T09:23:00.000Z',
   },
   {
     id: 'm4',
-    conversationId: 'c-sara',
+    conversationId: 'c-mara',
     authorId: VIEWER.id,
     body: 'Perfeito, te vejo lá.',
     createdAt: '2026-09-20T09:24:00.000Z',

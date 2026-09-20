@@ -23,6 +23,11 @@ export const planKeys = {
   list: () => key(planKeys.lists()),
   details: () => [...planKeys.all, 'detail'] as const,
   detail: (planId: string) => key([...planKeys.details(), planId] as const),
+  /**
+   * Tags every write against one plan, so a mutation can ask how many of its
+   * siblings are still in flight before it rolls back or invalidates.
+   */
+  mutation: (planId: string) => [...planKeys.all, 'mutation', planId] as const,
 } as const;
 
 export const userKeys = {

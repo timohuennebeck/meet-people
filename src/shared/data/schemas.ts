@@ -20,7 +20,6 @@ export const pronounsSchema = z.enum(['she', 'he', 'they', 'unspecified']);
 export type Pronouns = z.infer<typeof pronounsSchema>;
 
 export const languageLevelSchema = z.enum(['native', 'fluent', 'learning']);
-export type LanguageLevel = z.infer<typeof languageLevelSchema>;
 
 export const spokenLanguageSchema = z.object({
   /** BCP-47 language code, e.g. `de`, `en`. */
@@ -69,7 +68,6 @@ export const planParticipantSchema = z.object({
   /** True for the signed-in user, which draws the brand ring on their avatar. */
   isViewer: z.boolean(),
 });
-export type PlanParticipant = z.infer<typeof planParticipantSchema>;
 
 export const joinRequestSchema = z.object({
   id: z.string(),
@@ -82,7 +80,6 @@ export const joinRequestSchema = z.object({
   status: z.enum(['pending', 'accepted', 'declined']),
   createdAt: z.string(),
 });
-export type JoinRequest = z.infer<typeof joinRequestSchema>;
 
 export const planSchema = z.object({
   id: z.string(),
@@ -168,6 +165,5 @@ export const searchResultSchema = z.object({
   user: userSchema,
   detail: z.string(),
 });
-export type SearchResult = z.infer<typeof searchResultSchema>;
 
 export const searchResultsSchema = z.array(searchResultSchema);

@@ -32,9 +32,19 @@ export function usePlan(planId: string) {
  * change locally, and roll back if the write fails. Every plan mutation below
  * goes through this so they cannot drift apart.
  *
- * The mutations are scoped to the plan, which makes React Query run them one at
- * a time: two writes against the same plan would otherwise snapshot each other's
- * optimistic state, and a rollback would take the other write's change with it.
+ * Two writes against the same plan can overlap — the host can tap Accept on a
+ * second request before the first has landed — and `scope` alone does not make
+ * them safe: React Query serialises the `mutationFn`, but `onMutate` and
+ * `onSettled` still run as soon as each mutation is fired. Two things follow
+ * from that, and both are handled by counting what is still in flight under
+ * this plan's `mutationKey`:
+ *
+ * - A rollback must not restore a snapshot that predates another write's
+ *   optimistic change, so it only runs when nothing else is pending; otherwise
+ *   the refetch below settles it.
+ * - Only the last write to finish invalidates. Invalidating earlier refetches
+ *   server state that has not seen the queued write yet, which makes the row it
+ *   removed flicker back into the list.
  */
 function usePlanMutation<TVariables>(
   planId: string,
@@ -43,8 +53,13 @@ function usePlanMutation<TVariables>(
 ) {
   const queryClient = useQueryClient();
   const key = planKeys.detail(planId).queryKey;
+  const mutationKey = planKeys.mutation(planId);
+
+  /** Counts this mutation too, so 1 means "I am the last one still running". */
+  const isLastInFlight = () => queryClient.isMutating({ mutationKey }) <= 1;
 
   return useMutation({
+    mutationKey,
     scope: { id: `plan:${planId}` },
     mutationFn,
     onMutate: async (variables: TVariables) => {
@@ -54,9 +69,10 @@ function usePlanMutation<TVariables>(
       return { previous };
     },
     onError: (_error, _variables, context) => {
-      if (context?.previous) queryClient.setQueryData(key, context.previous);
+      if (context?.previous && isLastInFlight()) queryClient.setQueryData(key, context.previous);
     },
     onSettled: () => {
+      if (!isLastInFlight()) return;
       void queryClient.invalidateQueries({ queryKey: key });
       void queryClient.invalidateQueries({ queryKey: planKeys.lists() });
     },
@@ -96,17 +112,5 @@ export function useAcceptRequest(planId: string) {
         ],
       };
     },
-  );
-}
-
-/** Host declines a request; the row disappears from the list straight away. */
-export function useDeclineRequest(planId: string) {
-  return usePlanMutation<string>(
-    planId,
-    (requestId) => dataSource.plans.declineRequest(planId, requestId),
-    (plan, requestId) => ({
-      ...plan,
-      requests: plan.requests.filter((candidate) => candidate.id !== requestId),
-    }),
   );
 }

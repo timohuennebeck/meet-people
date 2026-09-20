@@ -33,7 +33,7 @@ import {
 let plans: Plan[] = fixtures.PLANS.map((plan) => ({ ...plan }));
 let preferences: Preferences = { ...fixtures.DEFAULT_PREFERENCES };
 const threads = new Map<string, Message[]>([
-  ['c-sara', [...fixtures.DIRECT_MESSAGES]],
+  ['c-mara', [...fixtures.DIRECT_MESSAGES]],
   ['c-run', [...fixtures.GROUP_MESSAGES]],
 ]);
 
@@ -104,20 +104,6 @@ export const dataSource = {
         return updated;
       });
       if (!updated) return Promise.reject(new Error(`Request ${requestId} not found`));
-      return settle(planSchema, updated);
-    },
-
-    declineRequest: (planId: string, requestId: string): Promise<Plan> => {
-      let updated: Plan | undefined;
-      plans = plans.map((plan) => {
-        if (plan.id !== planId) return plan;
-        updated = {
-          ...plan,
-          requests: plan.requests.filter((candidate) => candidate.id !== requestId),
-        };
-        return updated;
-      });
-      if (!updated) return Promise.reject(new Error(`Plan ${planId} not found`));
       return settle(planSchema, updated);
     },
   },

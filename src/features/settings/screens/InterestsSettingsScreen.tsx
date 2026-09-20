@@ -39,7 +39,10 @@ export function InterestsSettingsScreen() {
       </SectionLabel>
 
       <View className="mt-[10px] shrink-0 flex-row flex-wrap gap-[8px]">
-        {SUGGESTIONS.map((suggestion) => (
+        {/* A tag already on the list is not offered again — adding it twice
+            would put two chips under the same key, and removing either would
+            take both. */}
+        {SUGGESTIONS.filter((suggestion) => !interests.includes(suggestion)).map((suggestion) => (
           <Chip
             key={suggestion}
             label={`+ ${suggestion}`}

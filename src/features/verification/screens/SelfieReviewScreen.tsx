@@ -13,7 +13,12 @@ export function SelfieReviewScreen() {
 
   return (
     // Heavier at the bottom than the capture scrim, to carry the primary button.
-    <CameraFrame scrimOpacity={[0.4, 0.8]} scrimStops={[0, 0.24, 0.52, 1]}>
+    <CameraFrame
+      scrimOpacity={[0.4, 0.8]}
+      scrimStops={[0, 0.24, 0.52, 1]}
+      // The × abandons verification; Retake, beside it, is the one that goes back.
+      onClose={() => router.dismissTo('/(onboarding)/verification')}
+    >
       <CameraButton
         accessibilityLabel={t('verification.review.retake')}
         onPress={() => router.back()}

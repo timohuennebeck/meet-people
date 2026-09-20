@@ -1,5 +1,6 @@
 import { Image } from 'expo-image';
 import type { ReactNode } from 'react';
+import { useTranslation } from 'react-i18next';
 import { View } from 'react-native';
 
 import { cn } from '@shared/lib/cn';
@@ -140,6 +141,7 @@ export function VerifiedSeal({
   tickSize,
   tickStrokeWidth = 3.4,
 }: VerifiedSealProps) {
+  const { t } = useTranslation();
   const pad = inset ? size * 0.15 : 0;
   const burst = size - pad * 2;
   const radius = burst * (inset ? 0.32 : 0.34);
@@ -148,7 +150,7 @@ export function VerifiedSeal({
     <View
       className="shrink-0 items-center justify-center"
       style={{ width: size, height: size }}
-      accessibilityLabel="Verified"
+      accessibilityLabel={t('common.verified')}
     >
       <View
         className="absolute bg-brand"

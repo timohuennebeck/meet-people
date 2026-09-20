@@ -21,8 +21,7 @@ export function ThreadScreen() {
   const insets = useSafeAreaInsets();
   const scrollRef = useRef<ScrollView>(null);
 
-  const { id } = useLocalSearchParams<{ id: string }>();
-  const conversationId = id ?? 'c-sara';
+  const { id: conversationId } = useLocalSearchParams<{ id: string }>();
 
   const { data: conversations } = useConversations();
   const { data: messages } = useThread(conversationId);

@@ -12,7 +12,11 @@ export function SelfieCaptureScreen() {
   const router = useRouter();
 
   return (
-    <CameraFrame scrimOpacity={[0.45, 0.72]} scrimStops={[0, 0.26, 0.58, 1]}>
+    <CameraFrame
+      scrimOpacity={[0.45, 0.72]}
+      scrimStops={[0, 0.26, 0.58, 1]}
+      onClose={() => router.back()}
+    >
       <Text
         weight={500}
         className="absolute left-0 right-0 top-[112px] text-center text-[15px] text-white"

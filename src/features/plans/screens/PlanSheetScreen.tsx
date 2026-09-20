@@ -22,35 +22,48 @@ import { openSeatCount, seatsFor } from '../lib/seats';
 import { HostRequestList } from '../ui/HostRequestList';
 import { PlanSheetHeader } from '../ui/PlanSheetHeader';
 
+/** The host summary the open and joined sheets both open with. */
+function PlanHost({ plan }: { plan: Plan }) {
+  const { t } = useTranslation();
+
+  return (
+    <HostCard
+      avatarUri={plan.host.avatarUrl}
+      name={`${plan.host.name}, ${plan.host.age}`}
+      detail={t('plan.hostTenure')}
+    />
+  );
+}
+
+/** The seat count and the row of faces under it. */
+function PlanSeats({ plan }: { plan: Plan }) {
+  const { t } = useTranslation();
+
+  return (
+    <View className="gap-[10px]">
+      <SeatSummary
+        filled={t('plan.participating', {
+          filled: String(plan.participants.length),
+          total: String(plan.capacity),
+        })}
+        open={t('plan.seatsFree', { count: openSeatCount(plan) })}
+      />
+      <SeatList seats={seatsFor(plan, t('common.freeSeat'), t('common.you'))} size={52} gap={14} />
+    </View>
+  );
+}
+
 /** The plan is open and the viewer can ask to join. */
 function OpenState({ plan, onJoin }: { plan: Plan; onJoin: () => void }) {
   const { t } = useTranslation();
-  const open = openSeatCount(plan);
 
   return (
     <SheetSurface gap={16} padding={{ top: 12, horizontal: 18, bottom: 40 }}>
       <PlanSheetHeader plan={plan} photoHeight={220} mascotSize={148} titleGap={6} />
 
-      <HostCard
-        avatarUri={plan.host.avatarUrl}
-        name={`${plan.host.name}, ${plan.host.age}`}
-        detail={t('plan.hostTenure')}
-      />
+      <PlanHost plan={plan} />
 
-      <View className="gap-[10px]">
-        <SeatSummary
-          filled={t('plan.participating', {
-            filled: String(plan.participants.length),
-            total: String(plan.capacity),
-          })}
-          open={t('plan.seatsFree', { count: open })}
-        />
-        <SeatList
-          seats={seatsFor(plan, t('common.freeSeat'), t('common.you'))}
-          size={52}
-          gap={14}
-        />
-      </View>
+      <PlanSeats plan={plan} />
 
       {plan.description ? (
         <Text weight={500} className="text-[14px] leading-[21px] text-ink-body">
@@ -69,6 +82,7 @@ function OpenState({ plan, onJoin }: { plan: Plan; onJoin: () => void }) {
 /** The request is in; the primary action becomes withdrawing it. */
 function RequestedState({ plan, onWithdraw }: { plan: Plan; onWithdraw: () => void }) {
   const { t } = useTranslation();
+  const router = useRouter();
   const open = openSeatCount(plan);
 
   return (
@@ -100,6 +114,7 @@ function RequestedState({ plan, onWithdraw }: { plan: Plan; onWithdraw: () => vo
           total: String(plan.capacity),
         })} · ${t('plan.seatsFree', { count: open })}`}
         action={t('common.profile')}
+        onPressAction={() => router.push(`/people/${plan.host.id}`)}
       />
 
       <Button label={t('plan.withdraw')} variant="outline" onPress={onWithdraw} />
@@ -110,32 +125,14 @@ function RequestedState({ plan, onWithdraw }: { plan: Plan; onWithdraw: () => vo
 /** The viewer is in: green badge, their face in the seats, chat as the action. */
 function JoinedState({ plan, onLeave }: { plan: Plan; onLeave: () => void }) {
   const { t } = useTranslation();
-  const open = openSeatCount(plan);
 
   return (
     <SheetSurface gap={16} padding={{ top: 12, horizontal: 18, bottom: 36 }}>
       <PlanSheetHeader plan={plan} photoHeight={180} mascotSize={132} joined />
 
-      <HostCard
-        avatarUri={plan.host.avatarUrl}
-        name={`${plan.host.name}, ${plan.host.age}`}
-        detail={t('plan.hostTenure')}
-      />
+      <PlanHost plan={plan} />
 
-      <View className="gap-[10px]">
-        <SeatSummary
-          filled={t('plan.participating', {
-            filled: String(plan.participants.length),
-            total: String(plan.capacity),
-          })}
-          open={t('plan.seatsFree', { count: open })}
-        />
-        <SeatList
-          seats={seatsFor(plan, t('common.freeSeat'), t('common.you'))}
-          size={52}
-          gap={14}
-        />
-      </View>
+      <PlanSeats plan={plan} />
 
       <View className="gap-[10px]">
         {plan.description ? (

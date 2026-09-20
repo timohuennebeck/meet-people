@@ -2,7 +2,7 @@ import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { ScrollView, View } from 'react-native';
 
-import { languageName } from '@shared/lib/languages';
+import { APP_LANGUAGES, languageName } from '@shared/lib/languages';
 import { useSession } from '@shared/providers/SessionProvider';
 import {
   Flag,
@@ -51,6 +51,12 @@ export function SettingsScreen() {
     .map((language) => languageName(language.code))
     .join(', ');
   const range = preferences?.ageRange ?? [21, 34];
+  // The row mirrors the preference the page behind it writes, rather than
+  // restating the design's default.
+  const appLanguage =
+    APP_LANGUAGES.find((language) =>
+      (preferences?.appLanguage ?? 'pt').startsWith(language.code),
+    ) ?? APP_LANGUAGES[0]!;
 
   return (
     <Screen>
@@ -98,8 +104,8 @@ export function SettingsScreen() {
         <Group label={t('settings.groupApp')}>
           <ListRow
             label={t('settings.appLanguage')}
-            accessory={<Flag code="pt" size={22} />}
-            value="Português"
+            accessory={<Flag code={appLanguage.flag} size={22} />}
+            value={appLanguage.name}
             onPress={() => router.push('/settings/app-language')}
           />
           <ListRow

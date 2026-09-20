@@ -2,6 +2,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import type { ReactNode } from 'react';
 import { Pressable, View } from 'react-native';
 
+import type { PlanCategory } from '@shared/data/schemas';
 import { cn } from '@shared/lib/cn';
 import { gradients } from '@shared/theme/tokens';
 
@@ -12,14 +13,12 @@ import { Text } from './Text';
  * Category colours. Every plan photo carries one of these as its top-left
  * badge — sport green, games slate, walk orange, coffee pink.
  */
-export const CATEGORY_STYLE = {
+export const CATEGORY_STYLE: Record<PlanCategory, string> = {
   sport: 'bg-category-sport',
   games: 'bg-category-games',
   walk: 'bg-category-walk',
   coffee: 'bg-category-coffee',
-} as const;
-
-export type PlanCategory = keyof typeof CATEGORY_STYLE;
+};
 
 export interface PlanPhotoProps {
   /** Frame height: 140 on a map card, 160–220 inside a sheet. */
