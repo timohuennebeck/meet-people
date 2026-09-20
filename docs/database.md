@@ -146,6 +146,12 @@ free-tier quota (§3.7). Everything else is a call the app made and whose result
 
 ## 3. Schema
 
+A table earns its place when its rows carry attributes of their own. `plan_participants` has a
+`joined_at` and a `left_at`; `join_requests` has a message and a status. A table holding nothing but
+a foreign key and one short string is a join written out longhand, and seven of those were folded
+back into columns — see `supabase/migrations/20260920000600_collapse_side_tables.sql` for the list
+and the reasoning. What is left below is twenty tables, not twenty-seven.
+
 Conventions: `snake_case`, plural table names, `uuid` keys (`gen_random_uuid()`), `timestamptz`,
 `updated_at` maintained by `moddatetime`, enums for closed sets, RLS enabled on every table
 (policies in §4). `profile_id` always references `profiles(id)`, cascading on delete — with two deliberate
@@ -207,7 +213,6 @@ Seed:
 | `selfie_retention_days`    | `7`       | the retention job (§3.8)                    |
 | `plan_seats_max`           | `20`      | the create flow's seat stepper              |
 | `free_radius_max_mi`       | `3`       | radius clamp for non-Plus users (§3.7)      |
-| `max_interests`            | `10`      | the interests trigger (§3.3)                |
 
 Three properties matter. It is readable by **`anon` as well as `authenticated`** — a version gate
 that only works after sign-in cannot lock out a broken build. It has **no write policies**, so only
@@ -217,15 +222,17 @@ Secrets go to Supabase Vault.
 
 Prices, plans and the trial are **not** in the database: RevenueCat offerings own them (§3.7).
 
-Interests are free text (the design's tag input), not a reference table, and **capped at
-`max_interests` per profile** — ten to start. A `check` cannot count rows, so a `before insert`
-trigger on `profile_interests` does, reading the number from `app_config` like the other tunables.
-The client enforces the same cap politely (`TagInput` stops at the limit and shows "7/10"; the
-suggestion chips hide once full), so nobody meets it as a database error. Ten because the fixtures
-show two to five, the profile draws them as a wrapped chip row, and past about ten they stop saying
-anything about the person. Spoken languages and
-countries are client constants in `src/shared/lib/languages.ts` today; they stay there until a
-second surface needs them.
+Interests are free text (the design's tag input), not a reference table, and live in
+`profiles.interests` — a `text[]` capped at ten by a check constraint. It was a separate table with
+a `before insert` trigger reading the cap from `app_config`, which meant two tables and two places
+to look for one number that has never moved. A second constraint calls
+`private.folded_unique()` so "Café" and "café" cannot both be added and quietly dodge the cap; that
+is what the old table's `unique (profile_id, lower(interest))` did. The client enforces the same
+cap politely (`TagInput` stops at the limit and shows "7/10"; the suggestion chips hide once full),
+so nobody meets either as a database error. Ten because the fixtures show two to five, the profile
+draws them as a wrapped chip row, and past about ten they stop saying anything about the person.
+Spoken languages and countries are client constants in `src/shared/lib/languages.ts` today; they
+stay there until a second surface needs them.
 
 ### 3.3 Profiles, privacy and preferences
 
@@ -247,10 +254,28 @@ create table public.profiles (
   country_code            char(2),                               -- ISO 3166-1 alpha-2; "De onde você é?"
   onboarding_completed_at timestamptz,
   deleted_at              timestamptz,                           -- anonymised, see §3.9
+  -- Two lists that were tables. Neither row carried anything but itself.
+  interests               text[] not null default '{}',
+  languages               text[] not null default '{}',
+  -- And the whole of what was `preferences`: one row per profile, private to its
+  -- owner, same policy and same lifetime as the row it hung off.
+  radius                  numeric(5,2) not null default 2,
+  distance_unit           public.distance_unit not null default 'mi',
+  age_min                 smallint not null default 21,
+  age_max                 smallint not null default 34,
+  audience_gender         public.audience_gender not null default 'everyone',
+  app_language            text not null default 'pt-BR',
+  notifications_enabled   boolean not null default true,
   created_at              timestamptz not null default now(),
   updated_at              timestamptz not null default now(),
-  constraint adult check (birthdate is null or birthdate <= current_date - interval '18 years')
+  constraint adult check (birthdate is null or birthdate <= current_date - interval '18 years'),
+  constraint interest_cap check (cardinality(interests) <= 10),
+  constraint interests_folded_unique check (private.folded_unique(interests)),
+  constraint languages_folded_unique check (private.folded_unique(languages)),
+  constraint age_range_ordered check (age_min <= age_max)
 );
+create index on public.profiles using gin (interests);
+create index on public.profiles using gin (languages);
 
 -- The exact home point, isolated so no policy on `profiles` can ever leak it.
 create table public.profile_locations (
@@ -264,7 +289,8 @@ create index on public.profile_locations using gist (point);
 create view public.public_profiles as
   select p.id, p.name, extract(year from age(p.birthdate))::int as age, p.avatar_storage_path,
          p.pronouns, p.gender, p.bio, p.neighbourhood, p.country_code,
-         public.verification_status_of(p.id) = 'verified' as verified
+         p.interests, p.languages,
+         private.verification_status_of(p.id) = 'verified' as verified
   from public.profiles p
   where p.deleted_at is null;
 ```
@@ -297,37 +323,16 @@ declining to answer. Open question 4.
 Age is derived, not stored, so it cannot go stale. `birthdate` is nullable because it arrives at
 step 12, six steps after the account exists.
 
-```sql
-create table public.profile_interests (
-  profile_id  uuid not null references public.profiles(id) on delete cascade,
-  interest    text not null check (interest = btrim(interest) and char_length(interest) between 1 and 30),
-  primary key (profile_id, interest)
-);
--- "Café" and "café" are one interest, or the cap below is dodged with near-duplicates.
-create unique index on public.profile_interests (profile_id, lower(interest));
+The three tables that used to hold all of this — `profile_interests`, `profile_languages` and
+`preferences` — are gone. The first two held a foreign key and one short string; the third held
+exactly one row per profile, with the same owner, the same policy and the same lifetime as the row
+it hung off. Three tables to express one.
 
-create table public.profile_languages (
-  profile_id     uuid not null references public.profiles(id) on delete cascade,
-  language_code  text not null,
-  primary key (profile_id, language_code)
-);
-
-create table public.preferences (
-  profile_id            uuid primary key references public.profiles(id) on delete cascade,
-  radius                numeric(5,2) not null default 2 check (radius > 0),
-  distance_unit         public.distance_unit not null default 'mi',
-  age_min               smallint not null default 21 check (age_min >= 18),
-  age_max               smallint not null default 34 check (age_max <= 99),
-  audience_gender       public.audience_gender not null default 'everyone',
-  app_language          text not null default 'pt-BR',
-  notifications_enabled boolean not null default true,
-  updated_at            timestamptz not null default now(),
-  constraint age_range_ordered check (age_min <= age_max)
-);
-```
-
-`preferences` exists in the first migration and is unchanged except for an `updated_at` trigger,
-which is currently missing.
+The lists are indexed with GIN, so "who else nearby speaks Turkish?" is still an index scan rather
+than a sequential one — it was the only argument for keeping them as tables, and `text[]` answers
+it as well as the join did. What the join cannot do is answer "what does _this_ person speak?"
+without a second read, which is the question the app actually asks on every profile and every seat
+in a plan.
 
 The `avatars` bucket is public so `expo-image` can cache from the CDN, but every policy on
 `storage.objects` — including `select` — must be owner-only. A bucket-wide read policy would let
@@ -374,14 +379,11 @@ map viewport, computed at render time.
 for any signed-in user, which is a spam vector; the author at least makes cleanup possible.
 
 ```sql
--- Which languages the plan will actually be held in. Mirrors
--- `profile_languages`, minus the level: a plan is in a language or it is not.
-create table public.plan_languages (
-  plan_id        uuid not null references public.plans(id) on delete cascade,
-  language_code  text not null,
-  primary key (plan_id, language_code)
-);
-create index on public.plan_languages (language_code);
+-- Which languages the plan will actually be held in. A column on `plans`, the
+-- same way a profile carries its own: a plan is in a language or it is not, so
+-- there was never an attribute for a join table to hold.
+alter table public.plans add column languages text[] not null default '{}';
+create index on public.plans using gin (languages);
 ```
 
 **Language is not decoration here.** Lisbon's newcomers are most of who this is
@@ -398,7 +400,12 @@ create table public.plan_participants (
   profile_id uuid not null references public.profiles(id) on delete cascade,
   is_host    boolean not null default false,
   joined_at  timestamptz not null default now(),
-  left_at    timestamptz,                     -- leaving keeps the row; see attendance below
+  left_at     timestamptz,                    -- leaving keeps the row; see attendance below
+  -- How the evening went, filled in by `close-stale-plans` once it has. Null
+  -- until then. This was `plan_attendance`, a table keyed exactly the same way
+  -- and derived entirely from the `left_at` above it.
+  outcome     public.attendance_outcome,
+  recorded_at timestamptz,
   primary key (plan_id, profile_id)
 );
 create index on public.plan_participants (profile_id);
@@ -415,14 +422,6 @@ create table public.join_requests (
 );
 create index on public.join_requests (plan_id) where status = 'pending';
 create index on public.join_requests (profile_id, created_at desc);   -- the weekly quota count
-
-create table public.plan_attendance (
-  plan_id      uuid not null references public.plans(id) on delete cascade,
-  profile_id   uuid not null references public.profiles(id) on delete cascade,
-  outcome      public.attendance_outcome not null,
-  recorded_at  timestamptz not null default now(),
-  primary key (plan_id, profile_id)
-);
 ```
 
 **The seats trigger.** Nothing in the current migration stops a full plan being over-seated. A
@@ -476,9 +475,18 @@ plans.
 
 ```sql
 create table public.conversations (
-  id          uuid primary key default gen_random_uuid(),
-  plan_id     uuid references public.plans(id) on delete cascade,  -- null = direct
-  created_at  timestamptz not null default now()
+  id               uuid primary key default gen_random_uuid(),
+  plan_id          uuid references public.plans(id) on delete cascade,
+  -- The other kind: two people, stored in one order so a pair has one spelling.
+  -- This was `direct_conversations`, a whole table for a pair and a uniqueness
+  -- rule, sitting beside the `plan_id` that already said which kind this was.
+  direct_lower_id  uuid references public.profiles(id) on delete cascade,
+  direct_higher_id uuid references public.profiles(id) on delete cascade,
+  created_at       timestamptz not null default now(),
+  constraint direct_pair_complete check ((direct_lower_id is null) = (direct_higher_id is null)),
+  constraint direct_pair_ordered  check (direct_lower_id is null or direct_lower_id < direct_higher_id),
+  constraint one_kind_of_conversation check (plan_id is null or direct_lower_id is null),
+  unique (direct_lower_id, direct_higher_id)
 );
 
 create table public.conversation_members (
@@ -515,8 +523,9 @@ within seconds of a connection dropping.
 `Message.receipt` ("Visto 9:24", "Visto por 4") is derived from the other members' `last_read_at`.
 A receipt row per message per reader is write amplification nobody needs at this size.
 
-One constraint to add: a direct conversation must be unique per pair, or the app will happily
-create a second thread with the same person.
+A direct conversation is unique per pair, which is what the ordered columns and the unique
+constraint above are for — without them the app will happily open a second thread with the same
+person.
 
 ### 3.7 Billing and the free-tier quota
 
@@ -807,12 +816,12 @@ reads but no screen can ever write is fixture data wearing a schema**, and it go
 screen exists. Removed on that rule, each with its reader left in the app until `source.ts` points
 at Supabase, when the missing field simply renders nothing:
 
-| Column                    | Read by                          | Why nothing writes it                                        |
-| ------------------------- | -------------------------------- | ------------------------------------------------------------ |
-| `plans.category`          | photo badge, map-pin ring colour | no create step chooses one; both visuals go too              |
-| `plans.description`       | the plan sheet                   | the create flow is title, place, time, mode, seats, audience |
-| `profile_languages.level` | the language row subtitle        | both writers hardcoded `'learning'`                          |
-| `plan_attendance.source`  | —                                | every row would say `'derived'` until host confirmation      |
+| Column                     | Read by                          | Why nothing writes it                                        |
+| -------------------------- | -------------------------------- | ------------------------------------------------------------ |
+| `plans.category`           | photo badge, map-pin ring colour | no create step chooses one; both visuals go too              |
+| `plans.description`        | the plan sheet                   | the create flow is title, place, time, mode, seats, audience |
+| `profile_languages.level`  | the language row subtitle        | both writers hardcoded `'learning'`                          |
+| `plan_participants.source` | —                                | every row would say `'derived'` until host confirmation      |
 
 Kept, but each is a gap the app has to close, not a spare column:
 
@@ -859,11 +868,7 @@ create table public.plan_series (
   created_at       timestamptz not null default now()
 );
 
-create table public.plan_series_languages (
-  series_id      uuid not null references public.plan_series(id) on delete cascade,
-  language_code  text not null,
-  primary key (series_id, language_code)
-);
+alter table public.plan_series add column languages text[] not null default '{}';
 
 alter table public.plans add column series_id uuid references public.plan_series(id);
 create index on public.plans (series_id) where series_id is not null;
@@ -903,36 +908,31 @@ is what the publish path checks.
 Every table has RLS enabled. Pattern for user-owned tables:
 
 ```sql
-alter table public.preferences enable row level security;
-create policy "own preferences: read"  on public.preferences for select using (auth.uid() = profile_id);
-create policy "own preferences: write" on public.preferences for all
-  using (auth.uid() = profile_id) with check (auth.uid() = profile_id);
+alter table public.profiles enable row level security;
+create policy "own profile: read"  on public.profiles for select using (auth.uid() = id);
+create policy "own profile: write" on public.profiles for all
+  using (auth.uid() = id) with check (auth.uid() = id);
 ```
 
-| Table                                    | read                                  | client write                   |
-| ---------------------------------------- | ------------------------------------- | ------------------------------ |
-| `app_config`, `legal_documents`          | everyone (incl. `anon`)               | none (secret key only)         |
-| `profiles`                               | own                                   | insert / update own            |
-| `public_profiles` (view)                 | any signed-in, minus blocks           | —                              |
-| `profile_locations`                      | **nobody**                            | insert / update own            |
-| `profile_interests`, `profile_languages` | any signed-in                         | own                            |
-| `preferences`                            | own                                   | own                            |
-| `places`                                 | any signed-in                         | insert (author recorded)       |
-| `plan_languages`                         | with their plan                       | plan's host only               |
-| `plan_series`, `plan_series_languages`   | everyone (incl. `anon`)               | none (secret key only)         |
-| `plans`                                  | live plans, minus blocks              | insert / update own as host    |
-| `plan_participants`                      | any signed-in, minus blocks           | update own `left_at` (leaving) |
-| `join_requests`                          | author or host                        | insert own, host resolves      |
-| `plan_attendance`                        | own                                   | none (derived server-side)     |
-| `conversations`, `conversation_members`  | members                               | update own `last_read_at`      |
-| `direct_conversations`                   | the pair themselves                   | none (written with the thread) |
-| `messages`                               | members, minus blocked direct threads | insert own                     |
-| `blocks`                                 | own                                   | insert / delete own            |
-| `reports`                                | own                                   | insert own                     |
-| `entitlements`                           | own                                   | **none** (webhook only)        |
-| `billing_events`                         | none                                  | none (edge functions)          |
-| `verification_submissions`               | own                                   | none (edge function + Studio)  |
-| `legal_acceptances`                      | own                                   | insert own                     |
+| Table                                   | read                                  | client write                   |
+| --------------------------------------- | ------------------------------------- | ------------------------------ |
+| `app_config`, `legal_documents`         | everyone (incl. `anon`)               | none (secret key only)         |
+| `profiles`                              | own                                   | insert / update own            |
+| `public_profiles` (view)                | any signed-in, minus blocks           | —                              |
+| `profile_locations`                     | **nobody**                            | insert / update own            |
+| `places`                                | any signed-in                         | insert (author recorded)       |
+| `plan_series`                           | everyone (incl. `anon`)               | none (secret key only)         |
+| `plans`                                 | live plans, minus blocks              | insert / update own as host    |
+| `plan_participants`                     | any signed-in, minus blocks           | update own `left_at` (leaving) |
+| `join_requests`                         | author or host                        | insert own, host resolves      |
+| `conversations`, `conversation_members` | members                               | update own `last_read_at`      |
+| `messages`                              | members, minus blocked direct threads | insert own                     |
+| `blocks`                                | own                                   | insert / delete own            |
+| `reports`                               | own                                   | insert own                     |
+| `entitlements`                          | own                                   | **none** (webhook only)        |
+| `billing_events`                        | none                                  | none (edge functions)          |
+| `verification_submissions`              | own                                   | none (edge function + Studio)  |
+| `legal_acceptances`                     | own                                   | insert own                     |
 
 **Every helper in the table above lives in a `private` schema, not in `public`.** PostgREST
 publishes each function in `public` as an RPC endpoint, so a `security definer` helper written for a
@@ -985,7 +985,7 @@ membership value the client has to compute.
 | 2 Standort                            | —                                      | `profile_locations` + reverse-geocoded `neighbourhood` |
 | 3 Radius · Settings 2                 | `preferences`                          | `preferences.radius`, `distance_unit`                  |
 | 3b Altersspanne · Settings 6          | `preferences`                          | `preferences.age_min/max`, `audience_gender`           |
-| 4 Interessen · Settings 5             | `profile_interests`                    | `profile_interests`                                    |
+| 4 Interessen · Settings 5             | `profiles.interests`                   | `profiles.interests`                                   |
 | 5 Sprachen · Settings 3b              | `profile_languages`                    | `profile_languages`                                    |
 | 6 Herkunftsland                       | client constants                       | `profiles.country_code`                                |
 | 6/6b/7 Konto                          | `legal_documents`                      | `updateUser` / `linkIdentity`, acceptance              |
@@ -1001,7 +1001,7 @@ membership value the client has to compute.
 | Create 1–6 · Veröffentlicht           | `places` (recent, nearby)              | `places`, `plans` (+ host seat trigger)                |
 | 12a Conversas                         | `conversation_list` view               | —                                                      |
 | 1:1 / Gruppe                          | `messages` + Realtime, presence        | `messages`, `conversation_members.last_read_at`        |
-| 17a Profil                            | `public_profiles`, `plan_attendance`   | `blocks`, `reports`                                    |
+| 17a Profil                            | `public_profiles`, `plan_participants` | `blocks`, `reports`                                    |
 | 15d Personensuche                     | `public_profiles` search, minus blocks | —                                                      |
 | Settings · Konto löschen              | —                                      | `delete-account`                                       |
 
@@ -1024,6 +1024,13 @@ supabase/migrations/
   20260920000300_function_exposure.sql   the `private` schema: moves every helper and trigger
                                             function out of the REST surface, and narrows who may
                                             call the four that stay
+  20260920000350_scheduled_jobs.sql      the two pg_cron jobs
+  20260920000400_storage.sql             the avatars and verification buckets, owner-only
+  20260920000500_policy_recursion.sql    the conversation-member policy that read its own table
+  20260920000600_collapse_side_tables.sql
+                                         seven tables become columns: the two profile lists, the
+                                            preferences row, both language tables, attendance and
+                                            the direct-conversation pair
 supabase/seed.sql                        app_config, eight people with home points, seven places,
                                             four plans matching the design fixtures, one standing
                                             meetup, two chat threads
@@ -1046,6 +1053,11 @@ eu-west-1). `nearby_plans()` returns the four design plans at the distances the 
 374 m to Café Kotti, 812 m to Königsplatz, 3 861 m to Schlachtensee — plus the standing meetup, and
 the privacy inversion holds under test: a signed-in user reads eight rows from `public_profiles`,
 one row from `profiles`, and **zero** from `profile_locations`.
+
+Seven tables lighter than it started. The collapse ran against the live database as three
+migrations rather than one, because `create or replace view` may only add columns at the end and
+the drops had to wait for everything that named those tables to be rewritten first — the ordering
+in `20260920000600` is load-bearing, not cosmetic.
 
 Two things the linter still flags, both deliberate. `public_profiles` and `conversation_list` are
 security-definer views, which is the entire mechanism — they exist to read what the caller cannot.

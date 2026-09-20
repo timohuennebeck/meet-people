@@ -129,40 +129,18 @@ from (values
 ) as v(id, lng, lat)
 on conflict (profile_id) do update set point = excluded.point;
 
-insert into public.profile_interests (profile_id, interest)
-values
-  ('11111111-1111-4111-8111-000000000001', 'Corrida'),
-  ('11111111-1111-4111-8111-000000000001', 'Cinema'),
-  ('11111111-1111-4111-8111-000000000001', 'Café'),
-  ('11111111-1111-4111-8111-000000000002', 'Jogos'),
-  ('11111111-1111-4111-8111-000000000002', 'Café'),
-  ('11111111-1111-4111-8111-000000000003', 'Corrida'),
-  ('11111111-1111-4111-8111-000000000003', 'Cinema'),
-  ('11111111-1111-4111-8111-000000000003', 'Café'),
-  ('11111111-1111-4111-8111-000000000004', 'Corrida'),
-  ('11111111-1111-4111-8111-000000000005', 'Jogos'),
-  ('11111111-1111-4111-8111-000000000006', 'Jogos'),
-  ('11111111-1111-4111-8111-000000000006', 'Café'),
-  ('11111111-1111-4111-8111-000000000007', 'Jogos'),
-  ('11111111-1111-4111-8111-000000000008', 'Café')
-on conflict do nothing;
-
-insert into public.profile_languages (profile_id, language_code)
-values
-  ('11111111-1111-4111-8111-000000000001', 'de'),
-  ('11111111-1111-4111-8111-000000000001', 'en'),
-  ('11111111-1111-4111-8111-000000000002', 'de'),
-  ('11111111-1111-4111-8111-000000000002', 'en'),
-  ('11111111-1111-4111-8111-000000000003', 'de'),
-  ('11111111-1111-4111-8111-000000000003', 'en'),
-  ('11111111-1111-4111-8111-000000000004', 'de'),
-  ('11111111-1111-4111-8111-000000000005', 'de'),
-  ('11111111-1111-4111-8111-000000000006', 'de'),
-  ('11111111-1111-4111-8111-000000000006', 'en'),
-  ('11111111-1111-4111-8111-000000000007', 'de'),
-  ('11111111-1111-4111-8111-000000000008', 'pt'),
-  ('11111111-1111-4111-8111-000000000008', 'en')
-on conflict do nothing;
+update public.profiles p set interests = v.interests, languages = v.languages
+from (values
+  ('11111111-1111-4111-8111-000000000001'::uuid, array['Corrida','Cinema','Café'], array['de','en']),
+  ('11111111-1111-4111-8111-000000000002'::uuid, array['Jogos','Café'],            array['de','en']),
+  ('11111111-1111-4111-8111-000000000003'::uuid, array['Corrida','Cinema','Café'], array['de','en']),
+  ('11111111-1111-4111-8111-000000000004'::uuid, array['Corrida'],                 array['de']),
+  ('11111111-1111-4111-8111-000000000005'::uuid, array['Jogos'],                   array['de']),
+  ('11111111-1111-4111-8111-000000000006'::uuid, array['Jogos','Café'],            array['de','en']),
+  ('11111111-1111-4111-8111-000000000007'::uuid, array['Jogos'],                   array['de']),
+  ('11111111-1111-4111-8111-000000000008'::uuid, array['Café'],                    array['pt','en'])
+) as v(id, interests, languages)
+where p.id = v.id;
 
 -- Everyone but Tom is verified, which is what the design draws: his request row
 -- is the one that reads "Ainda não verificado".
@@ -172,7 +150,7 @@ from public.profiles
 where id <> '11111111-1111-4111-8111-000000000007'
 on conflict do nothing;
 
-update public.preferences set radius = 3 where profile_id = '11111111-1111-4111-8111-000000000001';
+update public.profiles set radius = 3 where id = '11111111-1111-4111-8111-000000000001';
 
 -- ---------------------------------------------------------------------------
 -- Places
@@ -218,16 +196,14 @@ insert into public.plans (id, host_id, place_id, title, join_mode, starts_at, du
    date_trunc('day', now()) + interval '1 day 10 hours', 90, 4)
 on conflict (id) do nothing;
 
-insert into public.plan_languages (plan_id, language_code) values
-  ('33333333-3333-4333-8333-000000000001', 'pt'),
-  ('33333333-3333-4333-8333-000000000001', 'en'),
-  ('33333333-3333-4333-8333-000000000002', 'pt'),
-  ('33333333-3333-4333-8333-000000000002', 'en'),
-  ('33333333-3333-4333-8333-000000000002', 'de'),
-  ('33333333-3333-4333-8333-000000000003', 'pt'),
-  ('33333333-3333-4333-8333-000000000004', 'en'),
-  ('33333333-3333-4333-8333-000000000004', 'es')
-on conflict do nothing;
+update public.plans p set languages = v.languages
+from (values
+  ('33333333-3333-4333-8333-000000000001'::uuid, array['pt','en']),
+  ('33333333-3333-4333-8333-000000000002'::uuid, array['pt','en','de']),
+  ('33333333-3333-4333-8333-000000000003'::uuid, array['pt']),
+  ('33333333-3333-4333-8333-000000000004'::uuid, array['en','es'])
+) as v(id, languages)
+where p.id = v.id;
 
 -- The run: Lea hosts, and Sara, Noah and the viewer have seats — four of six,
 -- which is why the viewer can open its group chat below.
@@ -262,15 +238,11 @@ on conflict (id) do nothing;
 -- will.
 -- ---------------------------------------------------------------------------
 
-insert into public.plan_series (id, place_id, title, join_mode, seats, repeats_on, start_time, duration_minutes) values
+insert into public.plan_series
+  (id, place_id, title, join_mode, seats, repeats_on, start_time, duration_minutes, languages) values
   ('55555555-5555-4555-8555-000000000001', '22222222-2222-4222-8222-000000000003',
-   'Caminhada de quarta no Görlitzer', 'open', null, 3, time '18:30', 90)
+   'Caminhada de quarta no Görlitzer', 'open', null, 3, time '18:30', 90, array['pt','en'])
 on conflict (id) do nothing;
-
-insert into public.plan_series_languages (series_id, language_code) values
-  ('55555555-5555-4555-8555-000000000001', 'pt'),
-  ('55555555-5555-4555-8555-000000000001', 'en')
-on conflict do nothing;
 
 -- ---------------------------------------------------------------------------
 -- Chat
@@ -295,10 +267,10 @@ insert into public.conversation_members (conversation_id, profile_id, last_read_
   ('66666666-6666-4666-8666-000000000002', '11111111-1111-4111-8111-000000000003', now())
 on conflict do nothing;
 
-insert into public.direct_conversations (conversation_id, lower_id, higher_id) values
-  ('66666666-6666-4666-8666-000000000002',
-   '11111111-1111-4111-8111-000000000001', '11111111-1111-4111-8111-000000000003')
-on conflict do nothing;
+update public.conversations set
+  direct_lower_id = '11111111-1111-4111-8111-000000000001',
+  direct_higher_id = '11111111-1111-4111-8111-000000000003'
+where id = '66666666-6666-4666-8666-000000000002';
 
 insert into public.messages (conversation_id, author_id, content, created_at) values
   ('66666666-6666-4666-8666-000000000001', '11111111-1111-4111-8111-000000000004',
