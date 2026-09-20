@@ -8,6 +8,8 @@ import { COUNTRIES } from '@shared/lib/languages';
 import { STEPS } from '@shared/lib/steps';
 import { Button, SelectableRow, Spacer, TextButton } from '@shared/ui';
 
+import { saveProfile } from '../lib/profileWrites';
+
 /** Home country, whose flag ends up on the profile avatar. Skippable. */
 export function CountryScreen() {
   const { t } = useTranslation();
@@ -16,6 +18,16 @@ export function CountryScreen() {
 
   const next = () => router.push('/(onboarding)/account');
 
+  /**
+   * This step runs before the account does, so the write is held and replayed
+   * once sign-up hands over a session — see `profileWrites`. The column is ISO
+   * 3166-1 alpha-2, which is upper case; the flag catalogue is lower.
+   */
+  const confirm = () => {
+    saveProfile({ country_code: selected.toUpperCase() });
+    next();
+  };
+
   return (
     <StepScaffold
       position={STEPS.country}
@@ -23,7 +35,7 @@ export function CountryScreen() {
       subtitle={t('onboarding.country.subtitle')}
       footer={
         <>
-          <Button label={t('common.continue')} onPress={next} />
+          <Button label={t('common.continue')} onPress={confirm} />
           <TextButton
             label={t('common.preferNotToSay')}
             tone="mutedTall"

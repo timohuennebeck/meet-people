@@ -9,6 +9,8 @@ import { StepScaffold } from '@shared/components/StepScaffold';
 import { STEPS } from '@shared/lib/steps';
 import { Button, Text, TextButton } from '@shared/ui';
 
+import { saveAvatar } from '../lib/profileWrites';
+
 /**
  * One square photo, cropped by the system picker so what is chosen is what the
  * round frame shows.
@@ -43,7 +45,16 @@ export function PhotoScreen() {
   const [photo, setPhoto] = useState<string | null>(null);
   const [notice, setNotice] = useState<Notice | null>(null);
 
-  const next = () => router.push('/(onboarding)/verification');
+  /**
+   * The upload starts here rather than on the pick, so choosing three photos
+   * in a row only ever sends the one kept. Nothing waits for it: the row is
+   * pointed at the object once it is there, and a failure leaves the profile
+   * without a photo rather than with a path to nothing.
+   */
+  const next = () => {
+    if (photo) saveAvatar(photo);
+    router.push('/(onboarding)/verification');
+  };
 
   /** Keeps the first asset of a finished pick; a cancelled one changes nothing. */
   const keep = (result: ImagePicker.ImagePickerResult) => {

@@ -73,11 +73,13 @@ export function ExploreScreen() {
     <View className="flex-1 overflow-hidden">
       <LinearGradient colors={gradients.map} className="absolute inset-0" />
 
-      {/* Pins. Positions come from each plan's fixture coordinates. */}
+      {/* Pins. A plan with no host — a standing meetup — has no face to wear,
+          so the pin falls back to whoever is in it, and to the repeat mark when
+          nobody is yet. */}
       {cards.map((plan) => (
         <MapPin
           key={plan.id}
-          avatarUri={plan.host.avatarUrl}
+          avatarUri={plan.host?.avatarUrl ?? plan.participants[0]?.user.avatarUrl}
           x={plan.pin.x}
           y={plan.pin.y}
           title={plan.title}
@@ -86,7 +88,7 @@ export function ExploreScreen() {
             plan.id === cards[0]?.id && plan.pinLabel
               ? {
                   title: plan.pinLabel,
-                  meta: `18:30 · ${plan.participants.length}/${plan.capacity}`,
+                  meta: `18:30 · ${plan.participants.length}${plan.capacity === null ? '' : `/${plan.capacity}`}`,
                 }
               : undefined
           }

@@ -20,10 +20,17 @@ import { openSeatCount, seatsFor } from '../lib/seats';
 import { HostRequestList } from '../ui/HostRequestList';
 import { PlanLanguages } from '../ui/PlanLanguages';
 import { PlanSheetHeader } from '../ui/PlanSheetHeader';
+import { StandingMeetupCard } from '../ui/StandingMeetupCard';
 
-/** The host summary the open and joined sheets both open with. */
+/**
+ * The host summary the open and joined sheets both open with — or, on a plan
+ * with no host, the card that says so. A standing meetup has no organiser, so
+ * there is no face to show and nobody to name.
+ */
 function PlanHost({ plan }: { plan: Plan }) {
   const { t } = useTranslation();
+
+  if (!plan.host) return <StandingMeetupCard />;
 
   return (
     <HostCard
@@ -34,18 +41,29 @@ function PlanHost({ plan }: { plan: Plan }) {
   );
 }
 
-/** The seat count and the row of faces under it. */
+/**
+ * The seat count and the row of faces under it.
+ *
+ * An uncapped event counts who is coming rather than how many places are left:
+ * "3 de 6" and "3 vagas livres" both describe a plan with an end, and this one
+ * has none.
+ */
 function PlanSeats({ plan }: { plan: Plan }) {
   const { t } = useTranslation();
+  const open = openSeatCount(plan);
 
   return (
     <View className="gap-[10px]">
       <SeatSummary
-        filled={t('plan.participating', {
-          filled: String(plan.participants.length),
-          total: String(plan.capacity),
-        })}
-        open={t('plan.seatsFree', { count: openSeatCount(plan) })}
+        filled={
+          open === null
+            ? t('plan.participatingUncapped', { count: plan.participants.length })
+            : t('plan.participating', {
+                filled: String(plan.participants.length),
+                total: String(plan.capacity),
+              })
+        }
+        open={open === null ? t('plan.seatsUnlimited') : t('plan.seatsFree', { count: open })}
       />
       <SeatList seats={seatsFor(plan, t('common.freeSeat'), t('common.you'))} size={52} gap={14} />
     </View>
@@ -89,6 +107,12 @@ function RequestedState({ plan, onWithdraw }: { plan: Plan; onWithdraw: () => vo
   const router = useRouter();
   const open = openSeatCount(plan);
 
+  // Only an approval plan can leave someone waiting, and only a plan with a
+  // host can be an approval plan — there is nobody else to do the approving.
+  // So this state never renders without a host; the guard is for the compiler.
+  const host = plan.host;
+  if (!host) return null;
+
   return (
     <SheetSurface gap={16} padding={{ top: 12, horizontal: 18, bottom: 36 }}>
       <PlanSheetHeader plan={plan} photoHeight={180} mascotSize={132} />
@@ -98,27 +122,27 @@ function RequestedState({ plan, onWithdraw }: { plan: Plan; onWithdraw: () => vo
           state="done"
           connector={38}
           title={t('plan.sent.title')}
-          description={t('plan.sent.body', { name: plan.host.name })}
+          description={t('plan.sent.body', { name: host.name })}
         />
         <TimelineStep
           state="active"
           tight
           mutedTitle
           estimate={t('plan.sent.confirmEstimate')}
-          title={t('plan.sent.confirmTitle', { name: plan.host.name })}
+          title={t('plan.sent.confirmTitle', { name: host.name })}
           description={t('plan.sent.confirmBody')}
         />
       </View>
 
       <HostCard
-        avatarUri={plan.host.avatarUrl}
-        name={`${plan.host.name}, ${plan.host.age}`}
+        avatarUri={host.avatarUrl}
+        name={`${host.name}, ${host.age}`}
         detail={`${t('plan.participating', {
           filled: String(plan.participants.length),
           total: String(plan.capacity),
-        })} · ${t('plan.seatsFree', { count: open })}`}
+        })} · ${t('plan.seatsFree', { count: open ?? 0 })}`}
         action={t('common.profile')}
-        onPressAction={() => router.push(`/people/${plan.host.id}`)}
+        onPressAction={() => router.push(`/people/${host.id}`)}
       />
 
       <Button label={t('plan.withdraw')} variant="outline" onPress={onWithdraw} />
@@ -182,11 +206,13 @@ function JoinedState({
 function HostState({ plan }: { plan: Plan }) {
   const { t } = useTranslation();
   const open = openSeatCount(plan);
+  // An uncapped plan never reads as full, so the seats header stays.
   const full = open === 0;
   const hasRequests = plan.requests.length > 0;
 
-  // A plan with five seats lays them out smaller to fit the row.
-  const wide = plan.capacity > 4;
+  // A plan with five seats lays them out smaller to fit the row, and so does an
+  // uncapped one, which has however many people have turned up.
+  const wide = plan.capacity === null || plan.capacity > 4;
 
   const seatRow = (
     <SeatList
@@ -226,7 +252,7 @@ function HostState({ plan }: { plan: Plan }) {
                 {t('plan.seatsLabel')}
               </Text>
               <Text weight={600} className="text-[13px] text-ink-slate">
-                {t('plan.seatsFree', { count: open })}
+                {open === null ? t('plan.seatsUnlimited') : t('plan.seatsFree', { count: open })}
               </Text>
             </View>
             {seatRow}

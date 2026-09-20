@@ -37,6 +37,8 @@ export const STEPS = {
   country: at(5),
   account: at(6),
   signUp: at(7),
+  // The other branch of the account step, for someone who already has one.
+  signIn: at(7),
   confirmation: at(8, true),
   name: at(9),
   birthday: at(10),

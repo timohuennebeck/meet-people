@@ -120,6 +120,25 @@ export const ptBR = {
       strong: 'Forte',
       haveAccount: 'Já tem conta?',
       signIn: 'Entrar',
+      creating: 'Criando sua conta…',
+    },
+    signIn: {
+      title: 'Entrar na sua conta.',
+      subtitle: 'Use o e-mail e a senha que você cadastrou.',
+      submit: 'Entrar',
+      submitting: 'Entrando…',
+      noAccount: 'Ainda não tem conta?',
+      createAccount: 'Criar conta',
+    },
+    // What went wrong signing up or signing in, in words the person can act on.
+    authError: {
+      offline: 'Sem conexão. Verifique sua internet e tente de novo.',
+      invalidCredentials: 'E-mail ou senha incorretos. Tente de novo ou crie uma conta.',
+      emailTaken: 'Já existe uma conta com esse e-mail. Entre em vez de criar outra.',
+      invalidEmail: 'Esse e-mail não parece válido. Confira e tente de novo.',
+      weakPassword: 'Senha muito fraca. Use pelo menos 8 caracteres, com um número.',
+      tooManyAttempts: 'Tentativas demais. Espere um minuto e tente de novo.',
+      unknown: 'Não foi possível concluir agora. Tente de novo em instantes.',
     },
     confirmation: {
       // The name is highlighted, so the sentence is split around it.
@@ -127,6 +146,9 @@ export const ptBR = {
       titleTrail: '.',
       subtitle: 'Sua conta está segura. Falta pouco para você ver quem tem planos por perto hoje.',
       manageAccount: 'Gerenciar conta',
+      pendingTitle: 'Confirme seu e-mail.',
+      pendingSubtitle: 'Enviamos um link para o seu e-mail. Abra o link e volte aqui para entrar.',
+      pendingContinue: 'Já confirmei — entrar',
     },
     name: {
       title: 'Como você se chama?',
@@ -222,6 +244,8 @@ export const ptBR = {
       retake: 'Repetir',
       prompt: 'Dá para ver seu rosto com clareza?',
       use: 'Usar esta selfie',
+      sending: 'Enviando…',
+      failed: 'Não foi possível enviar a selfie. Tente de novo.',
     },
     pending: {
       title: 'Estamos\nconferindo',
@@ -283,7 +307,13 @@ export const ptBR = {
     requestsCount: 'PEDIDOS · {{count}}',
     waitlistCount: 'LISTA DE ESPERA · {{count}}',
     participating: '{{filled}} de {{total}} participando',
+    participatingUncapped_one: '{{count}} participando',
+    participatingUncapped_other: '{{count}} participando',
+    seatsUnlimited: 'Sem limite',
     hostLine: '{{name}} hospeda ✓',
+    standingLine: 'Encontro fixo · sem anfitrião',
+    standingTitle: 'Encontro fixo',
+    standingDetail: 'Sem anfitrião — quem aparecer, aparece',
     hostTenure: 'Em Berlim desde março · hospeda pela 4ª vez',
     hostRole: 'Host',
     hostBadge: 'VOCÊ É HOST',
@@ -470,6 +500,12 @@ export const ptBR = {
     peopleCount: 'PESSOAS · {{count}}',
     placeholder: 'Buscar pessoas',
     recent: 'BUSCAS RECENTES',
+    // The line under a name in the results: neighbourhood, then how many plans
+    // the two of you have been on together.
+    resultDetail: '{{neighbourhood}} · {{shared}}',
+    sharedPlans_one: '{{count}} plano em comum',
+    sharedPlans_other: '{{count}} planos em comum',
+    noSharedPlans: 'sem planos em comum',
   },
 
   profile: {
@@ -676,6 +712,30 @@ export const ptBR = {
       s8Body:
         'Dúvidas sobre privacidade? Escreva para privacy@treff.app — respondemos em até 30 dias.',
     },
+  },
+
+  /**
+   * Dates and times the database does not store. `whenLabel` on a plan and the
+   * right-hand column of the conversations list are both built from a timestamp
+   * at render time, so they follow the interface language and the calendar day.
+   */
+  datetime: {
+    today: 'Hoje',
+    tomorrow: 'Amanhã',
+    yesterday: 'Ontem',
+    dayAtTime: '{{day}} {{time}}',
+    dayFromTo: '{{day}} {{start}}–{{end}}',
+  },
+
+  /**
+   * The four rules the database enforces by name. Each arrives as a bare word
+   * in a Postgres exception; this is what a person reads instead.
+   */
+  errors: {
+    noCredits: 'Você usou seus 3 pedidos desta semana',
+    planFull: 'Esse plano acabou de lotar',
+    blocked: 'Não dá para entrar nesse plano',
+    tooManyInterests: 'Você chegou ao limite de interesses',
   },
 
   tabs: {

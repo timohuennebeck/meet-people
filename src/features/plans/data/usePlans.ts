@@ -1,9 +1,9 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
-import { VIEWER } from '@shared/data/fixtures';
 import { planKeys } from '@shared/data/queryKeys';
-import type { Membership, Plan } from '@shared/data/schemas';
+import type { Membership, Plan, User } from '@shared/data/schemas';
 import { dataSource } from '@shared/data/source';
+import { useViewer } from '@shared/data/useViewer';
 
 /**
  * Every plan on the map.
@@ -79,20 +79,37 @@ function usePlanMutation<TVariables>(
   });
 }
 
-/** Ask to join, withdraw a request, join outright or leave — all one write. */
+/**
+ * Ask to join, withdraw a request, join outright or leave — all one write.
+ *
+ * The optimistic seat needs the viewer's own profile, which is a query rather
+ * than a constant now that the source may be Supabase. Until it has loaded the
+ * membership still flips immediately and the seat waits for the refetch: a
+ * button that responds is worth more than a face that appears a moment early.
+ */
 export function useSetMembership(planId: string) {
+  const { data: viewer } = useViewer();
+
   return usePlanMutation<Membership>(
     planId,
     (membership) => dataSource.plans.setMembership(planId, membership),
     (plan, membership) => ({
       ...plan,
       membership,
-      participants:
-        membership === 'joined'
-          ? [...plan.participants, { user: VIEWER, isHost: false, isViewer: true }]
-          : plan.participants.filter((participant) => !participant.isViewer),
+      participants: seatViewer(plan, membership, viewer),
     }),
   );
+}
+
+/** The participant list as it will read once this membership change lands. */
+function seatViewer(plan: Plan, membership: Membership, viewer: User | undefined) {
+  if (membership !== 'joined') {
+    return plan.participants.filter((participant) => !participant.isViewer);
+  }
+  if (!viewer || plan.participants.some((participant) => participant.isViewer)) {
+    return plan.participants;
+  }
+  return [...plan.participants, { user: viewer, isHost: false, isViewer: true }];
 }
 
 /** Host accepts a request; the applicant takes the next open seat immediately. */

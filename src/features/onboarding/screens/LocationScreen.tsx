@@ -34,6 +34,11 @@ export function LocationScreen() {
       subtitle={t('onboarding.location.subtitle')}
       footer={
         <>
+          {/* Still only the ask. Requesting the permission, reading the point
+              behind it and reverse-geocoding that into a neighbourhood all need
+              `expo-location`, which this app does not depend on — so there is
+              no coordinate on this screen to write. `saveLocation` in
+              `../lib/profileWrites` is the write that is waiting for one. */}
           <Button
             label={t('onboarding.location.allow')}
             onPress={() => router.push('/(onboarding)/radius')}

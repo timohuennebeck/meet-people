@@ -4,6 +4,7 @@ import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { View } from 'react-native';
 
+import { useUpdatePreferences } from '@features/settings/data/usePreferences';
 import { StepScaffold } from '@shared/components/StepScaffold';
 import { STEPS } from '@shared/lib/steps';
 import { gradientAngles, gradients, shadows } from '@shared/theme/tokens';
@@ -48,8 +49,17 @@ function SampleNotification() {
 export function NotificationsScreen() {
   const { t } = useTranslation();
   const router = useRouter();
+  const { mutate: update } = useUpdatePreferences();
 
-  const next = () => router.push('/(onboarding)/rules');
+  /**
+   * The answer is the preference. The system prompt is a separate ask that
+   * needs a push library this app does not have yet, but whether the person
+   * wants to be told is theirs to say either way, and it is stored either way.
+   */
+  const answer = (notificationsEnabled: boolean) => {
+    update({ notificationsEnabled });
+    router.push('/(onboarding)/rules');
+  };
 
   return (
     <StepScaffold
@@ -58,8 +68,12 @@ export function NotificationsScreen() {
       subtitle={t('onboarding.notifications.subtitle')}
       footer={
         <>
-          <Button label={t('onboarding.notifications.allow')} onPress={next} />
-          <TextButton label={t('common.notNow')} className="mt-[15px]" onPress={next} />
+          <Button label={t('onboarding.notifications.allow')} onPress={() => answer(true)} />
+          <TextButton
+            label={t('common.notNow')}
+            className="mt-[15px]"
+            onPress={() => answer(false)}
+          />
         </>
       }
     >

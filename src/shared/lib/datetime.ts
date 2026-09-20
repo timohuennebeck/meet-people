@@ -110,6 +110,19 @@ export function relativeDay(date: Date, now = new Date()): 'today' | 'yesterday'
   return 'other';
 }
 
+/**
+ * `2002-03-14` — what a Postgres `date` column takes.
+ *
+ * Built from the local parts rather than `toISOString()`, which converts to UTC
+ * first and so hands back the day before for anyone west of Greenwich. A
+ * birthday is a calendar day, not an instant.
+ */
+export function isoDate(date: Date): string {
+  const month = `${date.getMonth() + 1}`.padStart(2, '0');
+  const day = `${date.getDate()}`.padStart(2, '0');
+  return `${date.getFullYear()}-${month}-${day}`;
+}
+
 /** `14 de março de 2002` in pt-BR, `March 14, 2002` in en. */
 export function formatBirthdate(date: Date, locale: string): string {
   return date.toLocaleDateString(locale, { day: 'numeric', month: 'long', year: 'numeric' });

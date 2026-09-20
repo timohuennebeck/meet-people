@@ -7,23 +7,27 @@ import { StepScaffold } from '@shared/components/StepScaffold';
 import { STEPS } from '@shared/lib/steps';
 import { Button, Mascot, Spacer, TextField } from '@shared/ui';
 
+import { saveProfile } from '../lib/profileWrites';
+
 /** First name only. */
 export function NameScreen() {
   const { t } = useTranslation();
   const router = useRouter();
   const [name, setName] = useState('');
 
+  /** Saved on the way out, so a sign-up abandoned after this step keeps it. */
+  const next = () => {
+    const trimmed = name.trim();
+    if (trimmed) saveProfile({ name: trimmed });
+    router.push('/(onboarding)/birthday');
+  };
+
   return (
     <StepScaffold
       position={STEPS.name}
       title={t('onboarding.name.title')}
       subtitle={t('onboarding.name.subtitle')}
-      footer={
-        <Button
-          label={t('common.continue')}
-          onPress={() => router.push('/(onboarding)/birthday')}
-        />
-      }
+      footer={<Button label={t('common.continue')} onPress={next} />}
     >
       <View className="mt-[20px] shrink-0 gap-[16px] rounded-card bg-brand-tint p-[16px]">
         <View className="h-[212px] items-center justify-center">

@@ -1,10 +1,12 @@
 import { Image } from 'expo-image';
 import { useLocalSearchParams, useRouter } from 'expo-router';
+import { useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { View } from 'react-native';
 
 import { Button, Glyph, Text } from '@shared/ui';
 
+import { submitSelfie } from '../lib/submitSelfie';
 import { CameraButton, CameraFrame } from '../ui/CameraFrame';
 
 /** Keep the selfie or retake it. */
@@ -14,6 +16,35 @@ export function SelfieReviewScreen() {
   // The shot the capture step just took. Reached any other way — a deep link,
   // a reload — there is no selfie to show, and none is invented.
   const { uri } = useLocalSearchParams<{ uri?: string }>();
+  const [sending, setSending] = useState(false);
+  const [failed, setFailed] = useState(false);
+
+  /** Closes the button to a second tap before the re-render disables it. */
+  const inFlight = useRef(false);
+
+  /**
+   * Nothing moves on until the picture is actually on its way to a reviewer.
+   * Sending someone to a "we are reviewing it" screen for an upload that
+   * failed is the one outcome worth avoiding here.
+   */
+  const use = async () => {
+    if (!uri || inFlight.current) return;
+
+    inFlight.current = true;
+    setSending(true);
+    setFailed(false);
+
+    try {
+      if (await submitSelfie(uri)) {
+        router.push('/(onboarding)/verification-pending');
+      } else {
+        setFailed(true);
+      }
+    } finally {
+      inFlight.current = false;
+      setSending(false);
+    }
+  };
 
   return (
     // Heavier at the bottom than the capture scrim, to carry the primary button.
@@ -39,11 +70,12 @@ export function SelfieReviewScreen() {
 
       <View className="absolute bottom-[38px] left-[20px] right-[20px] gap-[14px]">
         <Text className="text-center text-[15px]" style={{ color: 'rgba(255,255,255,0.85)' }}>
-          {t('verification.review.prompt')}
+          {t(failed ? 'verification.review.failed' : 'verification.review.prompt')}
         </Text>
         <Button
-          label={t('verification.review.use')}
-          onPress={() => router.push('/(onboarding)/verification-pending')}
+          label={t(sending ? 'verification.review.sending' : 'verification.review.use')}
+          disabled={sending}
+          onPress={() => void use()}
         />
       </View>
     </CameraFrame>

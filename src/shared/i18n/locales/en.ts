@@ -121,6 +121,24 @@ export const en: Translation = {
       strong: 'Strong',
       haveAccount: 'Already have an account?',
       signIn: 'Sign in',
+      creating: 'Creating your account…',
+    },
+    signIn: {
+      title: 'Sign in to your account.',
+      subtitle: 'Use the e-mail and password you signed up with.',
+      submit: 'Sign in',
+      submitting: 'Signing in…',
+      noAccount: "Don't have an account yet?",
+      createAccount: 'Create account',
+    },
+    authError: {
+      offline: 'No connection. Check your internet and try again.',
+      invalidCredentials: 'Wrong e-mail or password. Try again, or create an account.',
+      emailTaken: 'An account already exists for that e-mail. Sign in instead.',
+      invalidEmail: "That e-mail doesn't look right. Check it and try again.",
+      weakPassword: 'That password is too weak. Use at least 8 characters, with a number.',
+      tooManyAttempts: 'Too many attempts. Wait a minute and try again.',
+      unknown: "That didn't go through. Try again in a moment.",
     },
     confirmation: {
       titleLead: "You're all set,",
@@ -128,6 +146,9 @@ export const en: Translation = {
       subtitle:
         "Your account is secure. You're moments away from seeing who has plans nearby today.",
       manageAccount: 'Manage account',
+      pendingTitle: 'Confirm your e-mail.',
+      pendingSubtitle: 'We sent a link to your e-mail. Open it, then come back here to sign in.',
+      pendingContinue: "I've confirmed — sign in",
     },
     name: {
       title: "What's your name?",
@@ -223,6 +244,8 @@ export const en: Translation = {
       retake: 'Retake',
       prompt: 'Can you see your face clearly?',
       use: 'Use this selfie',
+      sending: 'Sending…',
+      failed: "We couldn't send your selfie. Try again.",
     },
     pending: {
       title: "We're\nreviewing",
@@ -283,7 +306,13 @@ export const en: Translation = {
     requestsCount: 'REQUESTS · {{count}}',
     waitlistCount: 'WAITLIST · {{count}}',
     participating: '{{filled}} of {{total}} going',
+    participatingUncapped_one: '{{count}} going',
+    participatingUncapped_other: '{{count}} going',
+    seatsUnlimited: 'No limit',
     hostLine: '{{name}} is hosting ✓',
+    standingLine: 'Standing meetup · no host',
+    standingTitle: 'Standing meetup',
+    standingDetail: 'No host — whoever turns up, turns up',
     hostTenure: 'In Berlin since March · hosting for the 4th time',
     hostRole: 'Host',
     hostBadge: "YOU'RE HOSTING",
@@ -465,6 +494,10 @@ export const en: Translation = {
     peopleCount: 'PEOPLE · {{count}}',
     placeholder: 'Search people',
     recent: 'RECENT SEARCHES',
+    resultDetail: '{{neighbourhood}} · {{shared}}',
+    sharedPlans_one: '{{count}} plan in common',
+    sharedPlans_other: '{{count}} plans in common',
+    noSharedPlans: 'no plans in common',
   },
 
   profile: {
@@ -665,6 +698,21 @@ export const en: Translation = {
       s8Heading: 'Talk to us',
       s8Body: 'Questions about privacy? Write to privacy@treff.app — we answer within 30 days.',
     },
+  },
+
+  datetime: {
+    today: 'Today',
+    tomorrow: 'Tomorrow',
+    yesterday: 'Yesterday',
+    dayAtTime: '{{day}} {{time}}',
+    dayFromTo: '{{day}} {{start}}–{{end}}',
+  },
+
+  errors: {
+    noCredits: 'You have used your 3 requests for this week',
+    planFull: 'This plan just filled up',
+    blocked: 'You cannot join this plan',
+    tooManyInterests: 'You have reached the interest limit',
   },
 
   tabs: {

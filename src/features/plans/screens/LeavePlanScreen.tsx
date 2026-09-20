@@ -54,12 +54,12 @@ export function LeavePlanScreen() {
           {t('plan.leave.title')}
         </Text>
         <Text weight={500} className="text-[14.5px] leading-[21px] text-ink-muted">
-          {t('plan.leave.subtitle', { name: plan?.host.name ?? '' })}
+          {t('plan.leave.subtitle', { name: plan?.host?.name ?? '' })}
         </Text>
       </View>
 
       <HostCard
-        avatarUri={plan?.host.avatarUrl ?? ''}
+        avatarUri={plan?.host?.avatarUrl ?? ''}
         name={plan?.title ?? ''}
         detail={`${plan?.whenLabel.split(' · ')[0] ?? ''} · ${t('plan.leave.attendees', {
           names: attendees,

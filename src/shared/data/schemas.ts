@@ -88,14 +88,28 @@ export const planSchema = z.object({
   languages: z.array(z.string()),
   joinMode: joinModeSchema,
   membership: membershipSchema,
-  host: userSchema,
+  /**
+   * Null is a **standing meetup**: a weekly walk or run that nobody organises.
+   * Saying "whoever turns up, turns up" is truer and safer than putting a name
+   * against a plan nobody is running, so the host card becomes a standing-meetup
+   * badge rather than a face. A hostless plan can only be `open` — there is
+   * nobody to approve anything. See docs/database.md §3.11.
+   */
+  host: userSchema.nullable(),
   place: placeSchema,
   /** Pre-formatted, e.g. "Hoje 19:00–21:00". The design never shows raw dates. */
   whenLabel: z.string(),
   /** ISO timestamp, kept alongside the label for sorting and reminders. */
   startsAt: z.string(),
   durationMinutes: z.number().int().positive().nullable(),
-  capacity: z.number().int().positive(),
+  /**
+   * Total seats, host included — "vagas" in the product's words.
+   *
+   * Null is an **uncapped event**, which is a different shape of plan rather
+   * than a bigger number: no seat grid, no waitlist, `open` join mode only, and
+   * nothing to count "3 vagas livres" against. See docs/database.md §3.12.
+   */
+  capacity: z.number().int().positive().nullable(),
   participants: z.array(planParticipantSchema),
   requests: z.array(joinRequestSchema),
   waitlist: z.array(joinRequestSchema),
@@ -165,5 +179,7 @@ export const searchResultSchema = z.object({
   user: userSchema,
   detail: z.string(),
 });
+export type SearchResult = z.infer<typeof searchResultSchema>;
 
 export const searchResultsSchema = z.array(searchResultSchema);
+export type SearchResults = z.infer<typeof searchResultsSchema>;

@@ -13,11 +13,14 @@ import {
   defaultBirthdate,
   earliestBirthdate,
   formatBirthdate,
+  isoDate,
   latestBirthdate,
 } from '@shared/lib/datetime';
 import { STEPS } from '@shared/lib/steps';
 import { colors } from '@shared/theme/tokens';
 import { Button, Spacer, Text } from '@shared/ui';
+
+import { saveProfile } from '../lib/profileWrites';
 
 /** `height:236px;border-radius:24px` — the card the design draws the wheels in. */
 const CARD_HEIGHT = 236;
@@ -54,17 +57,17 @@ export function BirthdayScreen() {
     });
   }, [birthdate, bounds, commit]);
 
+  const next = () => {
+    saveProfile({ birthdate: isoDate(birthdate) });
+    router.push('/(onboarding)/pronouns');
+  };
+
   return (
     <StepScaffold
       position={STEPS.birthday}
       title={t('onboarding.birthday.title')}
       subtitle={t('onboarding.birthday.subtitle')}
-      footer={
-        <Button
-          label={t('common.continue')}
-          onPress={() => router.push('/(onboarding)/pronouns')}
-        />
-      }
+      footer={<Button label={t('common.continue')} onPress={next} />}
     >
       <View
         className="mt-[20px] shrink-0 overflow-hidden rounded-panel border border-hair bg-surface"

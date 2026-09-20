@@ -1,0 +1,796 @@
+import type { z } from 'zod';
+
+import { i18n } from '@shared/i18n';
+import { ageFromBirthdate } from '@shared/lib/datetime';
+import { supabase } from '@shared/lib/supabase/client';
+import {
+  avatarUrlFor,
+  conversationTimeLabel,
+  distanceLabel,
+  radiusMetres,
+  spokenLanguagesFor,
+  toPlan,
+  toUser,
+  type NearbyPlanRow,
+  type PlanContext,
+  type PublicProfileRow,
+} from '@shared/lib/supabase/mapping';
+
+import { throwAsDataError } from '../errors';
+import { DEFAULT_PREFERENCES } from '../fixtures';
+import {
+  conversationSchema,
+  messageSchema,
+  placeSchema,
+  planSchema,
+  preferencesSchema,
+  searchResultsSchema,
+  userSchema,
+  type AudienceGender,
+  type Conversation,
+  type DistanceUnit,
+  type Membership,
+  type Message,
+  type Place,
+  type Plan,
+  type Preferences,
+  type SearchResults,
+  type User,
+} from '../schemas';
+import type { DataSource } from './types';
+
+/**
+ * The Supabase source.
+ *
+ * One rule runs through it: the server decides, the client renders. Membership,
+ * distance, the block exclusion and the pending queue all come back from
+ * `nearby_plans()` already resolved, so no screen recomputes them and the list
+ * and the sheet cannot disagree. What is left here is the translation into the
+ * domain types, which lives in `@shared/lib/supabase/mapping`.
+ */
+
+function client() {
+  if (!supabase) {
+    throw new Error('[data] Supabase source used without credentials configured.');
+  }
+  return supabase;
+}
+
+/** The signed-in profile id, or null. Read from the persisted session, not the network. */
+async function sessionId(): Promise<string | null> {
+  const { data, error } = await client().auth.getSession();
+  if (error) throwAsDataError(error);
+  return data.session?.user.id ?? null;
+}
+
+/** The signed-in profile id, for the reads and writes that require one. */
+async function viewerId(): Promise<string> {
+  const id = await sessionId();
+  if (!id) throw new Error('[data] No signed-in user.');
+  return id;
+}
+
+/**
+ * Preferences chosen before the account exists.
+ *
+ * The design asks for a radius, an age range, interests and languages at steps
+ * 2 to 4, and only creates the account at step 6. Those answers have no row to
+ * land in and no `auth.uid()` for a policy to match, so writing them straight
+ * through would fail — and, because the settings controls are optimistic, would
+ * visibly snap back to the default the user had just moved away from.
+ *
+ * They are held here instead and replayed by `flushDeferredPreferences()` the
+ * moment a session appears. The same shape as the profile writes in
+ * `@features/onboarding/lib/profileWrites`, and for the same reason: a step
+ * saves its own answer as the user continues, so an abandoned sign-up keeps
+ * everything up to where it stopped.
+ *
+ * The alternative is reordering the flow so the account comes first, which is a
+ * product decision about the design rather than a fix for this one.
+ */
+let deferredPreferences: Partial<Preferences> = {};
+
+/**
+ * Replays the preferences chosen before sign-up. Called from
+ * `flushProfileWrites()`, so the two queues drain together and a screen only
+ * has to know about one of them.
+ */
+export async function flushDeferredPreferences(): Promise<void> {
+  if (!supabase || Object.keys(deferredPreferences).length === 0) return;
+  if (!(await sessionId())) return;
+
+  const patch = deferredPreferences;
+  deferredPreferences = {};
+  try {
+    await supabaseSource.preferences.update(patch);
+  } catch (error) {
+    // Put it back rather than lose it: a later step, or the next launch, tries
+    // again. Anything newer than the failed patch wins, since it is what the
+    // user last chose.
+    deferredPreferences = { ...patch, ...deferredPreferences };
+    console.warn('[data] Could not save the preferences chosen before sign-up:', error);
+  }
+}
+
+/** Rejects with a typed `DataError` where the schema named the rule it broke. */
+function unwrap<T>(result: { data: T; error: unknown | null }): T {
+  if (result.error) throwAsDataError(result.error);
+  return result.data;
+}
+
+/**
+ * The same, for a read that must return exactly one row. PostgREST types
+ * `.single()` as nullable; a missing row here is a bug, not an empty state.
+ */
+function unwrapSingle<T>(result: { data: T | null; error: unknown | null }, what: string): T {
+  const row = unwrap(result);
+  if (row === null) throw new Error(`[data] ${what} not found.`);
+  return row;
+}
+
+/**
+ * Validates on the way out, exactly as the fixture source does.
+ *
+ * In development a mismatch is a console error and the raw value still renders,
+ * so a schema drift is loud without blanking the screen that found it. In
+ * production the parse is skipped: the shape has already been checked by then,
+ * and a release is not the place to discover it.
+ */
+function validate<T>(schema: z.ZodType<T>, value: T): T {
+  if (!__DEV__) return value;
+  const result = schema.safeParse(value);
+  if (result.success) return result.data;
+  console.error('[data] Value does not match its schema:', result.error.issues);
+  return value;
+}
+
+/** View rows type every column as nullable; the view's own `where` says otherwise. */
+function asProfileRow(row: unknown): PublicProfileRow {
+  return row as PublicProfileRow;
+}
+
+// ---------------------------------------------------------------------------
+// Preferences, which most reads need before they can format anything
+// ---------------------------------------------------------------------------
+
+/** The subset of `preferences` columns the settings screen writes. */
+type PreferencesUpdate = Partial<{
+  radius: number;
+  distance_unit: DistanceUnit;
+  age_min: number;
+  age_max: number;
+  audience_gender: 'everyone' | 'women' | 'men' | 'non_binary';
+  app_language: string;
+  notifications_enabled: boolean;
+}>;
+
+const AUDIENCE_TO_DB: Record<AudienceGender, 'everyone' | 'women' | 'men' | 'non_binary'> = {
+  everyone: 'everyone',
+  women: 'women',
+  men: 'men',
+  nonBinary: 'non_binary',
+};
+
+const AUDIENCE_FROM_DB: Record<'everyone' | 'women' | 'men' | 'non_binary', AudienceGender> = {
+  everyone: 'everyone',
+  women: 'women',
+  men: 'men',
+  non_binary: 'nonBinary',
+};
+
+/**
+ * The viewer's id, radius and unit — what a plan needs before it can say how
+ * far away it is or where its pin goes.
+ */
+async function planContext(): Promise<PlanContext> {
+  const db = client();
+  const uid = await viewerId();
+  const row = unwrap(
+    await db
+      .from('preferences')
+      .select('radius, distance_unit')
+      .eq('profile_id', uid)
+      .maybeSingle(),
+  );
+  const unit: DistanceUnit = row?.distance_unit ?? 'mi';
+  // The default matches `preferences.radius`'s own default, so a profile whose
+  // row has not been created yet still places its pins somewhere sensible.
+  const radius = row?.radius ?? 2;
+  return { viewerId: uid, radiusM: radiusMetres(radius, unit), unit };
+}
+
+/** The plan ids the viewer currently holds a seat on — the "em comum" denominator. */
+async function viewerPlanIds(): Promise<string[]> {
+  const db = client();
+  const uid = await viewerId();
+  const rows = unwrap(
+    await db.from('plan_participants').select('plan_id').eq('profile_id', uid).is('left_at', null),
+  );
+  return (rows ?? []).map((row) => row.plan_id);
+}
+
+// ---------------------------------------------------------------------------
+// Plans
+// ---------------------------------------------------------------------------
+
+/**
+ * Every plan the viewer may see, in one round trip.
+ *
+ * `detail` reads the same call and picks its row rather than reading the tables
+ * directly: membership, the queue and the distance are all computed inside the
+ * function, and a second implementation of any of them would eventually make
+ * the card and the sheet say different things about the same plan.
+ */
+async function fetchPlans(): Promise<Plan[]> {
+  const db = client();
+  const [context, rows] = await Promise.all([
+    planContext(),
+    db.rpc('nearby_plans').then((result) => unwrap(result)),
+  ]);
+  return ((rows ?? []) as unknown as NearbyPlanRow[]).map((row) => toPlan(row, context));
+}
+
+async function planDetail(planId: string): Promise<Plan> {
+  const plan = (await fetchPlans()).find((candidate) => candidate.id === planId);
+  if (!plan) throw new Error(`Plan ${planId} not found`);
+  return validate(planSchema, plan);
+}
+
+// ---------------------------------------------------------------------------
+// People
+// ---------------------------------------------------------------------------
+
+async function interestsOf(profileId: string): Promise<string[]> {
+  const rows = unwrap(
+    await client().from('profile_interests').select('interest').eq('profile_id', profileId),
+  );
+  return (rows ?? []).map((row) => row.interest);
+}
+
+async function languagesOf(profileId: string): Promise<string[]> {
+  const rows = unwrap(
+    await client().from('profile_languages').select('language_code').eq('profile_id', profileId),
+  );
+  return (rows ?? []).map((row) => row.language_code);
+}
+
+/** How many of the given people share a plan with the viewer, keyed by profile id. */
+async function sharedPlanCounts(profileIds: string[]): Promise<Map<string, number>> {
+  const counts = new Map<string, number>();
+  if (profileIds.length === 0) return counts;
+  const planIds = await viewerPlanIds();
+  if (planIds.length === 0) return counts;
+
+  const rows = unwrap(
+    await client()
+      .from('plan_participants')
+      .select('profile_id')
+      .in('plan_id', planIds)
+      .in('profile_id', profileIds)
+      .is('left_at', null),
+  );
+  for (const row of rows ?? []) {
+    counts.set(row.profile_id, (counts.get(row.profile_id) ?? 0) + 1);
+  }
+  return counts;
+}
+
+/** "Kreuzberg · 2 planos em comum" — the line under a name in people search. */
+function searchDetailLine(neighbourhood: string, shared: number): string {
+  const sharedLine =
+    shared === 0 ? i18n.t('search.noSharedPlans') : i18n.t('search.sharedPlans', { count: shared });
+  if (!neighbourhood) return sharedLine;
+  return i18n.t('search.resultDetail', { neighbourhood, shared: sharedLine });
+}
+
+async function searchPeople(term: string): Promise<SearchResults> {
+  const needle = term.trim();
+  if (needle.length === 0) return [];
+
+  const db = client();
+  const uid = await viewerId();
+  const rows =
+    unwrap(
+      await db
+        .from('public_profiles')
+        .select('*')
+        .ilike('name', `%${needle}%`)
+        .neq('id', uid)
+        .order('name')
+        .limit(20),
+    ) ?? [];
+
+  const profiles = rows.map(asProfileRow);
+  const counts = await sharedPlanCounts(profiles.map((profile) => profile.id));
+
+  return validate(
+    searchResultsSchema,
+    profiles.map((profile) => {
+      const shared = counts.get(profile.id) ?? 0;
+      return {
+        user: toUser(profile, { sharedPlansCount: shared || undefined }),
+        detail: searchDetailLine(profile.neighbourhood ?? '', shared),
+      };
+    }),
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Chat
+// ---------------------------------------------------------------------------
+
+interface ConversationMemberJson {
+  id: string;
+  name: string | null;
+  avatarStoragePath: string | null;
+}
+
+/**
+ * A `conversation_list` row as the list renders it.
+ *
+ * `online` and `onlineCount` are absent from the view on purpose — presence
+ * comes over Realtime and a stored boolean is wrong seconds after a connection
+ * drops — so they read as nobody until that channel exists.
+ */
+function toConversation(row: {
+  id: string | null;
+  kind: string | null;
+  title: string | null;
+  members: unknown;
+  member_count: number | null;
+  preview: string | null;
+  last_message_at: string | null;
+  unread_count: number | null;
+}): Conversation {
+  const id = row.id ?? '';
+  const members = (row.members ?? []) as ConversationMemberJson[];
+  const avatarUrls = members
+    .slice(0, 2)
+    .map((member) => avatarUrlFor(member.avatarStoragePath, member.id));
+  const memberCount = row.member_count ?? 1;
+  const extra = memberCount - avatarUrls.length;
+
+  return {
+    id,
+    kind: row.kind === 'group' ? 'group' : 'direct',
+    title: row.title ?? '',
+    // A conversation with no other members still has to draw one avatar; the
+    // fallback is seeded on the conversation so it at least stays put.
+    avatarUrls: avatarUrls.length > 0 ? avatarUrls : [avatarUrlFor(null, id)],
+    extraMembers: extra > 0 ? extra : undefined,
+    preview: row.preview ?? '',
+    timeLabel: conversationTimeLabel(row.last_message_at),
+    unreadCount: row.unread_count ?? 0,
+    memberCount,
+    onlineCount: 0,
+  };
+}
+
+/** A row of `messages`. */
+interface MessageRow {
+  id: string;
+  conversation_id: string;
+  author_id: string;
+  content: string;
+  created_at: string;
+}
+
+/** A `messages` row as a bubble. */
+function toMessage(row: MessageRow): Message {
+  return {
+    id: row.id,
+    conversationId: row.conversation_id,
+    authorId: row.author_id,
+    body: row.content,
+    createdAt: row.created_at,
+  };
+}
+
+/** The design puts a receipt under the newest own message and nowhere else. */
+function withSentReceipt(messages: Message[], uid: string): Message[] {
+  let newestOwn = -1;
+  messages.forEach((message, index) => {
+    if (message.authorId === uid) newestOwn = index;
+  });
+  if (newestOwn === -1) return messages;
+  return messages.map((message, index) =>
+    index === newestOwn ? { ...message, receipt: i18n.t('chat.sent') } : message,
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Places
+// ---------------------------------------------------------------------------
+
+/**
+ * Places with their distance from the viewer, nearest first.
+ *
+ * `distance_to()` takes one place at a time — it is the function that lets a
+ * client learn a distance without ever seeing a coordinate — so this is one
+ * call per row. That is fine for the handful the create flow offers and wrong
+ * for a list; a `nearby_places()` RPC alongside `nearby_plans()` is what
+ * replaces it.
+ */
+async function placesWithDistance(
+  rows: { id: string; name: string; address: string }[],
+  unit: DistanceUnit,
+): Promise<Place[]> {
+  const db = client();
+  const withDistance = await Promise.all(
+    rows.map(async (row) => ({
+      row,
+      metres: unwrap(await db.rpc('distance_to', { place: row.id })),
+    })),
+  );
+
+  return withDistance
+    .sort((a, b) => (a.metres ?? Infinity) - (b.metres ?? Infinity))
+    .map(({ row, metres }) => ({
+      id: row.id,
+      name: row.name,
+      address: row.address,
+      distanceLabel: distanceLabel(metres, unit),
+    }));
+}
+
+// ---------------------------------------------------------------------------
+// The source
+// ---------------------------------------------------------------------------
+
+export const supabaseSource: DataSource = {
+  plans: {
+    list: async (): Promise<Plan[]> => validate(planSchema.array(), await fetchPlans()),
+
+    detail: planDetail,
+
+    /**
+     * Moves the viewer between guest / requested / joined.
+     *
+     * Leaving is two idempotent writes rather than a read-then-branch: a
+     * pending request is deleted, a taken seat is stamped `left_at`, and
+     * whichever of the two the viewer does not have is a no-op. The seat row
+     * is never deleted — it is the one fact attendance is derived from.
+     */
+    setMembership: async (planId: string, membership: Membership): Promise<Plan> => {
+      const db = client();
+      const uid = await viewerId();
+
+      switch (membership) {
+        case 'requested':
+          // May be refused with NO_CREDITS (the weekly free quota) or BLOCKED.
+          unwrap(await db.from('join_requests').insert({ plan_id: planId, profile_id: uid }));
+          break;
+
+        case 'joined':
+          // Only an open plan can be joined directly; an approval plan is
+          // seated by the trigger on the accepted request. May raise PLAN_FULL.
+          unwrap(await db.from('plan_participants').insert({ plan_id: planId, profile_id: uid }));
+          break;
+
+        case 'guest':
+          await Promise.all([
+            db
+              .from('join_requests')
+              .delete()
+              .eq('plan_id', planId)
+              .eq('profile_id', uid)
+              .eq('status', 'pending')
+              .then((result) => unwrap(result)),
+            db
+              .from('plan_participants')
+              .update({ left_at: new Date().toISOString() })
+              .eq('plan_id', planId)
+              .eq('profile_id', uid)
+              .is('left_at', null)
+              .then((result) => unwrap(result)),
+          ]);
+          break;
+
+        default:
+          // `host` is decided when the plan is created and `waitlisted` is a
+          // position in a derived queue; neither is something a viewer sets.
+          throw new Error(`[data] Membership ${membership} is not settable.`);
+      }
+
+      return planDetail(planId);
+    },
+
+    /**
+     * Host accepts a request. The trigger on the update seats the applicant in
+     * the same transaction, so nothing here inserts a participant — doing both
+     * would race the trigger against the seat cap.
+     */
+    acceptRequest: async (planId: string, requestId: string): Promise<Plan> => {
+      unwrap(
+        await client()
+          .from('join_requests')
+          .update({ status: 'accepted' })
+          .eq('id', requestId)
+          .eq('plan_id', planId),
+      );
+      return planDetail(planId);
+    },
+  },
+
+  users: {
+    /**
+     * The signed-in user, from their own `profiles` row.
+     *
+     * The base table rather than `public_profiles`, because this is the one
+     * person entitled to everything it holds — the age below is computed from
+     * the `birthdate` no other screen ever sees. `verified` is the exception:
+     * it is derived from the verification submissions, which only the view can
+     * reach, so it comes from there.
+     */
+    me: async (): Promise<User> => {
+      const db = client();
+      const uid = await viewerId();
+
+      const [profile, publicRow] = await Promise.all([
+        db
+          .from('profiles')
+          .select('*, profile_interests(interest), profile_languages(language_code)')
+          .eq('id', uid)
+          .single()
+          .then((result) => unwrapSingle(result, `Profile ${uid}`)),
+        db
+          .from('public_profiles')
+          .select('verified')
+          .eq('id', uid)
+          .maybeSingle()
+          .then((result) => unwrap(result)),
+      ]);
+
+      return validate(userSchema, {
+        id: profile.id,
+        name: profile.name,
+        age: profile.birthdate ? ageFromBirthdate(new Date(profile.birthdate)) : 18,
+        avatarUrl: avatarUrlFor(profile.avatar_storage_path, profile.id),
+        verified: publicRow?.verified ?? false,
+        neighbourhood: profile.neighbourhood ?? '',
+        countryCode: profile.country_code ?? undefined,
+        pronouns: profile.pronouns ?? undefined,
+        bio: profile.bio ?? undefined,
+        interests: profile.profile_interests.map((row) => row.interest),
+        languages: spokenLanguagesFor(profile.profile_languages.map((row) => row.language_code)),
+        joinedAt: profile.created_at,
+      });
+    },
+
+    /** Somebody else's profile, as `public_profiles` is willing to show it. */
+    detail: async (userId: string): Promise<User> => {
+      const db = client();
+
+      const [row, interests, languages, attendanceRate, plansCount, sharedCounts] =
+        await Promise.all([
+          db
+            .from('public_profiles')
+            .select('*')
+            .eq('id', userId)
+            .maybeSingle()
+            .then((result) => unwrap(result)),
+          interestsOf(userId),
+          languagesOf(userId),
+          db.rpc('attendance_rate_of', { uid: userId }).then((result) => unwrap(result)),
+          db
+            .from('plan_participants')
+            .select('plan_id', { count: 'exact', head: true })
+            .eq('profile_id', userId)
+            .is('left_at', null)
+            .then((result) => {
+              if (result.error) throwAsDataError(result.error);
+              return result.count ?? 0;
+            }),
+          sharedPlanCounts([userId]),
+        ]);
+
+      if (!row) throw new Error(`User ${userId} not found`);
+
+      return validate(
+        userSchema,
+        toUser(asProfileRow(row), {
+          interests,
+          languages,
+          attendanceRate,
+          plansCount,
+          sharedPlansCount: sharedCounts.get(userId) ?? 0,
+        }),
+      );
+    },
+
+    search: searchPeople,
+
+    /**
+     * Recently viewed profiles.
+     *
+     * Nothing records a profile view — there is no table behind this and no
+     * screen that writes one — so it is an empty list rather than a guess.
+     * A `profile_views` table, or a client-side list in AsyncStorage, is what
+     * fills it; inventing rows from search history would put people under
+     * "BUSCAS RECENTES" the viewer never looked at.
+     */
+    recent: (): Promise<SearchResults> => Promise.resolve([]),
+  },
+
+  chats: {
+    conversations: async (): Promise<Conversation[]> => {
+      const rows = unwrap(
+        await client()
+          .from('conversation_list')
+          .select('*')
+          .order('last_message_at', { ascending: false, nullsFirst: false }),
+      );
+      return validate(conversationSchema.array(), (rows ?? []).map(toConversation));
+    },
+
+    thread: async (conversationId: string): Promise<Message[]> => {
+      const db = client();
+      const uid = await viewerId();
+      const rows = unwrap(
+        await db
+          .from('messages')
+          .select('*')
+          .eq('conversation_id', conversationId)
+          .order('created_at', { ascending: true }),
+      );
+      return validate(messageSchema.array(), withSentReceipt((rows ?? []).map(toMessage), uid));
+    },
+
+    send: async (conversationId: string, body: string): Promise<Message> => {
+      const db = client();
+      const uid = await viewerId();
+      const row = unwrapSingle<MessageRow>(
+        await db
+          .from('messages')
+          .insert({ conversation_id: conversationId, author_id: uid, content: body })
+          .select('*')
+          .single(),
+        'Sent message',
+      );
+      return validate(messageSchema, { ...toMessage(row), receipt: i18n.t('chat.sent') });
+    },
+
+    /**
+     * No-op.
+     *
+     * `receive` exists to play the design's scripted reply back on the fixture
+     * source. A real incoming message arrives on the `messages` Realtime
+     * publication, which writes into the thread cache directly; there is
+     * nothing for a client to insert on somebody else's behalf, and the RLS
+     * policy would refuse it if there were.
+     */
+    receive: (): Promise<Message | null> => Promise.resolve(null),
+  },
+
+  places: {
+    /** Places the viewer added themselves, which is what "recent" means so far. */
+    recent: async (): Promise<Place[]> => {
+      const db = client();
+      const uid = await viewerId();
+      const { unit } = await planContext();
+      const rows = unwrap(
+        await db
+          .from('places')
+          .select('id, name, address')
+          .eq('profile_id', uid)
+          .order('created_at', { ascending: false })
+          .limit(8),
+      );
+      return validate(placeSchema.array(), await placesWithDistance(rows ?? [], unit));
+    },
+
+    nearby: async (): Promise<Place[]> => {
+      const db = client();
+      const { unit } = await planContext();
+      const rows = unwrap(await db.from('places').select('id, name, address').limit(12));
+      return validate(placeSchema.array(), await placesWithDistance(rows ?? [], unit));
+    },
+  },
+
+  preferences: {
+    /**
+     * The viewer's preferences row, plus the two lists the settings screen
+     * edits alongside it. Interests and languages are their own tables — they
+     * belong to the profile rather than to discovery — but the settings screen
+     * shows them on the same page, so the domain type carries all three.
+     */
+    get: async (): Promise<Preferences> => {
+      const db = client();
+      const uid = await sessionId();
+
+      // Before the account exists there is no row to read. The column defaults
+      // are the fixture defaults, so the early steps open on the same values
+      // they would have after sign-up, with anything already chosen on top.
+      if (!uid) {
+        return validate(preferencesSchema, { ...DEFAULT_PREFERENCES, ...deferredPreferences });
+      }
+
+      const [row, interests, languages] = await Promise.all([
+        db
+          .from('preferences')
+          .select('*')
+          .eq('profile_id', uid)
+          .single()
+          .then((result) => unwrapSingle(result, 'Preferences')),
+        interestsOf(uid),
+        languagesOf(uid),
+      ]);
+
+      return validate(preferencesSchema, {
+        radius: row.radius,
+        distanceUnit: row.distance_unit,
+        ageRange: [row.age_min, row.age_max],
+        audienceGender: AUDIENCE_FROM_DB[row.audience_gender],
+        interests,
+        spokenLanguages: spokenLanguagesFor(languages),
+        appLanguage: row.app_language,
+        notificationsEnabled: row.notifications_enabled,
+      });
+    },
+
+    /**
+     * Applies a patch.
+     *
+     * Interests and languages are replaced wholesale rather than diffed: both
+     * lists are short, the screen sends the whole set every time, and a delete
+     * followed by an insert is one shape to reason about. The insert may be
+     * refused with TOO_MANY_INTERESTS when the cap in `app_config` is lower
+     * than the one the client enforces.
+     */
+    update: async (patch: Partial<Preferences>): Promise<Preferences> => {
+      const db = client();
+      const uid = await sessionId();
+
+      if (!uid) {
+        deferredPreferences = { ...deferredPreferences, ...patch };
+        return validate(preferencesSchema, { ...DEFAULT_PREFERENCES, ...deferredPreferences });
+      }
+
+      const columns: PreferencesUpdate = {};
+      if (patch.radius !== undefined) columns.radius = patch.radius;
+      if (patch.distanceUnit !== undefined) columns.distance_unit = patch.distanceUnit;
+      if (patch.ageRange !== undefined) {
+        columns.age_min = patch.ageRange[0];
+        columns.age_max = patch.ageRange[1];
+      }
+      if (patch.audienceGender !== undefined) {
+        columns.audience_gender = AUDIENCE_TO_DB[patch.audienceGender];
+      }
+      if (patch.appLanguage !== undefined) columns.app_language = patch.appLanguage;
+      if (patch.notificationsEnabled !== undefined) {
+        columns.notifications_enabled = patch.notificationsEnabled;
+      }
+
+      if (Object.keys(columns).length > 0) {
+        unwrap(await db.from('preferences').update(columns).eq('profile_id', uid));
+      }
+
+      if (patch.interests !== undefined) {
+        unwrap(await db.from('profile_interests').delete().eq('profile_id', uid));
+        if (patch.interests.length > 0) {
+          unwrap(
+            await db
+              .from('profile_interests')
+              .insert(patch.interests.map((interest) => ({ profile_id: uid, interest }))),
+          );
+        }
+      }
+
+      if (patch.spokenLanguages !== undefined) {
+        unwrap(await db.from('profile_languages').delete().eq('profile_id', uid));
+        if (patch.spokenLanguages.length > 0) {
+          unwrap(
+            await db.from('profile_languages').insert(
+              patch.spokenLanguages.map((language) => ({
+                profile_id: uid,
+                language_code: language.code,
+              })),
+            ),
+          );
+        }
+      }
+
+      return supabaseSource.preferences.get();
+    },
+  },
+};

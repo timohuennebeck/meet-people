@@ -5,12 +5,43 @@ import { View } from 'react-native';
 import { StepScaffold } from '@shared/components/StepScaffold';
 import { VIEWER } from '@shared/data/fixtures';
 import { STEPS } from '@shared/lib/steps';
+import { useSession } from '@shared/providers/SessionProvider';
 import { Button, Highlight, Mascot, StepTitle, Text, TextButton } from '@shared/ui';
 
-/** A short confirmation once the account exists. */
+/**
+ * A short confirmation once the account exists.
+ *
+ * Whether it *is* a confirmation depends on the project: with e-mail
+ * confirmations on, `signUp` creates the account but hands back no session
+ * until the link in the e-mail is opened, and there is nothing to continue into
+ * — every step after this one writes to a profile row that row-level security
+ * will not open without a session. So the same step covers both endings, and
+ * which one it shows is whether a session actually arrived.
+ */
 export function ConfirmationScreen() {
   const { t } = useTranslation();
   const router = useRouter();
+  const { isAuthenticated } = useSession();
+
+  if (!isAuthenticated) {
+    return (
+      <StepScaffold
+        position={STEPS.confirmation}
+        title={t('onboarding.confirmation.pendingTitle')}
+        subtitle={t('onboarding.confirmation.pendingSubtitle')}
+        footer={
+          <Button
+            label={t('onboarding.confirmation.pendingContinue')}
+            onPress={() => router.replace('/(onboarding)/sign-in')}
+          />
+        }
+      >
+        <View className="min-h-0 flex-1 items-center justify-center">
+          <Mascot size={232} />
+        </View>
+      </StepScaffold>
+    );
+  }
 
   return (
     <StepScaffold

@@ -9,7 +9,7 @@ import { colors } from '@shared/theme/tokens';
 import { Button, InfoNote, TextButton } from '@shared/ui';
 
 /** The plans that disappear with the account are the ones the viewer hosts. */
-const HOSTED_PLANS = PLANS.filter((plan) => plan.host.id === VIEWER.id).length;
+const HOSTED_PLANS = PLANS.filter((plan) => plan.host?.id === VIEWER.id).length;
 
 /**
  * Deleting the account. The question names the person and the sentence under it

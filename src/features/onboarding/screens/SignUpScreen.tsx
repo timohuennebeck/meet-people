@@ -1,13 +1,17 @@
 import { useRouter } from 'expo-router';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Pressable, View } from 'react-native';
 
 import { StepScaffold } from '@shared/components/StepScaffold';
 import { cn } from '@shared/lib/cn';
 import { STEPS } from '@shared/lib/steps';
+import { supabase } from '@shared/lib/supabase/client';
 import { colors } from '@shared/theme/tokens';
 import { Button, FieldLabel, Glyph, Spacer, Text, TextField } from '@shared/ui';
+
+import { describeAuthFailure, type AuthFailure } from '../lib/authErrors';
+import { flushProfileWrites } from '../lib/profileWrites';
 
 /** The label beside the meter, one per lit segment. */
 const STRENGTH_LABEL = ['weak', 'weak', 'fair', 'good', 'strong'] as const;
@@ -61,7 +65,53 @@ export function SignUpScreen() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [revealed, setRevealed] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [failure, setFailure] = useState<AuthFailure | null>(null);
   const strength = strengthOf(password);
+
+  /**
+   * Closes the button to a second tap before React has re-rendered it
+   * disabled. `submitting` greys the button out; this is what stops the two
+   * taps of a double tap from both getting through and creating the account
+   * twice.
+   */
+  const inFlight = useRef(false);
+
+  const createAccount = async () => {
+    if (inFlight.current) return;
+    if (!supabase) {
+      setFailure('unknown');
+      return;
+    }
+
+    inFlight.current = true;
+    setSubmitting(true);
+    setFailure(null);
+
+    try {
+      const { data, error } = await supabase.auth.signUp({ email: email.trim(), password });
+      if (error) {
+        setFailure(describeAuthFailure(error));
+        return;
+      }
+
+      // An address that already has an account does not come back as an error
+      // while confirmations are on — answering "that one is taken" to anyone
+      // who asks would hand out the user list. Supabase returns a decoy user
+      // with no identities instead, which is the one safe way to tell.
+      if (data.user && data.user.identities?.length === 0) {
+        setFailure('emailTaken');
+        return;
+      }
+
+      // Everything answered before there was an account to hang it on.
+      await flushProfileWrites();
+      router.push('/(onboarding)/confirmation');
+    } finally {
+      inFlight.current = false;
+      setSubmitting(false);
+    }
+  };
 
   return (
     <StepScaffold
@@ -122,16 +172,24 @@ export function SignUpScreen() {
         </>
       ) : null}
 
+      {/* Under the field it is about, above the button that caused it. */}
+      {failure ? (
+        <Text className="mt-[16px] shrink-0 text-[13.5px] leading-[19px] text-danger">
+          {t(`onboarding.authError.${failure}`)}
+        </Text>
+      ) : null}
+
       <Button
-        label={t('onboarding.account.createAccount')}
+        label={t(submitting ? 'onboarding.signUp.creating' : 'onboarding.account.createAccount')}
         className="mt-[20px]"
-        onPress={() => router.push('/(onboarding)/confirmation')}
+        disabled={submitting}
+        onPress={() => void createAccount()}
       />
 
       <Pressable
         accessibilityRole="button"
         className="mt-[14px] shrink-0 active:opacity-60"
-        onPress={() => router.push('/(onboarding)/account')}
+        onPress={() => router.push('/(onboarding)/sign-in')}
       >
         <Text className="text-center text-[15.5px] text-ink-body">
           {t('onboarding.signUp.haveAccount')}{' '}

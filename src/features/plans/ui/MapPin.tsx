@@ -1,10 +1,16 @@
+import { Repeat } from 'phosphor-react-native';
 import { Pressable, View } from 'react-native';
 
 import { colors, shadows } from '@shared/theme/tokens';
 import { Avatar, Text } from '@shared/ui';
 
 export interface MapPinProps {
-  avatarUri: string;
+  /**
+   * Whose face the pin wears — the host's, or the first person in. A standing
+   * meetup has neither until somebody turns up, and draws the repeat mark
+   * instead of borrowing a face that belongs to nobody.
+   */
+  avatarUri?: string;
   /** Position in the design's 402×874 canvas. */
   x: number;
   y: number;
@@ -32,7 +38,13 @@ export function MapPin({ avatarUri, x, y, title, label, onPress }: MapPinProps) 
         className="h-[62px] w-[62px] overflow-hidden rounded-full border-[4px] bg-surface p-[2px]"
         style={[{ borderColor: colors.brand }, shadows.pin]}
       >
-        <Avatar uri={avatarUri} size={50} />
+        {avatarUri ? (
+          <Avatar uri={avatarUri} size={50} />
+        ) : (
+          <View className="h-[50px] w-[50px] items-center justify-center rounded-full bg-brand-tint">
+            <Repeat size={22} weight="bold" color={colors.brand} />
+          </View>
+        )}
       </View>
 
       {label ? (

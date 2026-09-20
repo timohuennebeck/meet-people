@@ -87,7 +87,7 @@ export function PlanCard({ plan, variant, onPress }: PlanCardProps) {
         mascotSize={100}
         radius={18}
         trailing={
-          variant === 'full' && openSeats > 0 ? (
+          variant === 'full' && openSeats !== null && openSeats > 0 ? (
             <View
               className="rounded-pill px-[10px] py-[6px]"
               style={{ backgroundColor: 'rgba(255,255,255,0.92)' }}
@@ -118,10 +118,16 @@ export function PlanCard({ plan, variant, onPress }: PlanCardProps) {
                 {`${plan.place.name} · a ${plan.place.distanceLabel}`}
               </DetailLine>
               <DetailLine icon={<HandWaving size={17} color={colors.inkFaint} />}>
-                {`${t('plan.participating', {
-                  filled: String(plan.participants.length),
-                  total: String(plan.capacity),
-                })} · ${t('plan.hostLine', { name: plan.host.name })}`}
+                {`${
+                  plan.capacity === null
+                    ? t('plan.participatingUncapped', { count: plan.participants.length })
+                    : t('plan.participating', {
+                        filled: String(plan.participants.length),
+                        total: String(plan.capacity),
+                      })
+                } · ${
+                  plan.host ? t('plan.hostLine', { name: plan.host.name }) : t('plan.standingLine')
+                }`}
               </DetailLine>
             </View>
 

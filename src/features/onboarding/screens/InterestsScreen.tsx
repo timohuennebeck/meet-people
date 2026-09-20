@@ -1,8 +1,8 @@
 import { useRouter } from 'expo-router';
-import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { View } from 'react-native';
 
+import { usePreferences, useUpdatePreferences } from '@features/settings/data/usePreferences';
 import { StepScaffold } from '@shared/components/StepScaffold';
 import { MAX_INTEREST_LENGTH, MAX_INTERESTS } from '@shared/lib/limits';
 import { STEPS } from '@shared/lib/steps';
@@ -15,7 +15,13 @@ const SUGGESTIONS = ['Café', 'Café da manhã'];
 export function InterestsScreen() {
   const { t } = useTranslation();
   const router = useRouter();
-  const [tags, setTags] = useState(['Corrida', 'Cinema']);
+  const { data: preferences } = usePreferences();
+  const { mutate: update } = useUpdatePreferences();
+
+  // Saved as each tag is added rather than on continue, which is what the
+  // settings page does with the same field — and what keeps the answer when
+  // the step is abandoned half way.
+  const tags = preferences?.interests ?? [];
 
   return (
     <StepScaffold
@@ -36,8 +42,8 @@ export function InterestsScreen() {
         tags={tags}
         max={MAX_INTERESTS}
         maxLength={MAX_INTEREST_LENGTH}
-        onAdd={(tag) => setTags((current) => [...current, tag])}
-        onRemove={(tag) => setTags((current) => current.filter((entry) => entry !== tag))}
+        onAdd={(tag) => update({ interests: [...tags, tag] })}
+        onRemove={(tag) => update({ interests: tags.filter((entry) => entry !== tag) })}
       />
 
       <View className="mt-[14px] shrink-0 flex-row flex-wrap gap-[8px]">
@@ -53,7 +59,7 @@ export function InterestsScreen() {
               label={`+ ${suggestion}`}
               size="suggestion"
               tone="outline"
-              onPress={() => setTags((current) => [...current, suggestion])}
+              onPress={() => update({ interests: [...tags, suggestion] })}
             />
           ))}
       </View>

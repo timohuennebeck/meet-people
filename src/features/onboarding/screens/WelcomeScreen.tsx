@@ -121,7 +121,7 @@ export function WelcomeScreen() {
         <Pressable
           accessibilityRole="button"
           className="active:opacity-60"
-          onPress={() => router.push('/(onboarding)/account')}
+          onPress={() => router.push('/(onboarding)/sign-in')}
         >
           <Text weight={500} className="mt-[15px] text-center text-[16px] text-ink-body">
             {t('welcome.haveAccount')}{' '}

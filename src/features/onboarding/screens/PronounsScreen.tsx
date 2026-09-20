@@ -9,6 +9,8 @@ import type { Pronouns } from '@shared/data/schemas';
 import { STEPS } from '@shared/lib/steps';
 import { Button, Spacer, Text, TextButton } from '@shared/ui';
 
+import { saveProfile } from '../lib/profileWrites';
+
 /** Pronouns, shown beside the user's name. Skippable. */
 export function PronounsScreen() {
   const { t } = useTranslation();
@@ -16,6 +18,16 @@ export function PronounsScreen() {
   const [selected, setSelected] = useState<Pronouns>('she');
 
   const next = () => router.push('/(onboarding)/photo');
+
+  /**
+   * Skipping is not the same as answering "prefer not to say": the column
+   * already defaults to `unspecified`, so a skip leaves it alone rather than
+   * overwriting an answer given on an earlier run through.
+   */
+  const confirm = () => {
+    saveProfile({ pronouns: selected });
+    next();
+  };
 
   const options: { value: Pronouns; label: string }[] = [
     { value: 'she', label: t('onboarding.pronouns.she') },
@@ -31,7 +43,7 @@ export function PronounsScreen() {
       subtitle={t('onboarding.pronouns.subtitle')}
       footer={
         <>
-          <Button label={t('common.continue')} onPress={next} />
+          <Button label={t('common.continue')} onPress={confirm} />
           <TextButton label={t('common.skip')} className="mt-[15px]" onPress={next} />
         </>
       }
