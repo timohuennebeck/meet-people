@@ -21,6 +21,25 @@ import { SessionProvider, useSession } from '@shared/providers/SessionProvider';
 import '../global.css';
 
 /**
+ * The plan and report sheets, as real iOS form sheets.
+ *
+ * `react-native-screens` draws the panel, the corner radius, the grabber and
+ * the dimming behind it, and gives the sheet its drag-to-dismiss and
+ * tap-outside-to-dismiss behaviour — all of which the app used to only paint.
+ * `fitToContents` measures the screen's content column to size the sheet, so
+ * nothing at the top of one of these screens may claim `flex: 1`: a child
+ * stretching into a container with no resolved height measures to zero.
+ */
+const SHEET_OPTIONS = {
+  presentation: 'formSheet',
+  sheetAllowedDetents: 'fitToContents',
+  /** `radii.sheet` — the design's `rounded-t-sheet`, now drawn natively. */
+  sheetCornerRadius: 30,
+  sheetGrabberVisible: true,
+  sheetElevation: 24,
+} as const;
+
+/**
  * Route groups and the conditions that unlock them.
  *
  * expo-router renders only the `Stack.Protected` groups whose `guard` passes,
@@ -60,11 +79,27 @@ function RootNavigator() {
 
       <Stack.Protected guard={isAuthenticated && hasOnboarded}>
         <Stack.Screen name="(tabs)" />
-        <Stack.Screen name="plan/[id]" options={{ presentation: 'transparentModal' }} />
+
+        {/* The plan and report directories carry no `_layout`, so their screens
+            are routes on this stack rather than a nested navigator — a nested
+            navigator inside a `fitToContents` sheet cannot be measured. Each
+            sheet therefore declares its presentation here. */}
+        <Stack.Screen name="plan/[id]/index" options={SHEET_OPTIONS} />
+        <Stack.Screen name="plan/[id]/join" options={SHEET_OPTIONS} />
+        <Stack.Screen name="plan/[id]/leave" options={SHEET_OPTIONS} />
+        <Stack.Screen name="plan/[id]/attendance" options={SHEET_OPTIONS} />
+        {/* A `MascotScreen` confirmation: full-bleed by design, never a sheet. */}
+        <Stack.Screen name="plan/[id]/attendance-thanks" />
+
         <Stack.Screen name="create" />
         <Stack.Screen name="chat/[id]" />
         <Stack.Screen name="people/[id]" />
-        <Stack.Screen name="report" />
+
+        <Stack.Screen name="report/[id]/index" options={SHEET_OPTIONS} />
+        <Stack.Screen name="report/[id]/detail" options={SHEET_OPTIONS} />
+        {/* The other `MascotScreen` confirmation — same reason. */}
+        <Stack.Screen name="report/[id]/sent" />
+
         <Stack.Screen name="search" />
         <Stack.Screen name="settings" />
         <Stack.Screen name="verification-badge" />

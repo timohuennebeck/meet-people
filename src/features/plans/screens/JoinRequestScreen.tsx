@@ -1,17 +1,14 @@
-import { LinearGradient } from 'expo-linear-gradient';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { View } from 'react-native';
 
-import { gradients, gradientStops } from '@shared/theme/tokens';
 import {
   Avatar,
   Button,
   NoteField,
   Chip,
   SealNote,
-  SheetScrim,
   SheetSurface,
   Text,
   TextButton,
@@ -42,50 +39,43 @@ export function JoinRequestScreen() {
     router.back();
   };
 
+  // No map backdrop and no scrim: the sheet is presented over the real map
+  // now, and the system dims what is behind it.
   return (
-    <View className="flex-1">
-      <LinearGradient
-        colors={gradients.mapFade}
-        locations={gradientStops.mapFade}
-        className="absolute inset-0"
+    <SheetSurface gap={16} padding={{ top: 14, horizontal: 20, bottom: 32 }}>
+      <View className="flex-row items-center gap-[13px]">
+        {host ? <Avatar uri={host.avatarUrl} size={52} /> : null}
+        <View className="min-w-0 flex-1 gap-[3px]">
+          <Text weight={600} className="text-[22px] tracking-[-0.44px]">
+            {t('plan.request.title', { name: host?.name ?? '' })}
+          </Text>
+          <Text className="text-[14.5px] text-ink-dim">{t('plan.request.subtitle')}</Text>
+        </View>
+      </View>
+
+      <NoteField
+        value={message}
+        onChangeText={setMessage}
+        placeholder={t('plan.request.notePlaceholder')}
+        autoFocus
       />
-      <SheetScrim />
 
-      <SheetSurface gap={16} padding={{ top: 14, horizontal: 20, bottom: 32 }}>
-        <View className="flex-row items-center gap-[13px]">
-          {host ? <Avatar uri={host.avatarUrl} size={52} /> : null}
-          <View className="min-w-0 flex-1 gap-[3px]">
-            <Text weight={600} className="text-[22px] tracking-[-0.44px]">
-              {t('plan.request.title', { name: host?.name ?? '' })}
-            </Text>
-            <Text className="text-[14.5px] text-ink-dim">{t('plan.request.subtitle')}</Text>
-          </View>
-        </View>
+      <View className="flex-row flex-wrap gap-[8px]">
+        {(['chipBeginner', 'chipBoard', 'chipArrival'] as const).map((key) => (
+          <Chip
+            key={key}
+            label={t(`plan.request.${key}`)}
+            size="soft"
+            tone="fill"
+            onPress={() => append(t(`plan.request.${key}`))}
+          />
+        ))}
+      </View>
 
-        <NoteField
-          value={message}
-          onChangeText={setMessage}
-          placeholder={t('plan.request.notePlaceholder')}
-          autoFocus
-        />
+      <SealNote>{t('plan.request.privacyNote', { name: host?.name ?? '' })}</SealNote>
 
-        <View className="flex-row flex-wrap gap-[8px]">
-          {(['chipBeginner', 'chipBoard', 'chipArrival'] as const).map((key) => (
-            <Chip
-              key={key}
-              label={t(`plan.request.${key}`)}
-              size="soft"
-              tone="fill"
-              onPress={() => append(t(`plan.request.${key}`))}
-            />
-          ))}
-        </View>
-
-        <SealNote>{t('plan.request.privacyNote', { name: host?.name ?? '' })}</SealNote>
-
-        <Button label={t('plan.request.send')} onPress={send} />
-        <TextButton label={t('common.cancel')} tone="body" onPress={() => router.back()} />
-      </SheetSurface>
-    </View>
+      <Button label={t('plan.request.send')} onPress={send} />
+      <TextButton label={t('common.cancel')} tone="body" onPress={() => router.back()} />
+    </SheetSurface>
   );
 }

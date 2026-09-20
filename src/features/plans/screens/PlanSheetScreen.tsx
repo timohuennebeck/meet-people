@@ -1,19 +1,13 @@
-import { LinearGradient } from 'expo-linear-gradient';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
-import { View } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { ScrollView, View } from 'react-native';
 
 import type { Plan } from '@shared/data/schemas';
-import { gradients, shadows } from '@shared/theme/tokens';
 import {
   Button,
-  CircleButton,
-  Glyph,
   HostCard,
   SeatList,
   SeatSummary,
-  SheetScrim,
   SheetSurface,
   Text,
   TextButton,
@@ -208,68 +202,56 @@ function HostState({ plan }: { plan: Plan }) {
 
   return (
     <SheetSurface gap={18} padding={{ top: 12, horizontal: 18, bottom: 36 }}>
-      <PlanSheetHeader
-        plan={plan}
-        photoHeight={hasRequests ? 220 : 160}
-        mascotSize={hasRequests ? 148 : 118}
-        hosting
-        showDistance={false}
-      />
+      {/* The only plan state that can outgrow the screen: a tall photo, the
+          seat grid and a row per pending request. `fitToContents` stops
+          growing the sheet at the full detent, so past that the content has to
+          scroll. The sheet's own gap moves into the scroll content, and the
+          ScrollView is deliberately left unstretched — `flex-1` here would
+          measure to zero and the sheet with it. */}
+      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ gap: 18 }}>
+        <PlanSheetHeader
+          plan={plan}
+          photoHeight={hasRequests ? 220 : 160}
+          mascotSize={hasRequests ? 148 : 118}
+          hosting
+          showDistance={false}
+        />
 
-      {full ? (
-        seatRow
-      ) : (
-        <View className="gap-[12px]">
-          <View className="flex-row items-baseline justify-between">
-            <Text weight={600} className="text-[12px] tracking-[0.4px] text-ink-faint">
-              {t('plan.seatsLabel')}
-            </Text>
-            <Text weight={600} className="text-[13px] text-ink-slate">
-              {t('plan.seatsFree', { count: open })}
-            </Text>
+        {full ? (
+          seatRow
+        ) : (
+          <View className="gap-[12px]">
+            <View className="flex-row items-baseline justify-between">
+              <Text weight={600} className="text-[12px] tracking-[0.4px] text-ink-faint">
+                {t('plan.seatsLabel')}
+              </Text>
+              <Text weight={600} className="text-[13px] text-ink-slate">
+                {t('plan.seatsFree', { count: open })}
+              </Text>
+            </View>
+            {seatRow}
           </View>
-          {seatRow}
-        </View>
-      )}
+        )}
 
-      <HostRequestList plan={plan} full={full} />
+        <HostRequestList plan={plan} full={full} />
+      </ScrollView>
     </SheetSurface>
-  );
-}
-
-/**
- * The × over the map, for the case where no sheet has rendered yet.
- *
- * Every real state goes through `PlanSheetHeader`, whose photo carries the
- * design's own × in its top-right corner — drawing this one over those as well
- * put two close buttons on screen, in a spot the design gives to the `treff`
- * wordmark. It is left for the not-yet-loaded branch, which otherwise offers
- * nothing but the system back gesture.
- */
-function CloseOverlay({ onPress }: { onPress: () => void }) {
-  const { t } = useTranslation();
-  const insets = useSafeAreaInsets();
-
-  return (
-    <View
-      className="absolute left-[18px] rounded-full"
-      style={[{ top: Math.max(70, insets.top + 11) }, shadows.chip]}
-    >
-      <CircleButton
-        size={40}
-        className="bg-surface"
-        accessibilityLabel={t('common.close')}
-        onPress={onPress}
-      >
-        <Glyph.CloseHeader size={13} />
-      </CircleButton>
-    </View>
   );
 }
 
 /**
  * The plan detail sheet. Which state renders follows the viewer's membership,
  * so the same route serves the guest and host flows.
+ *
+ * Nothing here draws a map, a scrim or a close button any more: the route is a
+ * native form sheet, so the real map sits behind it, the system dims it, and
+ * the grabber, the swipe down and the tap outside all dismiss it. Every state
+ * is its own `SheetSurface` because the design gives each its own padding.
+ *
+ * `useSafeAreaInsets` is gone with the close button. The sheet no longer runs
+ * to the bottom of the window — it stops above the home indicator, and
+ * `fitToContents` adds a little bottom inset of its own on iOS — so adding the
+ * inset to the design's bottom padding would now count it twice.
  */
 export function PlanSheetScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -277,34 +259,31 @@ export function PlanSheetScreen() {
   const { data: plan } = usePlan(id ?? '');
   const { mutate: setMembership } = useSetMembership(id ?? '');
 
+  // A sheet sized to its contents has no height while the plan is loading, so
+  // hold the open state's photo height rather than flashing an empty sliver.
   if (!plan) {
     return (
-      <View className="flex-1">
-        <LinearGradient colors={gradients.map} className="absolute inset-0" />
-        <SheetScrim />
-        <CloseOverlay onPress={() => router.back()} />
-      </View>
+      <SheetSurface gap={16} padding={{ top: 12, horizontal: 18, bottom: 40 }}>
+        <View className="h-[220px]" />
+      </SheetSurface>
     );
   }
 
-  return (
-    <View className="flex-1">
-      <LinearGradient colors={gradients.map} className="absolute inset-0" />
-      <SheetScrim />
+  if (plan.membership === 'host') return <HostState plan={plan} />;
 
-      {plan.membership === 'host' ? (
-        <HostState plan={plan} />
-      ) : plan.membership === 'requested' ? (
-        <RequestedState plan={plan} onWithdraw={() => setMembership('guest')} />
-      ) : plan.membership === 'joined' ? (
-        <JoinedState
-          plan={plan}
-          onLeave={() => router.push(`/plan/${plan.id}/leave`)}
-          onReview={() => router.push(`/plan/${plan.id}/attendance`)}
-        />
-      ) : (
-        <OpenState plan={plan} onJoin={() => router.push(`/plan/${plan.id}/join`)} />
-      )}
-    </View>
-  );
+  if (plan.membership === 'requested') {
+    return <RequestedState plan={plan} onWithdraw={() => setMembership('guest')} />;
+  }
+
+  if (plan.membership === 'joined') {
+    return (
+      <JoinedState
+        plan={plan}
+        onLeave={() => router.push(`/plan/${plan.id}/leave`)}
+        onReview={() => router.push(`/plan/${plan.id}/attendance`)}
+      />
+    );
+  }
+
+  return <OpenState plan={plan} onJoin={() => router.push(`/plan/${plan.id}/join`)} />;
 }

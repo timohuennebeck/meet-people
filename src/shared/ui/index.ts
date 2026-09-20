@@ -26,7 +26,7 @@ export { ActionPill, HostCard, OutlinePill, PersonRow } from './PersonRow';
 export { PlanPhoto } from './PlanPhoto';
 export { Screen, type ScreenPadding } from './Screen';
 export { SeatList, SeatSummary, type Seat } from './Seats';
-export { SheetScrim, SheetSurface } from './Sheet';
+export { SheetSurface } from './Sheet';
 export { RangeSlider, SegmentedControl, Slider, SliderBounds, SliderReadout } from './Slider';
 export { FieldLabel, NoteField, TagInput, TextField, type TextFieldProps } from './Fields';
 export { Text, FONT_FAMILY, type FontWeight, type TextProps } from './Text';
