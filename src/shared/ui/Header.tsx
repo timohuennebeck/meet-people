@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { Pressable, View } from 'react-native';
 
 import { cn } from '@shared/lib/cn';
+import { haptics } from '@shared/lib/haptics';
 
 import { ChevronLeft, CloseHeader } from './icons';
 import { Text } from './Text';
@@ -33,7 +34,13 @@ export function CircleButton({
     <Pressable
       accessibilityRole="button"
       accessibilityLabel={accessibilityLabel}
-      onPress={onPress}
+      onPress={
+        onPress &&
+        (() => {
+          haptics.tap();
+          onPress();
+        })
+      }
       className={cn(
         'shrink-0 items-center justify-center rounded-full bg-surface-chip active:opacity-60',
         className,
