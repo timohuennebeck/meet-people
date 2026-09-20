@@ -1,12 +1,12 @@
 import { useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
-  PanResponder,
   Pressable,
   View,
   type AccessibilityActionEvent,
   type LayoutChangeEvent,
 } from 'react-native';
+import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 
 import { cn } from '@shared/lib/cn';
 import { haptics } from '@shared/lib/haptics';
@@ -23,40 +23,44 @@ const clamp = (value: number) => Math.min(1, Math.max(0, value));
  * Turns a touch anywhere on the rail — a tap or a drag — into a fraction of the
  * way along it.
  *
- * `grant` is told apart from `move` so a two-handle slider can pick which
+ * `begin` is told apart from `update` so a two-handle slider can pick which
  * handle it is dragging when the finger lands and then keep hold of it, rather
  * than swapping handles halfway across as the other one becomes the nearer.
  *
- * The responder is rebuilt whenever the callback changes, which during a drag
- * is every frame. That is fine here: only `locationX` off the raw event is
- * read, never the accumulated `gestureState` a rebuild would reset.
+ * A gesture handler rather than a `PanResponder`, because the left end of every
+ * slider sits inside the screen's back-swipe zone. `PanResponder` is the JS
+ * responder system and cannot stop a native recogniser, so dragging the low end
+ * of a range started pulling the whole page back instead. This one is native
+ * and takes part in the same arbitration, so claiming the touch actually
+ * cancels the pop.
  */
-function useTrackDrag(onAt: (fraction: number, grant: boolean) => void) {
+function useTrackDrag(onAt: (fraction: number, begin: boolean) => void) {
   const [width, setWidth] = useState(0);
 
-  const responder = useMemo(
+  const gesture = useMemo(
     () =>
-      PanResponder.create({
-        onStartShouldSetPanResponder: () => true,
-        onMoveShouldSetPanResponder: () => true,
-        // A slider often sits inside a scroll view. Without this the first
-        // slightly vertical wobble hands the drag to the scroller mid-stroke.
-        onPanResponderTerminationRequest: () => false,
-        onPanResponderGrant: (event) => {
+      Gesture.Pan()
+        // The value is React state, so the callbacks may as well run where it
+        // lives; a slider's updates are nothing next to a thread hop each.
+        .runOnJS(true)
+        // Zero, so a tap lands the handle without waiting for movement first.
+        .minDistance(0)
+        // A finger that strays off the rail mid-drag keeps the handle.
+        .shouldCancelWhenOutside(false)
+        .onBegin((event) => {
           if (width === 0) return;
           // Once as the handle is picked up, not on every frame of the drag.
           haptics.select();
-          onAt(clamp(event.nativeEvent.locationX / width), true);
-        },
-        onPanResponderMove: (event) => {
-          if (width > 0) onAt(clamp(event.nativeEvent.locationX / width), false);
-        },
-      }),
+          onAt(clamp(event.x / width), true);
+        })
+        .onUpdate((event) => {
+          if (width > 0) onAt(clamp(event.x / width), false);
+        }),
     [onAt, width],
   );
 
   return {
-    panHandlers: responder.panHandlers,
+    gesture,
     onLayout: (event: LayoutChangeEvent) => setWidth(event.nativeEvent.layout.width),
   };
 }
@@ -74,11 +78,11 @@ function Thumb({ left }: { left: number }) {
 /**
  * `6px · #E3E9F2` track with a brand fill.
  *
- * Deaf to touches on purpose: `locationX` is measured against the view that was
- * hit, so a touch landing on a thumb or on the fill would otherwise be read
- * relative to *that* view and send the handle somewhere else entirely. With the
- * whole track transparent to touches the enclosing slider is always the target,
- * and `locationX` is a true offset along the rail.
+ * Deaf to touches on purpose. The gesture reports `x` relative to the view the
+ * detector is attached to, so the rail and its furniture must not become that
+ * view: a touch landing on a thumb or on the fill would be measured against
+ * *it* and send the handle somewhere else entirely. Transparent to touches, the
+ * enclosing slider stays the target and `x` is a true offset along the rail.
  */
 function Track({ children }: { children: React.ReactNode }) {
   return (
@@ -104,28 +108,29 @@ export function Slider({ value, onChange, valueText, accessibilityLabel, classNa
   const drag = useTrackDrag(useCallback((fraction) => onChange?.(fraction), [onChange]));
 
   return (
-    <View
-      accessibilityRole="adjustable"
-      accessibilityLabel={accessibilityLabel}
-      accessibilityValue={{ min: 0, max: 100, now: Math.round(value * 100), text: valueText }}
-      accessibilityActions={[{ name: 'increment' }, { name: 'decrement' }]}
-      onAccessibilityAction={(event: AccessibilityActionEvent) => {
-        if (!onChange) return;
-        const delta = event.nativeEvent.actionName === 'increment' ? STEP : -STEP;
-        onChange(clamp(value + delta));
-      }}
-      className={cn(className)}
-      onLayout={drag.onLayout}
-      {...drag.panHandlers}
-    >
-      <Track>
-        <View
-          className="absolute left-0 h-[6px] rounded-[4px] bg-brand"
-          style={{ width: `${value * 100}%` }}
-        />
-        <Thumb left={value} />
-      </Track>
-    </View>
+    <GestureDetector gesture={drag.gesture}>
+      <View
+        accessibilityRole="adjustable"
+        accessibilityLabel={accessibilityLabel}
+        accessibilityValue={{ min: 0, max: 100, now: Math.round(value * 100), text: valueText }}
+        accessibilityActions={[{ name: 'increment' }, { name: 'decrement' }]}
+        onAccessibilityAction={(event: AccessibilityActionEvent) => {
+          if (!onChange) return;
+          const delta = event.nativeEvent.actionName === 'increment' ? STEP : -STEP;
+          onChange(clamp(value + delta));
+        }}
+        className={cn(className)}
+        onLayout={drag.onLayout}
+      >
+        <Track>
+          <View
+            className="absolute left-0 h-[6px] rounded-[4px] bg-brand"
+            style={{ width: `${value * 100}%` }}
+          />
+          <Thumb left={value} />
+        </Track>
+      </View>
+    </GestureDetector>
   );
 }
 
@@ -162,14 +167,14 @@ export function RangeSlider({
 
   const drag = useTrackDrag(
     useCallback(
-      (at: number, grant: boolean) => {
+      (at: number, begin: boolean) => {
         if (!onChange) return;
-        const handle = grant
+        const handle = begin
           ? Math.abs(at - low) <= Math.abs(at - high)
             ? 'low'
             : 'high'
           : dragging;
-        if (grant) setDragging(handle);
+        if (begin) setDragging(handle);
         // Handles stop at each other rather than passing through.
         if (handle === 'low') onChange([Math.min(at, high), high]);
         else onChange([low, Math.max(at, low)]);
@@ -179,42 +184,43 @@ export function RangeSlider({
   );
 
   return (
-    <View
-      accessibilityRole="adjustable"
-      accessibilityLabel={accessibilityLabel}
-      accessibilityValue={{ text: valueText }}
-      accessibilityActions={[
-        { name: 'increment' },
-        { name: 'decrement' },
-        { name: 'raiseLower', label: t('common.raiseLower') },
-        { name: 'lowerLower', label: t('common.lowerLower') },
-      ]}
-      onAccessibilityAction={(event: AccessibilityActionEvent) => {
-        if (!onChange) return;
-        switch (event.nativeEvent.actionName) {
-          case 'increment':
-            return onChange([low, clamp(Math.max(high + STEP, low))]);
-          case 'decrement':
-            return onChange([low, clamp(Math.max(high - STEP, low))]);
-          case 'raiseLower':
-            return onChange([clamp(Math.min(low + STEP, high)), high]);
-          case 'lowerLower':
-            return onChange([clamp(Math.min(low - STEP, high)), high]);
-        }
-      }}
-      className={cn(className)}
-      onLayout={drag.onLayout}
-      {...drag.panHandlers}
-    >
-      <Track>
-        <View
-          className="absolute h-[6px] rounded-[4px] bg-brand"
-          style={{ left: `${low * 100}%`, width: `${(high - low) * 100}%` }}
-        />
-        <Thumb left={low} />
-        <Thumb left={high} />
-      </Track>
-    </View>
+    <GestureDetector gesture={drag.gesture}>
+      <View
+        accessibilityRole="adjustable"
+        accessibilityLabel={accessibilityLabel}
+        accessibilityValue={{ text: valueText }}
+        accessibilityActions={[
+          { name: 'increment' },
+          { name: 'decrement' },
+          { name: 'raiseLower', label: t('common.raiseLower') },
+          { name: 'lowerLower', label: t('common.lowerLower') },
+        ]}
+        onAccessibilityAction={(event: AccessibilityActionEvent) => {
+          if (!onChange) return;
+          switch (event.nativeEvent.actionName) {
+            case 'increment':
+              return onChange([low, clamp(Math.max(high + STEP, low))]);
+            case 'decrement':
+              return onChange([low, clamp(Math.max(high - STEP, low))]);
+            case 'raiseLower':
+              return onChange([clamp(Math.min(low + STEP, high)), high]);
+            case 'lowerLower':
+              return onChange([clamp(Math.min(low - STEP, high)), high]);
+          }
+        }}
+        className={cn(className)}
+        onLayout={drag.onLayout}
+      >
+        <Track>
+          <View
+            className="absolute h-[6px] rounded-[4px] bg-brand"
+            style={{ left: `${low * 100}%`, width: `${(high - low) * 100}%` }}
+          />
+          <Thumb left={low} />
+          <Thumb left={high} />
+        </Track>
+      </View>
+    </GestureDetector>
   );
 }
 
