@@ -166,12 +166,13 @@ create type public.audience_gender     as enum ('everyone','women','men','non_bi
 create type public.verification_status as enum ('none','pending','verified','rejected');
 ```
 
+`plan_category` and `language_level` are dropped in `002` — see §3.10.
+
 To add:
 
 ```sql
 create type public.gender              as enum ('woman','man','non_binary');
-create type public.attendance_outcome  as enum ('attended','cancelled_early','cancelled_late','no_show');
-create type public.attendance_source   as enum ('derived','host','self');
+create type public.attendance_outcome  as enum ('attended','cancelled','no_show');
 create type public.legal_doc_kind      as enum ('terms','privacy');
 create type public.report_reason       as enum ('harassment','no_show','fake_profile','inappropriate','other');
 create type public.entitlement_status  as enum ('active','in_trial','in_grace','billing_issue','paused','expired','refunded');
@@ -295,7 +296,6 @@ create table public.profile_interests (
 create table public.profile_languages (
   profile_id     uuid not null references public.profiles(id) on delete cascade,
   language_code  text not null,
-  level          public.language_level not null,
   primary key (profile_id, language_code)
 );
 
@@ -339,8 +339,6 @@ create table public.plans (
   host_id          uuid not null references public.profiles(id) on delete cascade,
   place_id         uuid not null references public.places(id) on delete restrict,
   title            text not null check (char_length(title) between 1 and 60),
-  description      text check (char_length(description) <= 500),
-  category         public.plan_category not null,
   join_mode        public.join_mode not null default 'approval',
   starts_at        timestamptz not null,
   duration_minutes int check (duration_minutes > 0),
@@ -392,7 +390,6 @@ create table public.plan_attendance (
   plan_id      uuid not null references public.plans(id) on delete cascade,
   profile_id   uuid not null references public.profiles(id) on delete cascade,
   outcome      public.attendance_outcome not null,
-  source       public.attendance_source not null default 'derived',
   recorded_at  timestamptz not null default now(),
   primary key (plan_id, profile_id)
 );
@@ -426,13 +423,20 @@ question 9.
 não puder", so the thing worth measuring is cancellation discipline. Leaving a plan stamps
 `plan_participants.left_at` rather than deleting the row — an earlier draft deleted it, which
 erased the one fact attendance is derived from. `close-stale-plans` then reads every seat once the
-plan's end time has passed: no `left_at` is `attended`, a `left_at` well before `starts_at` is
-`cancelled_early`, one close to it is `cancelled_late`. No new UI, nothing a hostile host can
-weaponise, nothing gameable by faking a location.
+plan's end time has passed: no `left_at` is `attended`, a `left_at` is `cancelled`. No new UI,
+nothing a hostile host can weaponise, nothing gameable by faking a location.
+
+An earlier draft split `cancelled` into `cancelled_early` and `cancelled_late` — well before
+`starts_at` versus shortly before it — because Rule 1 says _avise a tempo_ and a courteous
+cancellation is not a last-minute one. It was cut for now: the threshold would have been an
+invented number, and nothing in the design shows the two apart. If the profile ever distinguishes
+them, `left_at` and `starts_at` are both still there to derive it from.
 
 Its weakness is worth naming: someone who silently fails to turn up, without ever tapping leave,
-keeps a perfect score. `source` exists from day one so host confirmation can be added later as a
-correcting signal — an insert, not a migration.
+keeps a perfect score. `no_show` is in the enum for that case, but **nothing can write it yet** —
+it needs the host to say so, which is the host-confirmed attendance deferred in §8. Until then every
+derived row is `attended` or `cancelled`. The `source` column that would have told derived rows
+from host-reported ones goes with it; it comes back in the same migration.
 
 `attendanceRate` on a profile is `count(outcome = 'attended') / count(*)` over that person's past
 plans.
@@ -766,6 +770,30 @@ scrubs name, avatar, bio, birthdate, gender, interests and languages, drops the
 hold. The person is erased; other people's conversations stay readable. `export_my_data()` returns
 one JSON document for the caller.
 
+### 3.10 Columns nothing writes
+
+A pass over every column against the screens that exist. The rule applied: **a column the app
+reads but no screen can ever write is fixture data wearing a schema**, and it goes until the
+screen exists. Removed on that rule, each with its reader left in the app until `source.ts` points
+at Supabase, when the missing field simply renders nothing:
+
+| Column                    | Read by                          | Why nothing writes it                                        |
+| ------------------------- | -------------------------------- | ------------------------------------------------------------ |
+| `plans.category`          | photo badge, map-pin ring colour | no create step chooses one; both visuals go too              |
+| `plans.description`       | the plan sheet                   | the create flow is title, place, time, mode, seats, audience |
+| `profile_languages.level` | the language row subtitle        | both writers hardcoded `'learning'`                          |
+| `plan_attendance.source`  | —                                | every row would say `'derived'` until host confirmation      |
+
+Kept, but each is a gap the app has to close, not a spare column:
+
+| Column / table                              | State today                                                                                                                                                                            |
+| ------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `profiles.bio`                              | shown on another person's profile (17a); no screen edits it. Same rule as `category` applies — flagged rather than cut because it is on the decided profile screen. Open question 11.  |
+| `profiles.gender`                           | nothing writes it; the settings field is in §9 and was decided on. Stays.                                                                                                              |
+| `plans.cancelled_at`                        | no host action cancels a plan. Stays: `cancelled_at is null` is what "live" means in every read policy, and a plan that cannot be cancelled is a missing screen, not a missing column. |
+| `reports`                                   | no report affordance in the design. Stays: safety is table stakes; the overflow menu is in §9.                                                                                         |
+| `legal_acceptances.app_version`, `platform` | written at acceptance, read by nobody — provenance for the consent record, which is what an audit column is for.                                                                       |
+
 ---
 
 ## 4. Row-level security
@@ -870,7 +898,9 @@ supabase/migrations/
                                             profile policies, missing indexes; DROPS
                                             profiles.verification_status + verified_at and adds
                                             verification_submissions + verification_status_of()
-                                            first, because public_profiles calls it
+                                            first, because public_profiles calls it; drops
+                                            plans.category + description, profile_languages.level
+                                            and the plan_category + language_level enums
   003_safety_and_seats.sql               blocks + is_blocked(), reports, seats trigger,
                                             participants.left_at, plan_attendance,
                                             messages FK restrict, messages.body → content
@@ -907,17 +937,17 @@ made once the schema settles, and can go method by method behind the existing fo
 
 ## 8. Deferred (cut from this plan on purpose)
 
-| Item                                                  | Comes back with                                                                  |
-| ----------------------------------------------------- | -------------------------------------------------------------------------------- |
-| `devices` (push tokens) + a scheduled notifier        | **Push**: reminders and "Phil aceitou você" arriving when the app is closed      |
-| A reviewer console, `reviewed_by` as a real FK        | **Moderação**: report triage and selfie review                                   |
-| `plan_photos` beyond the placeholder gradient         | When hosts can upload a picture; the bucket already exists in `config.toml`      |
-| Host-confirmed attendance (`source = 'host'`)         | Once there is enough volume that one grumpy host cannot move a number            |
-| Multi-city: a `cities` table, per-city config         | The second city                                                                  |
-| `conversation_turns` / full-text search over messages | Only if a screen ever needs to query across conversations                        |
-| Credit packs, referral codes                          | If pricing grows past one subscription; needs a balance that outlives the period |
-| Denormalised counters (`plans_count`, `unread_count`) | Only when a view proves too slow; at this size none do                           |
-| `profiles.timezone`                                   | Server-side reminders (day boundaries)                                           |
+| Item                                                          | Comes back with                                                                  |
+| ------------------------------------------------------------- | -------------------------------------------------------------------------------- |
+| `devices` (push tokens) + a scheduled notifier                | **Push**: reminders and "Phil aceitou você" arriving when the app is closed      |
+| A reviewer console, `reviewed_by` as a real FK                | **Moderação**: report triage and selfie review                                   |
+| `plan_photos` beyond the placeholder gradient                 | When hosts can upload a picture; the bucket already exists in `config.toml`      |
+| Host-confirmed attendance: writes `no_show`, re-adds `source` | Once there is enough volume that one grumpy host cannot move a number            |
+| Multi-city: a `cities` table, per-city config                 | The second city                                                                  |
+| `conversation_turns` / full-text search over messages         | Only if a screen ever needs to query across conversations                        |
+| Credit packs, referral codes                                  | If pricing grows past one subscription; needs a balance that outlives the period |
+| Denormalised counters (`plans_count`, `unread_count`)         | Only when a view proves too slow; at this size none do                           |
+| `profiles.timezone`                                           | Server-side reminders (day boundaries)                                           |
 
 ---
 
@@ -964,6 +994,6 @@ Not database work, but the schema above assumes them:
    data-minimisation argument for the Política de privacidade?
 9. Is the free tier three _requests_ a week (as the trigger counts — joining an `open` plan is
    unlimited) or three _joins_ a week? §3.5 explains the difference; the copy says "pedidos".
-10. `plans.category` is read everywhere — it is the badge on every plan photo and the ring colour on
-    every map pin — but no create step writes it. Either the column and both visuals go, or step 1
-    gains a four-chip category row. The schema keeps it until decided.
+10. ~~`plans.category`~~ Decided: removed, with the photo badge and the per-category pin ring.
+11. `profiles.bio` is drawn on the profile screen and nothing edits it (§3.10). Cut it like
+    `category`, or add it to an edit-profile screen the design does not have?
