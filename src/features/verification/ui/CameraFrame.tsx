@@ -46,10 +46,7 @@ export function CameraButton({
       accessibilityLabel={accessibilityLabel}
       onPress={onPress}
       className={cn('absolute top-[60px] h-[38px] flex-row items-center justify-center', className)}
-      style={({ pressed }) => [
-        { backgroundColor: CONTROL_FILL },
-        pressed ? { opacity: 0.7 } : null,
-      ]}
+      style={{ backgroundColor: CONTROL_FILL }}
     >
       {children}
     </Pressable>

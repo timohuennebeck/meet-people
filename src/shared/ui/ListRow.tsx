@@ -51,10 +51,9 @@ export function ListRow({
       accessibilityRole="button"
       onPress={onPress}
       className={cn(
-        'flex-row items-center gap-[12px] py-[15px]',
+        'flex-row items-center gap-[12px] py-[15px] active:opacity-60',
         divided && 'border-t border-hair-soft',
       )}
-      style={({ pressed }) => (pressed ? { opacity: 0.6 } : null)}
     >
       <View className="min-w-0 flex-1 gap-[3px]">
         <Text
@@ -113,10 +112,7 @@ export function SelectableRow({
         'rounded-well bg-surface',
         selected ? 'border-2 border-brand' : 'border border-hair',
       )}
-      style={({ pressed }) => [
-        { paddingVertical: 12 - padCompensation, paddingHorizontal: 14 - padCompensation },
-        pressed ? { opacity: 0.85 } : null,
-      ]}
+      style={{ paddingVertical: 12 - padCompensation, paddingHorizontal: 14 - padCompensation }}
     >
       <View className="flex-row items-center gap-[14px]">
         {flag ? <Flag code={flag} size={42} /> : null}

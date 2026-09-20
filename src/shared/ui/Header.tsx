@@ -34,8 +34,11 @@ export function CircleButton({
       accessibilityRole="button"
       accessibilityLabel={accessibilityLabel}
       onPress={onPress}
-      className={cn('shrink-0 items-center justify-center rounded-full bg-surface-chip', className)}
-      style={({ pressed }) => [{ width: size, height: size }, pressed ? { opacity: 0.6 } : null]}
+      className={cn(
+        'shrink-0 items-center justify-center rounded-full bg-surface-chip active:opacity-60',
+        className,
+      )}
+      style={{ width: size, height: size }}
     >
       {children}
     </Pressable>

@@ -132,10 +132,7 @@ export function Chip({
       accessibilityRole="button"
       onPress={onPress}
       className={classes}
-      style={({ pressed }) => [
-        tone === 'raised' ? shadows.chipSoft : null,
-        pressed ? { opacity: 0.75 } : null,
-      ]}
+      style={tone === 'raised' ? shadows.chipSoft : undefined}
     >
       {content}
     </Pressable>

@@ -86,8 +86,10 @@ export function PersonRow({
     <Pressable
       accessibilityRole="button"
       onPress={onPress}
-      className={cn('flex-row items-center', search ? 'gap-[13px] py-[2px]' : 'gap-[12px]')}
-      style={({ pressed }) => (pressed ? { opacity: 0.6 } : null)}
+      className={cn(
+        'flex-row items-center active:opacity-60',
+        search ? 'gap-[13px] py-[2px]' : 'gap-[12px]',
+      )}
     >
       <Avatar uri={avatarUri} size={size} />
       <View className="min-w-0 flex-1" style={{ gap: search ? 3 : 2 }}>
@@ -130,14 +132,13 @@ export function ActionPill({
       accessibilityRole="button"
       onPress={onPress}
       className={cn(
-        'shrink-0 rounded-pill',
+        'shrink-0 rounded-pill active:opacity-75',
         outlined
           ? 'border-2 border-brand px-[12px] py-[8px]'
           : muted
             ? 'bg-surface-sunken px-[14px] py-[10px]'
             : 'bg-brand px-[14px] py-[10px]',
       )}
-      style={({ pressed }) => (pressed ? { opacity: 0.75 } : null)}
     >
       <Text
         weight={600}
@@ -158,8 +159,7 @@ export function OutlinePill({ label, onPress }: { label: string; onPress?: () =>
     <Pressable
       accessibilityRole="button"
       onPress={onPress}
-      className="shrink-0 rounded-pill border-[1.5px] border-hair px-[14.5px] py-[7.5px]"
-      style={({ pressed }) => (pressed ? { opacity: 0.6 } : null)}
+      className="shrink-0 rounded-pill border-[1.5px] border-hair px-[14.5px] py-[7.5px] active:opacity-60"
     >
       <Text weight={600} className="text-[14px]">
         {label}

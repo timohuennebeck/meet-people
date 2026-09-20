@@ -89,10 +89,7 @@ export function PlanPhoto({
           accessibilityLabel={dismissLabel}
           onPress={onDismiss}
           className="absolute right-[10px] top-[10px] h-[32px] w-[32px] items-center justify-center rounded-full"
-          style={({ pressed }) => [
-            { backgroundColor: 'rgba(255,255,255,0.9)' },
-            pressed ? { opacity: 0.6 } : null,
-          ]}
+          style={{ backgroundColor: 'rgba(255,255,255,0.9)' }}
         >
           <Text weight={600} className="text-[16px]">
             ×

@@ -1,3 +1,7 @@
+// Registers `className` support on the third-party components we style with
+// it. Must be imported before anything renders one — see the module.
+import './interop';
+
 export { Avatar, AvatarStack, EmptySeat, FlaggedAvatar, PairAvatar, VerifiedSeal } from './Avatar';
 export { Button, Spacer, TextButton, type ButtonVariant, type TextButtonTone } from './Button';
 export {

@@ -18,8 +18,7 @@ export function ConversationRow({ conversation, onPress }: ConversationRowProps)
     <Pressable
       accessibilityRole="button"
       onPress={onPress}
-      className="flex-row items-center gap-[13px] py-[10px]"
-      style={({ pressed }) => (pressed ? { opacity: 0.6 } : null)}
+      className="flex-row items-center gap-[13px] py-[10px] active:opacity-60"
     >
       {isGroup ? (
         <PairAvatar

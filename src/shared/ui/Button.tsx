@@ -124,13 +124,10 @@ export function Button({
       className={cn(
         'w-full flex-row items-center justify-center gap-[10px] rounded-pill',
         recipe.container,
+        !disabled && 'active:opacity-90',
         className,
       )}
-      style={({ pressed }) => [
-        { height: recipe.height },
-        recipe.shadow,
-        pressed && !disabled ? { opacity: 0.9 } : null,
-      ]}
+      style={[{ height: recipe.height }, recipe.shadow]}
     >
       {icon}
       <Text weight={recipe.weight} className={recipe.text}>
@@ -178,7 +175,6 @@ export function TextButton({ label, tone = 'body', className, ...rest }: TextBut
       accessibilityRole="button"
       {...rest}
       className={cn('w-full items-center', className)}
-      style={({ pressed }) => (pressed ? { opacity: 0.6 } : null)}
     >
       <Text weight={recipe.weight} className={cn('text-center', recipe.text)}>
         {label}

@@ -31,11 +31,8 @@ function StepperButton({
       className={cn(
         'h-[52px] w-[52px] shrink-0 items-center justify-center rounded-full',
         kind === 'plus' ? 'bg-brand' : 'bg-surface-chip',
+        disabled ? 'opacity-40' : 'active:opacity-70',
       )}
-      style={({ pressed }) => [
-        disabled ? { opacity: 0.4 } : null,
-        pressed && !disabled ? { opacity: 0.7 } : null,
-      ]}
     >
       {kind === 'plus' ? (
         <Glyph.PlusGlyph size={22} strokeWidth={2.4} />

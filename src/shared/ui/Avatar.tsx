@@ -170,7 +170,12 @@ export function VerifiedSeal({
           transform: [{ rotate: '45deg' }],
         }}
       />
-      <CheckSeal size={tickSize ?? size * 0.55} strokeWidth={tickStrokeWidth} />
+      {/* Positioned, so it paints above the two absolute burst squares: on the
+          web a positioned box always paints over a static one, whatever the
+          document order, which would otherwise bury the tick. */}
+      <View className="relative">
+        <CheckSeal size={tickSize ?? size * 0.55} strokeWidth={tickStrokeWidth} />
+      </View>
     </View>
   );
 }

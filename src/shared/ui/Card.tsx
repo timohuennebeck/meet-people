@@ -84,16 +84,15 @@ export function SelectableCard({
       accessibilityRole="radio"
       accessibilityState={{ selected }}
       onPress={onPress}
-      className={cn('rounded-panel bg-surface', recipe.className, className)}
-      style={({ pressed }) => [
+      className={cn('rounded-panel bg-surface active:opacity-[0.85]', recipe.className, className)}
+      style={
         padding
           ? {
               paddingVertical: padding.vertical - recipe.padCompensation,
               paddingHorizontal: padding.horizontal - recipe.padCompensation,
             }
-          : null,
-        pressed ? { opacity: 0.85 } : null,
-      ]}
+          : undefined
+      }
       {...rest}
     >
       {children}

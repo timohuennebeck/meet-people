@@ -45,8 +45,7 @@ export function Composer({
             accessibilityRole="button"
             onPress={() => onQuickReply(reply)}
             // `inset 0 0 0 1px #E1E7F0`, so the padding drops by the border width.
-            className="shrink-0 rounded-pill border border-hair-tag bg-surface px-[13px] py-[8px]"
-            style={({ pressed }) => (pressed ? { opacity: 0.6 } : null)}
+            className="shrink-0 rounded-pill border border-hair-tag bg-surface px-[13px] py-[8px] active:opacity-60"
           >
             <Text className="text-[14px] text-ink-body">{reply}</Text>
           </Pressable>
