@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { Pressable, ScrollView, TextInput, View } from 'react-native';
 
 import { cn } from '@shared/lib/cn';
+import { haptics } from '@shared/lib/haptics';
 import { colors } from '@shared/theme/tokens';
 import { FONT_FAMILY, Glyph, Text } from '@shared/ui';
 
@@ -55,7 +56,10 @@ export function Composer({
           <Pressable
             key={reply}
             accessibilityRole="button"
-            onPress={() => onQuickReply(reply)}
+            onPress={() => {
+              haptics.select();
+              onQuickReply(reply);
+            }}
             // `inset 0 0 0 1px #E1E7F0`, so the padding drops by the border width.
             className="shrink-0 rounded-pill border border-hair-tag bg-surface px-[13px] py-[8px] active:opacity-60"
           >
@@ -91,7 +95,10 @@ export function Composer({
           accessibilityRole="button"
           accessibilityLabel={t('chat.send')}
           disabled={!canSend}
-          onPress={onSend}
+          onPress={() => {
+            haptics.commit();
+            onSend();
+          }}
           className={cn(
             'h-[46px] w-[46px] shrink-0 items-center justify-center rounded-full',
             canSend ? 'bg-brand' : 'bg-[#C8D3E4]',

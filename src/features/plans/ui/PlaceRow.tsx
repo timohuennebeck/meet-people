@@ -44,7 +44,11 @@ export function PlaceRow({ place, selected = false, onPress }: PlaceRowProps) {
         </Text>
       </View>
 
-      {selected ? <SelectionDot selected /> : null}
+      {/* The design shows a dot only on the chosen row, but letting it appear
+          and vanish takes 36px in and out of the text column, so the name and
+          address re-truncate as you move between rows. The slot is reserved in
+          both states; only the dot itself comes and goes. */}
+      <View className="w-[24px] shrink-0">{selected ? <SelectionDot selected /> : null}</View>
     </SelectableCard>
   );
 }

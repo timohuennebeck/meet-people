@@ -54,10 +54,6 @@ function RootNavigator() {
 
   return (
     <Stack screenOptions={{ headerShown: false }}>
-      {/* The legal documents sit outside both guards: the welcome screen links
-          to them before sign-in, and settings links to them after. */}
-      <Stack.Screen name="legal" options={{ presentation: 'modal' }} />
-
       <Stack.Protected guard={!isAuthenticated || !hasOnboarded}>
         <Stack.Screen name="(onboarding)" />
       </Stack.Protected>
@@ -72,6 +68,13 @@ function RootNavigator() {
         <Stack.Screen name="settings" />
         <Stack.Screen name="verification-badge" />
       </Stack.Protected>
+
+      {/* Outside both guards: the welcome screen links here before sign-in and
+          settings after. Declared LAST on purpose — when a guard flips and no
+          route in the current state survives, `StackRouter` falls back to
+          `routeNames[0]`, and this Stack sets no anchor. First in the list, the
+          legal modal would become where the app lands on every sign-in. */}
+      <Stack.Screen name="legal" options={{ presentation: 'modal' }} />
     </Stack>
   );
 }

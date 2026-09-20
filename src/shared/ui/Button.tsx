@@ -85,7 +85,11 @@ const VARIANTS = {
     weight: 600 as const,
     shadow: shadows.dangerButton,
   },
-  /** `h:60 · #E3E9F2 · 17.5px/600 #A7ADBA` — the inactive confirm button. */
+  /**
+   * `h:60 · #E3E9F2 · 17.5px/600 #A7ADBA` — the inactive confirm button, as a
+   * variant a screen can ask for outright. The rules step uses it to grey the
+   * button out while keeping it pressable.
+   */
   disabled: {
     container: 'bg-hair-rail',
     text: 'text-ink-mute text-[17.5px]',
@@ -94,6 +98,19 @@ const VARIANTS = {
     shadow: undefined,
   },
 } as const;
+
+/**
+ * What the `disabled` *prop* changes: the fill and the label colour, and
+ * nothing else.
+ *
+ * Swapping in the `disabled` variant wholesale would be wrong, because that
+ * variant carries `primary`'s 60px height and 17.5px type. A 56px `danger` or
+ * `primaryCompact` button would then grow 4px and change type size the moment
+ * it became enabled, jumping whatever sits below it. Keeping the variant's own
+ * geometry means only the colours move. `cn()` resolves the overlap: the fill
+ * and text colour are replaced, the height and font size survive.
+ */
+const MUTED = { container: 'bg-hair-rail', text: 'text-ink-mute' } as const;
 
 export type ButtonVariant = keyof typeof VARIANTS;
 
@@ -115,7 +132,7 @@ export function Button({
   onPress,
   ...rest
 }: ButtonProps) {
-  const recipe = VARIANTS[disabled ? 'disabled' : variant];
+  const recipe = VARIANTS[variant];
   // Destructive actions get the warning pattern; everything else a light tap.
   const feedback = variant === 'danger' ? haptics.warn : haptics.tap;
 
@@ -135,13 +152,14 @@ export function Button({
       className={cn(
         'w-full flex-row items-center justify-center gap-[10px] rounded-pill',
         recipe.container,
-        !disabled && 'active:opacity-90',
+        disabled ? MUTED.container : 'active:opacity-90',
         className,
       )}
-      style={[{ height: recipe.height }, recipe.shadow]}
+      // A greyed-out button keeps its size but drops its coloured shadow.
+      style={[{ height: recipe.height }, disabled ? undefined : recipe.shadow]}
     >
       {icon}
-      <Text weight={recipe.weight} className={recipe.text}>
+      <Text weight={recipe.weight} className={cn(recipe.text, disabled && MUTED.text)}>
         {label}
       </Text>
     </Pressable>

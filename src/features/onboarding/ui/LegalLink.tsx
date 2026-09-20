@@ -1,5 +1,6 @@
 import { useRouter } from 'expo-router';
 
+import { haptics } from '@shared/lib/haptics';
 import { legalHref, type LegalDoc } from '@shared/lib/legal';
 import { Text } from '@shared/ui';
 
@@ -27,7 +28,10 @@ export function LegalLink({ doc, label, className }: LegalLinkProps) {
       weight={500}
       accessibilityRole="link"
       className={className}
-      onPress={() => router.push(legalHref(doc))}
+      onPress={() => {
+        haptics.tap();
+        router.push(legalHref(doc));
+      }}
     >
       {label}
     </Text>

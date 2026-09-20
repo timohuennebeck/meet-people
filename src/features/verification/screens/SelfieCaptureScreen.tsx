@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Pressable, View } from 'react-native';
 
+import { haptics } from '@shared/lib/haptics';
 import { Text } from '@shared/ui';
 
 import { CameraFrame } from '../ui/CameraFrame';
@@ -67,7 +68,10 @@ export function SelfieCaptureScreen() {
             <Pressable
               accessibilityRole="button"
               accessibilityLabel={t('verification.capture.shutter')}
-              onPress={() => void shoot()}
+              onPress={() => {
+                haptics.commit();
+                void shoot();
+              }}
               // 78px white disc with a 5px translucent ring drawn outside it.
               className="h-[88px] w-[88px] rounded-full border-[5px] bg-white"
               style={{ borderColor: 'rgba(255,255,255,0.3)' }}
