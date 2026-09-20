@@ -356,3 +356,28 @@ export function SendGlyph({ size = 18, color = colors.white, ...rest }: GlyphPro
     </Svg>
   );
 }
+
+/**
+ * The five-pointed rating star the design sets as `★` in brand blue. Drawn as a
+ * path here so the empty half of a rating can keep the same outline while
+ * losing its fill — a glyph can only change colour.
+ */
+export function StarGlyph({
+  size = 34,
+  color = colors.brand,
+  strokeWidth = 1.6,
+  filled = true,
+  ...rest
+}: GlyphProps & { filled?: boolean }) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" {...rest}>
+      <Path
+        d="M12 2.6l2.94 5.96 6.58.96-4.76 4.64 1.12 6.55L12 17.62l-5.88 3.09 1.12-6.55L2.48 9.52l6.58-.96L12 2.6z"
+        fill={filled ? color : 'none'}
+        stroke={color}
+        strokeWidth={strokeWidth}
+        strokeLinejoin="round"
+      />
+    </Svg>
+  );
+}

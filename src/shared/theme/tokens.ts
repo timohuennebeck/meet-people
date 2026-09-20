@@ -28,6 +28,12 @@ export const gradients = {
   success: ['#E6F0FE', '#F7F9FC'],
   /** Profile header wash, fading out to transparent. */
   profile: ['#E4EEFD', '#F2F7FF', 'rgba(255,255,255,0)'],
+  /**
+   * Fades the app background up over content scrolling under a pinned action,
+   * as on the legal documents. The transparent stop is the same colour with a
+   * zero alpha channel, so the fade never passes through grey.
+   */
+  appFade: [`${palette.surface.app}00`, palette.surface.app],
 } as const;
 
 /**
@@ -46,6 +52,7 @@ export const gradientStops = {
   profile: [0, 0.46, 1],
   success: [0, 0.58],
   published: [0, 0.55],
+  appFade: [0, 0.44],
 } as const;
 
 /**

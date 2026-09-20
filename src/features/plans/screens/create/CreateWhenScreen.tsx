@@ -1,25 +1,78 @@
+import DateTimePicker, {
+  DateTimePickerAndroid,
+  type AndroidNativeProps,
+  type DateTimePickerEvent,
+} from '@react-native-community/datetimepicker';
 import { useRouter } from 'expo-router';
-import { useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { View } from 'react-native';
+import { Platform, Pressable, View } from 'react-native';
 
-import { Button, Chip, SectionLabel, Spacer, WheelPicker } from '@shared/ui';
+import {
+  DEFAULT_START_HOUR,
+  formatPlanDate,
+  formatTime,
+  inAnHour,
+  isToday,
+  todayAtHour,
+} from '@shared/lib/datetime';
+import { colors } from '@shared/theme/tokens';
+import { Button, Chip, Glyph, SectionLabel, Spacer, Text } from '@shared/ui';
 
 import { CreateStepLayout } from '../../ui/CreateStepLayout';
 
-/** Day and time wheels, centred on the selected "Hoje 19:00". */
-const COLUMNS = [
-  ['Anteontem', 'Hoje', 'Hoje', 'Amanhã', 'Sáb'],
-  ['18:00', '18:30', '19:00', '19:30', '20:00'],
-] as const;
+/** `height:262px;border-radius:28px` — the card the design draws the wheels in. */
+const CARD_HEIGHT = 262;
 
 type Duration = 60 | 120 | 180 | null;
 
+/**
+ * Which quick chip is lit. Dialling a time in by hand lights neither, since the
+ * start no longer is what either chip offers.
+ */
+type Preset = 'inAnHour' | 'todayEvening' | 'exact';
+
 /** Create step 3 — start time and how long it runs. */
 export function CreateWhenScreen() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const router = useRouter();
   const [duration, setDuration] = useState<Duration>(120);
+
+  // The evening chip's own time. Fixed for the life of the screen so its label
+  // and the value it sets can never drift apart.
+  const evening = useMemo(() => todayAtHour(DEFAULT_START_HOUR), []);
+  // A plan cannot start in the past. Pinned at mount rather than recomputed per
+  // render, so the native picker is not handed a new floor on every keystroke.
+  const earliest = useMemo(() => new Date(), []);
+  const [startsAt, setStartsAt] = useState(evening);
+  const [preset, setPreset] = useState<Preset>('todayEvening');
+
+  const commit = useCallback((event: DateTimePickerEvent, picked?: Date) => {
+    // Android reports a cancelled dialog as `dismissed` with no date; iOS only
+    // ever reports `set`, once per detent of the wheel.
+    if (event.type !== 'set' || !picked) return;
+    setStartsAt(picked);
+    setPreset('exact');
+  }, []);
+
+  /**
+   * Android has no inline picker, and splits date and time into two dialogs.
+   * Each is seeded with the current start, so the half it does not ask about
+   * survives untouched.
+   */
+  const openDialog = useCallback(
+    (mode: AndroidNativeProps['mode']) => {
+      DateTimePickerAndroid.open({
+        value: startsAt,
+        mode,
+        display: 'spinner',
+        // Freshly computed: the dialog opens long after the screen mounted.
+        minimumDate: new Date(),
+        onChange: commit,
+      });
+    },
+    [startsAt, commit],
+  );
 
   const durations: { value: Duration; label: string }[] = [
     { value: 60, label: t('create.when.oneHour') },
@@ -39,23 +92,62 @@ export function CreateWhenScreen() {
       }
     >
       <View className="mt-[16px] shrink-0 flex-row flex-wrap gap-[8px]">
-        <Chip label={t('create.when.inAnHour')} size="time" tone="chip" />
-        <Chip label="Hoje 19:00" size="time" tone="brand" />
+        <Chip
+          label={t('create.when.inAnHour')}
+          size="time"
+          tone={preset === 'inAnHour' ? 'brand' : 'chip'}
+          onPress={() => {
+            setStartsAt(inAnHour());
+            setPreset('inAnHour');
+          }}
+        />
+        <Chip
+          label={t(isToday(evening) ? 'create.when.todayAt' : 'create.when.tomorrowAt', {
+            time: formatTime(evening, i18n.language),
+          })}
+          size="time"
+          tone={preset === 'todayEvening' ? 'brand' : 'chip'}
+          onPress={() => {
+            setStartsAt(evening);
+            setPreset('todayEvening');
+          }}
+        />
       </View>
 
-      <WheelPicker
-        className="mt-[14px]"
-        columns={COLUMNS}
-        height={262}
-        bandHeight={54}
-        bandRadius={16}
-        columnGap={40}
-        rowGap={16}
-        fontSize={22}
-        selectedFontSize={25}
-        fade={70}
-        radius={28}
-      />
+      <View
+        className="mt-[14px] shrink-0 overflow-hidden rounded-[28px] border border-hair bg-surface"
+        style={{ height: CARD_HEIGHT }}
+      >
+        {Platform.OS === 'ios' ? (
+          <DateTimePicker
+            value={startsAt}
+            mode="datetime"
+            display="spinner"
+            locale={i18n.language}
+            minimumDate={earliest}
+            textColor={colors.ink}
+            onChange={commit}
+            accessibilityLabel={t('create.when.exact')}
+            // NativeWind drops `className` on components it has not been taught
+            // (see `@shared/ui/interop`), and the native picker is not one of
+            // them, so it is sized with a style.
+            style={{ flex: 1 }}
+          />
+        ) : (
+          <View className="flex-1 justify-center gap-[12px] px-[16px]">
+            <ExactRow
+              label={t('create.when.dayLabel')}
+              value={formatPlanDate(startsAt, i18n.language)}
+              onPress={() => openDialog('date')}
+            />
+            <ExactRow
+              label={t('create.when.timeLabel')}
+              value={formatTime(startsAt, i18n.language)}
+              onPress={() => openDialog('time')}
+            />
+          </View>
+        )}
+      </View>
 
       <SectionLabel className="mt-[20px] shrink-0">{t('create.when.durationLabel')}</SectionLabel>
 
@@ -73,5 +165,32 @@ export function CreateWhenScreen() {
 
       <Spacer min={16} />
     </CreateStepLayout>
+  );
+}
+
+interface ExactRowProps {
+  label: string;
+  value: string;
+  onPress: () => void;
+}
+
+/** One half of the Android start time — a labelled value that opens a dialog. */
+function ExactRow({ label, value, onPress }: ExactRowProps) {
+  return (
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel={label}
+      accessibilityValue={{ text: value }}
+      className="flex-row items-center justify-between rounded-well bg-surface-chip px-[16px] py-[16px]"
+      onPress={onPress}
+    >
+      <Text className="text-[14.5px] text-ink-dim">{label}</Text>
+      <View className="flex-row items-center gap-[10px]">
+        <Text weight={500} className="text-[19px]">
+          {value}
+        </Text>
+        <Glyph.ChevronRight size={13} />
+      </View>
+    </Pressable>
   );
 }

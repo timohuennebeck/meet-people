@@ -132,15 +132,6 @@ export const ptBR = {
       subtitle: 'Sua conta está segura. Falta pouco para você ver quem tem planos por perto hoje.',
       manageAccount: 'Gerenciar conta',
     },
-    widget: {
-      title: 'Um plano por dia,\ndireto na tela de início.',
-      subtitle: 'O widget mostra o que acontece a poucos minutos de você.',
-      nearYou: 'PERTO DE VOCÊ',
-      planTitle: 'Café no domingo',
-      planMeta: 'hoje 18:30 · 400 m',
-      seats: '2 vagas',
-      add: 'Adicionar widget',
-    },
     name: {
       title: 'Como você se chama?',
       subtitle: 'Só o primeiro nome.',
@@ -149,6 +140,8 @@ export const ptBR = {
     birthday: {
       title: 'Quando é seu\naniversário?',
       subtitle: 'Só a idade aparece.',
+      pick: 'Toque para escolher',
+      age: '{{age}} anos',
     },
     pronouns: {
       title: 'Seus pronomes',
@@ -162,6 +155,11 @@ export const ptBR = {
       subtitle: 'Com foto você é aceito três vezes mais.',
       takePhoto: 'Tirar foto',
       chooseFromGallery: 'Escolher da galeria',
+      addPhoto: 'Adicionar foto',
+      changePhoto: 'Trocar foto',
+      removePhoto: 'Remover foto',
+      cameraDenied: 'Libere o acesso à câmera nos ajustes para tirar uma foto.',
+      pickFailed: 'Não deu para abrir agora. Tente de novo.',
     },
     phone: {
       title: 'Seu telefone',
@@ -217,6 +215,13 @@ export const ptBR = {
     capture: {
       prompt: 'Olhe para a câmera',
       disclaimer: 'Apagamos a selfie depois da conferência.',
+      shutter: 'Tirar selfie',
+      deniedTitle: 'Precisamos da câmera',
+      deniedBody: 'Libere o acesso à câmera nos ajustes para tirar a selfie.',
+      openSettings: 'Abrir ajustes',
+      noCameraTitle: 'Sem câmera aqui',
+      noCameraBody:
+        'Não encontramos uma câmera neste aparelho. Você pode seguir sem o selo por enquanto.',
     },
     review: {
       retake: 'Repetir',
@@ -264,7 +269,6 @@ export const ptBR = {
     perYear: '/ mês · 71,88 € por ano',
     trial: 'Testar 5 dias grátis',
     trialTerms: 'Depois 5,99 € / mês · cancele quando quiser',
-    inviteCode: 'Código de convite',
     restore: 'Restaurar compras',
   },
 
@@ -363,6 +367,11 @@ export const ptBR = {
       title: 'Quando começa?',
       subtitle: '{{place}} abre até 23:00.',
       inAnHour: 'Em 1 hora',
+      todayAt: 'Hoje {{time}}',
+      tomorrowAt: 'Amanhã {{time}}',
+      exact: 'Hora exata',
+      dayLabel: 'Dia',
+      timeLabel: 'Horário',
       durationLabel: 'QUANTO TEMPO',
       oneHour: '1 hora',
       twoHours: '2 horas',
@@ -458,6 +467,8 @@ export const ptBR = {
     verificationBadge: 'Selo de verificação',
     verified: 'Verificado',
     privacyHelp: 'Privacidade e ajuda',
+    leaveReview: 'Avaliar o treff',
+    leaveReviewDetail: 'Conte o que está funcionando',
     deleteAccount: 'Excluir conta',
     signOut: 'Sair da conta',
 
@@ -483,6 +494,128 @@ export const ptBR = {
       nonBinary: 'Não-binário',
       nonBinaryDetail: 'e outras identidades',
       matchCount: '9 planos com estas preferências',
+    },
+    deleteAccountPage: {
+      title: 'Excluir conta',
+      heading: 'Quer mesmo apagar sua conta?',
+      subtitle: 'Isso não dá para desfazer. Tudo aqui embaixo some no mesmo momento.',
+      lossLabel: 'O QUE VOCÊ PERDE',
+      loss: {
+        plans: {
+          title: 'Os planos que você criou',
+          detail: 'Saem do mapa e quem ia recebe um aviso.',
+        },
+        chats: {
+          title: 'Suas conversas',
+          detail: 'Os chats dos grupos fecham para você.',
+        },
+        badge: {
+          title: 'Seu selo de verificação',
+          detail: 'Se voltar um dia, a selfie começa do zero.',
+        },
+      },
+      warning:
+        'A exclusão vale na hora. Criar outra conta com o mesmo número não traz nada disso de volta.',
+      acknowledge: 'Entendi que não dá para recuperar nada disso.',
+      confirm: 'Excluir minha conta',
+      keep: 'Quero manter minha conta',
+    },
+    signOutPage: {
+      title: 'Sair da conta',
+      heading: 'Sair por agora?',
+      subtitle: 'Nada é apagado. É só entrar de novo com seu número para continuar de onde parou.',
+      kept: {
+        plans: 'Seus planos seguem no mapa',
+        chats: 'Suas conversas ficam guardadas',
+        preferences: 'Suas preferências continuam as mesmas',
+      },
+      confirm: 'Sair da conta',
+      stay: 'Continuar conectado',
+    },
+    reviewPage: {
+      title: 'Avaliar o treff',
+      heading: 'Como está sendo para você?',
+      subtitle: 'Sua nota ajuda outras pessoas a decidir. Leva menos de um minuto.',
+      scorePrompt: 'Toque nas estrelas para dar sua nota',
+      starLabel: '{{score}} de 5 estrelas',
+      sentiment: {
+        one: 'Não deu certo',
+        two: 'Dá para melhorar',
+        three: 'Na média',
+        four: 'Gostei bastante',
+        five: 'Melhor impossível',
+      },
+      headlineLabel: 'EM UMA FRASE · OPCIONAL',
+      headlinePlaceholder: 'Conheci gente do bairro em uma semana',
+      noteLabel: 'CONTE MAIS · OPCIONAL',
+      notePlaceholder: 'O que funcionou bem e o que ainda falta.',
+      send: 'Enviar avaliação',
+      later: 'Agora não',
+      thanksTitle: 'Valeu pela avaliação!',
+      thanksSubtitle: 'A gente lê tudo. O que você escreveu ajuda a decidir o que vem a seguir.',
+    },
+  },
+
+  // Placeholder prose for the two legal documents, written to read like the
+  // real thing. Production text comes from `legal_documents.content_md`.
+  legal: {
+    updated: 'Atualizado em 20 de setembro de 2026 · versão 1.0',
+    understood: 'Entendi',
+
+    terms: {
+      title: 'Termos de uso',
+      s1Heading: 'Quem pode usar o treff',
+      s1Body:
+        'É preciso ter pelo menos 18 anos e usar seu nome real. Uma pessoa, uma conta — perfis criados para se passar por outra pessoa são removidos.',
+      s2Heading: 'Sua conta',
+      s2Body:
+        'Você responde pelo que acontece na sua conta e por manter a senha só com você. Avise a gente assim que desconfiar que alguém entrou nela.',
+      s3Heading: 'Planos e encontros',
+      s3Body:
+        'Quem cria um plano escolhe o lugar, o horário e quem entra. Os encontros acontecem em lugares públicos e o treff não organiza nem acompanha nenhum deles.',
+      s4Heading: 'Como a gente se trata',
+      s4Body:
+        'Apareça quando confirmar presença, respeite quem está na mesa e nada de cantadas, assédio ou vender qualquer coisa. Quem passa disso perde o acesso.',
+      s5Heading: 'Assinatura',
+      s5Body:
+        'O plano pago é cobrado pela loja do seu celular e renova sozinho até você cancelar. O cancelamento vale a partir do próximo período.',
+      s6Heading: 'O que você publica',
+      s6Body:
+        'O texto e as fotos dos seus planos continuam seus. Você só nos dá permissão para mostrá-los no app a quem está por perto.',
+      s7Heading: 'Encerrar a conta',
+      s7Body:
+        'Dá para apagar sua conta quando quiser, nas configurações. A gente também pode suspender contas que quebram estas regras ou colocam alguém em risco.',
+      s8Heading: 'Mudanças nestes termos',
+      s8Body:
+        'Quando algo importante mudar, avisamos no app antes de valer. Continuar usando o treff depois disso significa que você aceitou a nova versão.',
+    },
+
+    privacy: {
+      title: 'Política de privacidade',
+      s1Heading: 'O que a gente guarda',
+      s1Body:
+        'Seu nome, data de nascimento, idiomas, interesses e as fotos que você envia. Sem isso não dá para montar o perfil que aparece nos planos.',
+      s2Heading: 'Sua localização',
+      s2Body:
+        'Usamos sua posição só para ordenar os planos por distância. Ninguém vê seu endereço: as outras pessoas veem o bairro e um raio aproximado.',
+      s3Heading: 'A selfie de verificação',
+      s3Body:
+        'A selfie serve apenas para confirmar que você é uma pessoa real e conferir com sua foto de perfil. Ela não aparece para ninguém e é apagada depois da verificação.',
+      s4Heading: 'Com quem compartilhamos',
+      s4Body:
+        'Só com os serviços que fazem o app funcionar: hospedagem, envio de notificações, pagamentos e métricas de uso. Não vendemos seus dados nem exibimos anúncios.',
+      s5Heading: 'Por quanto tempo',
+      s5Body:
+        'Guardamos seus dados enquanto a conta existir. Depois que você apaga a conta, o perfil sai dos nossos sistemas em até 30 dias, salvo o que a lei manda manter.',
+      s6Heading: 'Seus direitos',
+      s6Body:
+        'Você pode ver, corrigir, exportar ou apagar seus dados quando quiser. É só pedir pelas configurações ou pelo e-mail abaixo.',
+      s7Heading: 'Notificações e métricas',
+      s7Body:
+        'As notificações avisam de pedidos e mensagens; as métricas são anônimas e mostram onde o app trava. Dá para desligar as notificações no aparelho a qualquer momento.',
+      s8Heading: 'Fale com a gente',
+      s8Body:
+        'Dúvidas sobre privacidade? Escreva para privacidade@treff.app — respondemos em até 30 dias.',
     },
   },
 

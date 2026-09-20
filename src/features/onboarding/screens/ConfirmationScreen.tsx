@@ -33,10 +33,7 @@ export function ConfirmationScreen() {
       }
       footer={
         <>
-          <Button
-            label={t('common.continue')}
-            onPress={() => router.push('/(onboarding)/widget')}
-          />
+          <Button label={t('common.continue')} onPress={() => router.push('/(onboarding)/name')} />
           <TextButton label={t('onboarding.confirmation.manageAccount')} className="mt-[15px]" />
         </>
       }

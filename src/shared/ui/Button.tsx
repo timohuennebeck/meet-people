@@ -2,6 +2,7 @@ import type { ReactNode } from 'react';
 import { Pressable, View, type PressableProps } from 'react-native';
 
 import { cn } from '@shared/lib/cn';
+import { haptics } from '@shared/lib/haptics';
 import { shadows } from '@shared/theme/tokens';
 
 import { Text } from './Text';
@@ -111,15 +112,25 @@ export function Button({
   icon,
   className,
   disabled,
+  onPress,
   ...rest
 }: ButtonProps) {
   const recipe = VARIANTS[disabled ? 'disabled' : variant];
+  // Destructive actions get the warning pattern; everything else a light tap.
+  const feedback = variant === 'danger' ? haptics.warn : haptics.tap;
 
   return (
     <Pressable
       accessibilityRole="button"
       accessibilityState={{ disabled: !!disabled }}
       disabled={disabled}
+      onPress={
+        onPress &&
+        ((event) => {
+          feedback();
+          onPress(event);
+        })
+      }
       {...rest}
       className={cn(
         'w-full flex-row items-center justify-center gap-[10px] rounded-pill',
@@ -156,6 +167,8 @@ const TEXT_TONES = {
   mutedTall: { text: 'text-ink-dim text-[16px]', weight: 500 as const },
   /** `15px/500 #2F7CF6` — "search for another language". */
   brand: { text: 'text-brand text-[15px]', weight: 500 as const },
+  /** `14.5px/600 #3E4553` — the paywall's "restore purchases". */
+  bodySmall: { text: 'text-ink-body text-[14.5px]', weight: 600 as const },
 } as const;
 
 export type TextButtonTone = keyof typeof TEXT_TONES;
@@ -167,14 +180,21 @@ export interface TextButtonProps extends Omit<PressableProps, 'children' | 'styl
 }
 
 /** Centred text-only action, used as the secondary choice under a `Button`. */
-export function TextButton({ label, tone = 'body', className, ...rest }: TextButtonProps) {
+export function TextButton({ label, tone = 'body', className, onPress, ...rest }: TextButtonProps) {
   const recipe = TEXT_TONES[tone];
 
   return (
     <Pressable
       accessibilityRole="button"
+      onPress={
+        onPress &&
+        ((event) => {
+          haptics.tap();
+          onPress(event);
+        })
+      }
       {...rest}
-      className={cn('w-full items-center', className)}
+      className={cn('w-full items-center', className, onPress && 'active:opacity-60')}
     >
       <Text weight={recipe.weight} className={cn('text-center', recipe.text)}>
         {label}

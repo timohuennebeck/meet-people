@@ -16,6 +16,7 @@ import {
   SelectionDot,
   Spacer,
   Text,
+  TextButton,
 } from '@shared/ui';
 
 type PlanId = 'monthly' | 'yearly';
@@ -175,15 +176,7 @@ export function PaywallScreen() {
         {t('paywall.trialTerms')}
       </Text>
 
-      <View className="mt-[12px] shrink-0 flex-row items-center justify-center gap-[10px]">
-        <Text weight={600} className="text-[14.5px] text-ink-body underline">
-          {t('paywall.inviteCode')}
-        </Text>
-        <View className="h-[4px] w-[4px] rounded-full bg-hair-dot" />
-        <Text weight={600} className="text-[14.5px] text-ink-body underline">
-          {t('paywall.restore')}
-        </Text>
-      </View>
+      <TextButton label={t('paywall.restore')} tone="bodySmall" className="mt-[12px] shrink-0" />
     </Screen>
   );
 }

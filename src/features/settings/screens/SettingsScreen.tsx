@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { ScrollView, View } from 'react-native';
 
 import { APP_LANGUAGES, languageName } from '@shared/lib/languages';
-import { useSession } from '@shared/providers/SessionProvider';
+import { legalHref } from '@shared/lib/legal';
 import {
   Flag,
   FlagStack,
@@ -43,7 +43,6 @@ function Group({ label, children }: { label: string; children: React.ReactNode }
 export function SettingsScreen() {
   const { t } = useTranslation();
   const router = useRouter();
-  const { signOut } = useSession();
   const { data: preferences } = usePreferences();
 
   const languageCodes = (preferences?.spokenLanguages ?? []).map((language) => language.flag);
@@ -124,15 +123,36 @@ export function SettingsScreen() {
             accessory={<VerifiedPill label={t('settings.verified')} />}
             onPress={() => router.push('/verification-badge')}
           />
-          <ListRow divided label={t('settings.privacyHelp')} />
-          <ListRow divided destructive label={t('settings.deleteAccount')} />
+          <ListRow
+            divided
+            label={t('settings.privacyHelp')}
+            onPress={() => router.push(legalHref('privacy'))}
+          />
+          <ListRow
+            divided
+            label={t('legal.terms.title')}
+            onPress={() => router.push(legalHref('terms'))}
+          />
+          <ListRow
+            divided
+            label={t('settings.leaveReview')}
+            detail={t('settings.leaveReviewDetail')}
+            onPress={() => router.push('/settings/leave-review')}
+          />
+          <ListRow
+            divided
+            destructive
+            label={t('settings.deleteAccount')}
+            onPress={() => router.push('/settings/delete-account')}
+          />
         </Group>
 
+        {/* Signing out asks first: the confirmation page owns the actual call. */}
         <TextButton
           label={t('settings.signOut')}
           tone="bodyBold"
           className="pb-[2px] pt-[4px]"
-          onPress={signOut}
+          onPress={() => router.push('/settings/sign-out')}
         />
       </ScrollView>
     </Screen>

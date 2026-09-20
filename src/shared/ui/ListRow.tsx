@@ -2,6 +2,7 @@ import type { ReactNode } from 'react';
 import { Pressable, View } from 'react-native';
 
 import { cn } from '@shared/lib/cn';
+import { haptics } from '@shared/lib/haptics';
 
 import { SelectionDot } from './Card';
 import { Flag } from './Flag';
@@ -36,7 +37,12 @@ export interface ListRowProps {
   onPress?: () => void;
 }
 
-/** `padding:15px 0 · 16.5px/500 label · 16px #72798A value · chevron` — a settings row. */
+/**
+ * `padding:18px 0 · 16.5px/500 label · 16px #72798A value · chevron` — a
+ * settings row. The design draws it at `15px 0`, which leaves a ~50px row; it
+ * is opened up to 18px so a single-line row clears the 56px tap target, with a
+ * `min-h` floor for the shorter rows that carry no detail line.
+ */
 export function ListRow({
   label,
   detail,
@@ -49,9 +55,15 @@ export function ListRow({
   return (
     <Pressable
       accessibilityRole="button"
-      onPress={onPress}
+      onPress={
+        onPress &&
+        (() => {
+          haptics.tap();
+          onPress();
+        })
+      }
       className={cn(
-        'flex-row items-center gap-[12px] py-[15px] active:opacity-60',
+        'min-h-[56px] flex-row items-center gap-[12px] py-[18px] active:opacity-60',
         divided && 'border-t border-hair-soft',
       )}
     >
@@ -107,9 +119,15 @@ export function SelectableRow({
     <Pressable
       accessibilityRole={addable ? 'button' : 'radio'}
       accessibilityState={addable ? undefined : { selected }}
-      onPress={onPress}
+      onPress={
+        onPress &&
+        (() => {
+          haptics.select();
+          onPress();
+        })
+      }
       className={cn(
-        'rounded-well bg-surface',
+        'rounded-well bg-surface active:opacity-[0.85]',
         selected ? 'border-2 border-brand' : 'border border-hair',
       )}
       style={{ paddingVertical: 12 - border, paddingHorizontal: 14 - border }}

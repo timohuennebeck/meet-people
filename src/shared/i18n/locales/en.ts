@@ -133,15 +133,6 @@ export const en: Translation = {
         "Your account is secure. You're moments away from seeing who has plans nearby today.",
       manageAccount: 'Manage account',
     },
-    widget: {
-      title: 'One plan a day,\nright on your home screen.',
-      subtitle: "The widget shows what's happening minutes away from you.",
-      nearYou: 'NEAR YOU',
-      planTitle: 'Coffee on Sunday',
-      planMeta: 'today 18:30 · 400 m',
-      seats: '2 seats',
-      add: 'Add widget',
-    },
     name: {
       title: "What's your name?",
       subtitle: 'First name only.',
@@ -150,6 +141,8 @@ export const en: Translation = {
     birthday: {
       title: "When's your\nbirthday?",
       subtitle: 'Only your age is shown.',
+      pick: 'Tap to choose',
+      age: '{{age}} years old',
     },
     pronouns: {
       title: 'Your pronouns',
@@ -163,6 +156,11 @@ export const en: Translation = {
       subtitle: "With a photo you're accepted three times as often.",
       takePhoto: 'Take photo',
       chooseFromGallery: 'Choose from gallery',
+      addPhoto: 'Add photo',
+      changePhoto: 'Change photo',
+      removePhoto: 'Remove photo',
+      cameraDenied: 'Allow camera access in Settings to take a photo.',
+      pickFailed: "That wouldn't open just now. Try again.",
     },
     phone: {
       title: 'Your phone',
@@ -218,6 +216,13 @@ export const en: Translation = {
     capture: {
       prompt: 'Look at the camera',
       disclaimer: 'We delete the selfie after the review.',
+      shutter: 'Take selfie',
+      deniedTitle: 'We need the camera',
+      deniedBody: 'Allow camera access in Settings to take the selfie.',
+      openSettings: 'Open Settings',
+      noCameraTitle: 'No camera here',
+      noCameraBody:
+        "We couldn't find a camera on this device. You can carry on without the badge for now.",
     },
     review: {
       retake: 'Retake',
@@ -264,7 +269,6 @@ export const en: Translation = {
     perYear: '/ month · €71.88 a year',
     trial: 'Try 5 days free',
     trialTerms: 'Then €5.99 / month · cancel any time',
-    inviteCode: 'Invite code',
     restore: 'Restore purchases',
   },
 
@@ -363,6 +367,11 @@ export const en: Translation = {
       title: 'When does it start?',
       subtitle: '{{place}} is open until 23:00.',
       inAnHour: 'In 1 hour',
+      todayAt: 'Today {{time}}',
+      tomorrowAt: 'Tomorrow {{time}}',
+      exact: 'Exact time',
+      dayLabel: 'Day',
+      timeLabel: 'Time',
       durationLabel: 'HOW LONG',
       oneHour: '1 hour',
       twoHours: '2 hours',
@@ -458,6 +467,8 @@ export const en: Translation = {
     verificationBadge: 'Verification badge',
     verified: 'Verified',
     privacyHelp: 'Privacy and help',
+    leaveReview: 'Rate treff',
+    leaveReviewDetail: 'Tell us what is working',
     deleteAccount: 'Delete account',
     signOut: 'Sign out',
 
@@ -483,6 +494,125 @@ export const en: Translation = {
       nonBinary: 'Non-binary',
       nonBinaryDetail: 'and other identities',
       matchCount: '9 plans match these preferences',
+    },
+    deleteAccountPage: {
+      title: 'Delete account',
+      heading: 'Really delete your account?',
+      subtitle: 'This cannot be undone. Everything below goes at the same moment.',
+      lossLabel: 'WHAT YOU LOSE',
+      loss: {
+        plans: {
+          title: 'The plans you host',
+          detail: 'They leave the map and everyone going is told.',
+        },
+        chats: {
+          title: 'Your conversations',
+          detail: 'Every group chat closes for you.',
+        },
+        badge: {
+          title: 'Your verification badge',
+          detail: 'Come back one day and the selfie starts over.',
+        },
+      },
+      warning:
+        'Deletion takes effect straight away. Signing up again with the same number brings none of it back.',
+      acknowledge: 'I understand none of this can be recovered.',
+      confirm: 'Delete my account',
+      keep: 'Keep my account',
+    },
+    signOutPage: {
+      title: 'Sign out',
+      heading: 'Sign out for now?',
+      subtitle: 'Nothing is deleted. Sign in with your number again to pick up where you left off.',
+      kept: {
+        plans: 'Your plans stay on the map',
+        chats: 'Your conversations are kept',
+        preferences: 'Your preferences stay as they are',
+      },
+      confirm: 'Sign out',
+      stay: 'Stay signed in',
+    },
+    reviewPage: {
+      title: 'Rate treff',
+      heading: 'How is it going for you?',
+      subtitle: 'Your rating helps other people decide. It takes under a minute.',
+      scorePrompt: 'Tap the stars to give your rating',
+      starLabel: '{{score}} out of 5 stars',
+      sentiment: {
+        one: 'Did not work out',
+        two: 'Room to improve',
+        three: 'About average',
+        four: 'Really liked it',
+        five: 'Could not be better',
+      },
+      headlineLabel: 'IN ONE LINE · OPTIONAL',
+      headlinePlaceholder: 'Met people from my area within a week',
+      noteLabel: 'TELL US MORE · OPTIONAL',
+      notePlaceholder: 'What worked well and what is still missing.',
+      send: 'Send review',
+      later: 'Not now',
+      thanksTitle: 'Thanks for the review!',
+      thanksSubtitle: 'We read every one. What you wrote helps decide what comes next.',
+    },
+  },
+
+  legal: {
+    updated: 'Updated 20 September 2026 · version 1.0',
+    understood: 'Got it',
+
+    terms: {
+      title: 'Terms of use',
+      s1Heading: 'Who can use treff',
+      s1Body:
+        'You need to be at least 18 and to use your real name. One person, one account — profiles set up to pass as someone else are removed.',
+      s2Heading: 'Your account',
+      s2Body:
+        'You are responsible for what happens on your account and for keeping your password to yourself. Tell us as soon as you suspect someone else got in.',
+      s3Heading: 'Plans and meetups',
+      s3Body:
+        'Whoever creates a plan picks the place, the time and who joins. Meetups happen in public places, and treff neither organises nor supervises any of them.',
+      s4Heading: 'How we treat each other',
+      s4Body:
+        'Show up when you say you will, respect everyone at the table, and no flirting, harassment or selling anything. Cross that line and you lose access.',
+      s5Heading: 'Subscription',
+      s5Body:
+        'The paid plan is billed by your phone’s app store and renews on its own until you cancel. Cancelling takes effect from the next period.',
+      s6Heading: 'What you post',
+      s6Body:
+        'The text and photos in your plans stay yours. You only give us permission to show them in the app to people nearby.',
+      s7Heading: 'Closing your account',
+      s7Body:
+        'You can delete your account whenever you like, from settings. We can also suspend accounts that break these rules or put someone at risk.',
+      s8Heading: 'Changes to these terms',
+      s8Body:
+        'When something important changes, we tell you in the app before it takes effect. Carrying on with treff afterwards means you accept the new version.',
+    },
+
+    privacy: {
+      title: 'Privacy Policy',
+      s1Heading: 'What we keep',
+      s1Body:
+        'Your name, date of birth, languages, interests and the photos you upload. Without those we cannot build the profile that shows up on plans.',
+      s2Heading: 'Your location',
+      s2Body:
+        'We use your position only to sort plans by distance. Nobody sees your address: other people see your neighbourhood and a rough radius.',
+      s3Heading: 'The verification selfie',
+      s3Body:
+        'The selfie only confirms that you are a real person and matches you against your profile photo. It is shown to nobody and deleted once verification is done.',
+      s4Heading: 'Who we share it with',
+      s4Body:
+        'Only the services that keep the app running: hosting, push notifications, payments and usage metrics. We do not sell your data and we run no ads.',
+      s5Heading: 'How long we keep it',
+      s5Body:
+        'We keep your data while the account exists. After you delete it, your profile leaves our systems within 30 days, except what the law requires us to hold.',
+      s6Heading: 'Your rights',
+      s6Body:
+        'You can see, correct, export or delete your data whenever you want. Just ask from settings or at the address below.',
+      s7Heading: 'Notifications and metrics',
+      s7Body:
+        'Notifications tell you about requests and messages; metrics are anonymous and show us where the app stalls. You can turn notifications off on your device at any time.',
+      s8Heading: 'Talk to us',
+      s8Body: 'Questions about privacy? Write to privacy@treff.app — we answer within 30 days.',
     },
   },
 

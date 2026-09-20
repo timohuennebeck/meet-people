@@ -31,5 +31,4 @@ export { RangeSlider, SegmentedControl, Slider, SliderBounds, SliderReadout } fr
 export { FieldLabel, NoteField, TagInput, TextField, type TextFieldProps } from './Fields';
 export { Text, FONT_FAMILY, type FontWeight, type TextProps } from './Text';
 export { TimelineStep, type TimelineState } from './Timeline';
-export { WheelPicker } from './WheelPicker';
 export * as Glyph from './icons';

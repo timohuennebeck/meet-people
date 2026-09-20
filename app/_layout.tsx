@@ -54,6 +54,10 @@ function RootNavigator() {
 
   return (
     <Stack screenOptions={{ headerShown: false }}>
+      {/* The legal documents sit outside both guards: the welcome screen links
+          to them before sign-in, and settings links to them after. */}
+      <Stack.Screen name="legal" options={{ presentation: 'modal' }} />
+
       <Stack.Protected guard={!isAuthenticated || !hasOnboarded}>
         <Stack.Screen name="(onboarding)" />
       </Stack.Protected>
