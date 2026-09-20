@@ -303,6 +303,14 @@ insert into public.messages (conversation_id, author_id, content, created_at) va
   ('66666666-6666-4666-8666-000000000002', '11111111-1111-4111-8111-000000000001',
    'Perfeito, te vejo lá.', now() - interval '30 minutes');
 
+-- A few people have looked at the viewer's profile this week, so the profile
+-- tab has a number to show and the Plus list has faces in it.
+insert into public.profile_views (profile_id, viewer_id, viewed_at) values
+  ('11111111-1111-4111-8111-000000000001', '11111111-1111-4111-8111-000000000003', now() - interval '2 hours'),
+  ('11111111-1111-4111-8111-000000000001', '11111111-1111-4111-8111-000000000004', now() - interval '1 day'),
+  ('11111111-1111-4111-8111-000000000001', '11111111-1111-4111-8111-000000000005', now() - interval '3 days')
+on conflict (profile_id, viewer_id) do update set viewed_at = excluded.viewed_at;
+
 select public.materialise_plan_series(21);
 
 commit;
