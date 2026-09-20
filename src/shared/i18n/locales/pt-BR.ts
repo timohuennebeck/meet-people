@@ -156,7 +156,6 @@ export const ptBR = {
       chooseFromGallery: 'Escolher da galeria',
       addPhoto: 'Adicionar foto',
       changePhoto: 'Trocar foto',
-      removePhoto: 'Remover foto',
       cameraDenied: 'Libere o acesso à câmera nos ajustes para tirar uma foto.',
       pickFailed: 'Não deu para abrir agora. Tente de novo.',
     },
@@ -356,6 +355,8 @@ export const ptBR = {
       filterParks: 'Parques',
       recent: 'RECENTES',
       nearYou: 'PERTO DE VOCÊ',
+      emptyTitle: 'Nenhum lugar para “{{query}}”',
+      emptyBody: 'Tente outro nome ou procure por perto.',
     },
     when: {
       title: 'Quando começa?',
@@ -412,6 +413,8 @@ export const ptBR = {
     messagePlaceholder: 'Mensagem',
     groupMessagePlaceholder: 'Mensagem para o grupo',
     attach: 'Anexar',
+    removeAttachment: 'Remover anexo',
+    attachFailed: 'Não deu para abrir a galeria agora. Tente de novo.',
     send: 'Enviar',
     sent: 'Enviada',
     quickAgreed: 'Combinado',
@@ -490,40 +493,25 @@ export const ptBR = {
       matchCount: '9 planos com estas preferências',
     },
     deleteAccountPage: {
-      title: 'Excluir conta',
-      heading: 'Quer mesmo apagar sua conta?',
-      subtitle: 'Isso não dá para desfazer. Tudo aqui embaixo some no mesmo momento.',
-      lossLabel: 'O QUE VOCÊ PERDE',
-      loss: {
-        plans: {
-          title: 'Os planos que você criou',
-          detail: 'Saem do mapa e quem ia recebe um aviso.',
-        },
-        chats: {
-          title: 'Suas conversas',
-          detail: 'Os chats dos grupos fecham para você.',
-        },
-        badge: {
-          title: 'Seu selo de verificação',
-          detail: 'Se voltar um dia, a selfie começa do zero.',
-        },
-      },
-      warning:
-        'A exclusão vale na hora. Criar outra conta com o mesmo número não traz nada disso de volta.',
-      acknowledge: 'Entendi que não dá para recuperar nada disso.',
-      confirm: 'Excluir minha conta',
-      keep: 'Quero manter minha conta',
+      title: 'Apagar conta',
+      heading: 'Apagar sua conta, {{name}}?',
+      subtitle:
+        'Some na hora: {{plans}}, {{chats}} e seu selo de verificação. Não dá para desfazer.',
+      plansCount_one: '{{count}} plano que você criou',
+      plansCount_other: '{{count}} planos que você criou',
+      chatsCount_one: '{{count}} conversa',
+      chatsCount_other: '{{count}} conversas',
+      billing:
+        'Sua assinatura Plus é cobrada pela loja do seu celular. Cancele por lá, senão ela continua sendo renovada.',
+      confirm: 'Apagar definitivamente',
+      keep: 'Manter conta',
     },
     signOutPage: {
-      title: 'Sair da conta',
-      heading: 'Sair por agora?',
-      subtitle: 'Nada é apagado. É só entrar de novo com seu número para continuar de onde parou.',
-      kept: {
-        plans: 'Seus planos seguem no mapa',
-        chats: 'Suas conversas ficam guardadas',
-        preferences: 'Suas preferências continuam as mesmas',
-      },
-      confirm: 'Sair da conta',
+      title: 'Sair',
+      heading: 'Quer mesmo sair?',
+      subtitle:
+        'Seus planos, suas conversas e seu selo ficam na sua conta. Da próxima vez que entrar, está tudo lá.',
+      confirm: 'Sair',
       stay: 'Continuar conectado',
     },
     reviewPage: {

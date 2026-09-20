@@ -157,7 +157,6 @@ export const en: Translation = {
       chooseFromGallery: 'Choose from gallery',
       addPhoto: 'Add photo',
       changePhoto: 'Change photo',
-      removePhoto: 'Remove photo',
       cameraDenied: 'Allow camera access in Settings to take a photo.',
       pickFailed: "That wouldn't open just now. Try again.",
     },
@@ -356,6 +355,8 @@ export const en: Translation = {
       filterParks: 'Parks',
       recent: 'RECENT',
       nearYou: 'NEAR YOU',
+      emptyTitle: 'No place for “{{query}}”',
+      emptyBody: 'Try another name or look around you.',
     },
     when: {
       title: 'When does it start?',
@@ -412,6 +413,8 @@ export const en: Translation = {
     messagePlaceholder: 'Message',
     groupMessagePlaceholder: 'Message the group',
     attach: 'Attach',
+    removeAttachment: 'Remove attachment',
+    attachFailed: "The gallery wouldn't open just now. Try again.",
     send: 'Send',
     sent: 'Sent',
     quickAgreed: 'Sounds good',
@@ -491,38 +494,22 @@ export const en: Translation = {
     },
     deleteAccountPage: {
       title: 'Delete account',
-      heading: 'Really delete your account?',
-      subtitle: 'This cannot be undone. Everything below goes at the same moment.',
-      lossLabel: 'WHAT YOU LOSE',
-      loss: {
-        plans: {
-          title: 'The plans you host',
-          detail: 'They leave the map and everyone going is told.',
-        },
-        chats: {
-          title: 'Your conversations',
-          detail: 'Every group chat closes for you.',
-        },
-        badge: {
-          title: 'Your verification badge',
-          detail: 'Come back one day and the selfie starts over.',
-        },
-      },
-      warning:
-        'Deletion takes effect straight away. Signing up again with the same number brings none of it back.',
-      acknowledge: 'I understand none of this can be recovered.',
-      confirm: 'Delete my account',
-      keep: 'Keep my account',
+      heading: 'Delete your account, {{name}}?',
+      subtitle: 'Gone at once: {{plans}}, {{chats}} and your verification badge. No undoing it.',
+      plansCount_one: '{{count}} plan you created',
+      plansCount_other: '{{count}} plans you created',
+      chatsCount_one: '{{count}} conversation',
+      chatsCount_other: '{{count}} conversations',
+      billing:
+        "Your Plus subscription is billed by your phone's store. Cancel it there, or it keeps renewing.",
+      confirm: 'Delete permanently',
+      keep: 'Keep account',
     },
     signOutPage: {
       title: 'Sign out',
-      heading: 'Sign out for now?',
-      subtitle: 'Nothing is deleted. Sign in with your number again to pick up where you left off.',
-      kept: {
-        plans: 'Your plans stay on the map',
-        chats: 'Your conversations are kept',
-        preferences: 'Your preferences stay as they are',
-      },
+      heading: 'Really sign out?',
+      subtitle:
+        'Your plans, conversations and badge stay on your account. Next time you sign in, it is all there.',
       confirm: 'Sign out',
       stay: 'Stay signed in',
     },

@@ -1,4 +1,7 @@
+import { Image } from 'expo-image';
+import * as ImagePicker from 'expo-image-picker';
 import { Plus } from 'phosphor-react-native';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Pressable, ScrollView, TextInput, View } from 'react-native';
 
@@ -6,6 +9,36 @@ import { cn } from '@shared/lib/cn';
 import { haptics } from '@shared/lib/haptics';
 import { colors } from '@shared/theme/tokens';
 import { FONT_FAMILY, Glyph, Text } from '@shared/ui';
+
+/**
+ * One photo out of the library, uncropped — a chat attachment is not a portrait,
+ * so unlike the onboarding photo step this one does not force a square.
+ */
+const PICK = {
+  mediaTypes: ['images'],
+  quality: 0.9,
+} satisfies ImagePicker.ImagePickerOptions;
+
+/**
+ * React Native pads a `TextInput` on its own — Android reserves room around the
+ * glyphs and both platforms add vertical padding — so a single line drifts off
+ * the centre of a field that was given a fixed height. Zeroing that and handing
+ * the input its own height, its font size and (for Android) an explicit vertical
+ * alignment centres the text and the placeholder. This is the same reset
+ * `TextField` in `@shared/ui` applies; the composer's field is not a `TextField`
+ * (see the note on the row below), so it repeats it here.
+ */
+const INPUT = {
+  margin: 0,
+  paddingVertical: 0,
+  includeFontPadding: false,
+  textAlignVertical: 'center',
+  // `height:46px · padding:0 18px · 15.5px`, as the design states the field.
+  height: 46,
+  paddingHorizontal: 18,
+  fontFamily: FONT_FAMILY[400],
+  fontSize: 15.5,
+} as const;
 
 export interface ComposerProps {
   value: string;
@@ -35,6 +68,28 @@ export function Composer({
 }: ComposerProps) {
   const { t } = useTranslation();
   const canSend = value.trim().length > 0;
+
+  // The picked photo waits here. Nothing consumes it yet: `messages` holds text
+  // only (docs/database.md §3.6), so there is no image message to send it as —
+  // it stays pending until the × clears it.
+  const [attachment, setAttachment] = useState<string | null>(null);
+  const [pickFailed, setPickFailed] = useState(false);
+
+  const attachPhoto = async () => {
+    // As on the onboarding photo step: iOS hands over one picked photo without
+    // any library permission at all, so none is asked for here.
+    try {
+      const result = await ImagePicker.launchImageLibraryAsync(PICK);
+      if (result.canceled) return;
+      const picked = result.assets[0];
+      if (!picked) return;
+      setAttachment(picked.uri);
+      setPickFailed(false);
+    } catch (error) {
+      console.warn('Could not open the photo library', error);
+      setPickFailed(true);
+    }
+  };
 
   return (
     <>
@@ -68,6 +123,40 @@ export function Composer({
         ))}
       </ScrollView>
 
+      {attachment ? (
+        <View className="shrink-0 px-[16px] pt-[10px]">
+          <View className="h-[64px] w-[64px]">
+            <Image
+              source={{ uri: attachment }}
+              className="h-full w-full rounded-field"
+              contentFit="cover"
+            />
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={t('chat.removeAttachment')}
+              onPress={() => setAttachment(null)}
+              className="absolute -right-[7px] -top-[7px] h-[24px] w-[24px] items-center justify-center rounded-full border-2 border-surface bg-ink"
+            >
+              <Glyph.CloseSmall size={9} />
+            </Pressable>
+          </View>
+        </View>
+      ) : null}
+
+      {pickFailed ? (
+        <Text className="shrink-0 px-[16px] pt-[10px] text-[13px] text-danger">
+          {t('chat.attachFailed')}
+        </Text>
+      ) : null}
+
+      {/*
+        The design puts the attach and send buttons beside the field rather than
+        inside it, so this row is three siblings and not a `TextField` with its
+        `leading`/`accessory` slots. The field itself stays a bare `TextInput`
+        for the same reason `TextField` cannot serve it: it hides the input's
+        `style` and `className`, and sets no text colour, so the design's
+        `#15181F` could not be passed through. `INPUT` above carries its reset.
+      */}
       <View
         className="shrink-0 flex-row items-center gap-[10px] px-[16px] pt-[10px]"
         style={{ paddingBottom: bottomInset }}
@@ -75,7 +164,11 @@ export function Composer({
         <Pressable
           accessibilityRole="button"
           accessibilityLabel={t('chat.attach')}
-          className="h-[42px] w-[42px] shrink-0 items-center justify-center rounded-full bg-surface-fill"
+          onPress={() => {
+            haptics.tap();
+            void attachPhoto();
+          }}
+          className="h-[42px] w-[42px] shrink-0 items-center justify-center rounded-full bg-surface-fill active:opacity-60"
         >
           <Plus size={19} color={colors.inkBody} />
         </Pressable>
@@ -86,9 +179,10 @@ export function Composer({
           onSubmitEditing={onSend}
           placeholder={placeholder}
           placeholderTextColor={colors.inkGhost}
+          selectionColor={colors.brand}
           returnKeyType="send"
-          className="h-[46px] min-w-0 flex-1 rounded-pill bg-surface-fill px-[18px] text-[15.5px] text-ink"
-          style={{ fontFamily: FONT_FAMILY[400] }}
+          className="min-w-0 flex-1 rounded-pill bg-surface-fill text-ink"
+          style={INPUT}
         />
 
         <Pressable

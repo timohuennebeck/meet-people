@@ -151,6 +151,14 @@ export function NoteField({
 }: NoteFieldProps) {
   const ring = useFocusRing(onFocus, onBlur);
 
+  // The wrapper's `minHeight` cannot stretch a `flex:1` child: a column with no
+  // resolved height gives its children nothing to grow into, so the input can
+  // measure to zero and the field looks empty. Sizing the input itself instead
+  // lets the wrapper grow around it. The wrapper spends `padding.vertical` per
+  // side whichever ring it draws — the compensation takes the border back out of
+  // the padding — so the content box is exactly `minHeight - 2 * padding`.
+  const contentHeight = Math.max(0, minHeight - padding.vertical * 2);
+
   return (
     <View
       className={cn('rounded-tile bg-surface', ring.className, className)}
@@ -173,7 +181,7 @@ export function NoteField({
         style={[
           INPUT_RESET,
           {
-            flex: 1,
+            minHeight: contentHeight,
             fontFamily: FONT_FAMILY[weight],
             fontSize,
             lineHeight,

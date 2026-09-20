@@ -6,7 +6,7 @@ import { View } from 'react-native';
 
 import type { Place } from '@shared/data/schemas';
 import { colors } from '@shared/theme/tokens';
-import { Button, Chip, SectionLabel, TextField } from '@shared/ui';
+import { Button, Chip, Mascot, SectionLabel, Text, TextField } from '@shared/ui';
 
 import { useNearbyPlaces, useRecentPlaces } from '../../data/usePlaces';
 import { CreateStepLayout } from '../../ui/CreateStepLayout';
@@ -30,6 +30,14 @@ export function CreateWhereScreen() {
         ? places.filter((place) => `${place.name} ${place.address}`.toLowerCase().includes(needle))
         : places;
   }, [query]);
+
+  const term = query.trim();
+  const recentMatches = match(recent ?? []);
+  const nearbyMatches = match(nearby ?? []);
+  // Both labels over two empty lists read as a broken screen, so a search that
+  // hits nothing anywhere replaces the sections outright. An empty field is not
+  // a failed search — it just has not narrowed anything yet.
+  const nothingFound = term.length > 0 && recentMatches.length === 0 && nearbyMatches.length === 0;
 
   return (
     <CreateStepLayout
@@ -61,31 +69,45 @@ export function CreateWhereScreen() {
         <Chip label={t('create.where.filterParks')} size="place" tone="outlineStrong" />
       </View>
 
-      <SectionLabel className="mt-[18px] shrink-0">{t('create.where.recent')}</SectionLabel>
-      <View className="mt-[8px] shrink-0 gap-[10px]">
-        {match(recent ?? []).map((place) => (
-          <PlaceRow
-            key={place.id}
-            place={place}
-            selected={selected === place.id}
-            onPress={() => setSelected(place.id)}
-          />
-        ))}
-      </View>
+      {nothingFound ? (
+        <View className="mt-[28px] flex-1 items-center">
+          <Mascot size={120} />
+          <Text weight={600} className="mt-[14px] max-w-[280px] text-center text-[17px]">
+            {t('create.where.emptyTitle', { query: term })}
+          </Text>
+          <Text className="mt-[6px] max-w-[280px] text-center text-[14.5px] leading-[19.6px] text-ink-dim">
+            {t('create.where.emptyBody')}
+          </Text>
+        </View>
+      ) : (
+        <>
+          <SectionLabel className="mt-[18px] shrink-0">{t('create.where.recent')}</SectionLabel>
+          <View className="mt-[8px] shrink-0 gap-[10px]">
+            {recentMatches.map((place) => (
+              <PlaceRow
+                key={place.id}
+                place={place}
+                selected={selected === place.id}
+                onPress={() => setSelected(place.id)}
+              />
+            ))}
+          </View>
 
-      <SectionLabel className="mt-[18px] shrink-0">{t('create.where.nearYou')}</SectionLabel>
-      <View className="mt-[8px] shrink-0 gap-[10px]">
-        {match(nearby ?? []).map((place) => (
-          <PlaceRow
-            key={place.id}
-            place={place}
-            selected={selected === place.id}
-            onPress={() => setSelected(place.id)}
-          />
-        ))}
-      </View>
+          <SectionLabel className="mt-[18px] shrink-0">{t('create.where.nearYou')}</SectionLabel>
+          <View className="mt-[8px] shrink-0 gap-[10px]">
+            {nearbyMatches.map((place) => (
+              <PlaceRow
+                key={place.id}
+                place={place}
+                selected={selected === place.id}
+                onPress={() => setSelected(place.id)}
+              />
+            ))}
+          </View>
 
-      <View className="flex-1" />
+          <View className="flex-1" />
+        </>
+      )}
     </CreateStepLayout>
   );
 }

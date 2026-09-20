@@ -83,7 +83,9 @@ export function CreateJoinModeScreen() {
         />
 
         <View className="mt-[6px]">
-          <InfoNote icon={<Info size={20} color={colors.white} />}>
+          {/* No bubble behind it, so the glyph carries the brand colour itself
+              and grows from 20 to 26 to hold the row against the two-line hint. */}
+          <InfoNote icon={<Info size={26} weight="fill" color={colors.brand} />}>
             {t('create.joinMode.hint')}
           </InfoNote>
         </View>

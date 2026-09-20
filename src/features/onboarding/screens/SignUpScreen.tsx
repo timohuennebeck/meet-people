@@ -13,6 +13,19 @@ import { Button, FieldLabel, Glyph, Spacer, Text, TextField } from '@shared/ui';
 const STRENGTH_LABEL = ['weak', 'weak', 'fair', 'good', 'strong'] as const;
 
 /**
+ * The tone a score wears — red, amber, green, then brand blue. The bars and the
+ * label beside them read from the same entry so the two always agree. Index 0
+ * is never used: neither the meter nor the label renders on an empty field.
+ */
+const STRENGTH_TONE = [
+  { bar: 'bg-hair-rail', label: 'text-ink-dim' },
+  { bar: 'bg-danger', label: 'text-danger' },
+  { bar: 'bg-warn', label: 'text-warn' },
+  { bar: 'bg-joined', label: 'text-joined' },
+  { bar: 'bg-brand', label: 'text-brand' },
+] as const;
+
+/**
  * How many of the meter's four segments light up. Length carries most of the
  * weight, with a segment each for mixing in a digit and a symbol.
  */
@@ -27,15 +40,14 @@ function strengthOf(password: string): number {
 
 /** Four segments that fill as the password gets stronger. */
 function StrengthMeter({ filled }: { filled: number }) {
+  const lit = STRENGTH_TONE[filled]!.bar;
+
   return (
     <View className="mt-[12px] shrink-0 flex-row items-center gap-[6px]">
       {[0, 1, 2, 3].map((index) => (
         <View
           key={index}
-          className={cn(
-            'h-[5px] flex-1 rounded-[3px]',
-            index < filled ? 'bg-brand' : 'bg-hair-rail',
-          )}
+          className={cn('h-[5px] flex-1 rounded-[3px]', index < filled ? lit : 'bg-hair-rail')}
         />
       ))}
     </View>
@@ -95,14 +107,20 @@ export function SignUpScreen() {
         }
       />
 
-      <StrengthMeter filled={strength} />
+      {/* Nothing stands under an untouched field — the meter arrives with the
+          first character typed. */}
+      {strength > 0 ? (
+        <>
+          <StrengthMeter filled={strength} />
 
-      <View className="mt-[9px] shrink-0 flex-row items-center justify-between">
-        <Text className="text-[14px] text-ink-dim">{t('onboarding.signUp.strength')}</Text>
-        <Text weight={600} className="text-[14px] text-brand">
-          {t(`onboarding.signUp.${STRENGTH_LABEL[strength]!}`)}
-        </Text>
-      </View>
+          <View className="mt-[9px] shrink-0 flex-row items-center justify-between">
+            <Text className="text-[14px] text-ink-dim">{t('onboarding.signUp.strength')}</Text>
+            <Text weight={600} className={cn('text-[14px]', STRENGTH_TONE[strength]!.label)}>
+              {t(`onboarding.signUp.${STRENGTH_LABEL[strength]!}`)}
+            </Text>
+          </View>
+        </>
+      ) : null}
 
       <Button
         label={t('onboarding.account.createAccount')}

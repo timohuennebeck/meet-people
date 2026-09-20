@@ -7,7 +7,7 @@ import { Pressable, View } from 'react-native';
 
 import { StepScaffold } from '@shared/components/StepScaffold';
 import { STEPS } from '@shared/lib/steps';
-import { Button, Glyph, Text, TextButton } from '@shared/ui';
+import { Button, Text, TextButton } from '@shared/ui';
 
 /**
  * One square photo, cropped by the system picker so what is chosen is what the
@@ -102,36 +102,24 @@ export function PhotoScreen() {
       }
     >
       <View className="min-h-0 flex-1 items-center justify-center gap-[26px]">
-        <View>
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel={t(
-              photo ? 'onboarding.photo.changePhoto' : 'onboarding.photo.addPhoto',
-            )}
-            onPress={() => void chooseFromGallery()}
-            className="h-[214px] w-[214px] rounded-full bg-surface p-[8px]"
-          >
-            {photo ? (
-              <Image
-                source={{ uri: photo }}
-                className="h-full w-full rounded-full"
-                contentFit="cover"
-              />
-            ) : (
-              <PortraitPlaceholder />
-            )}
-          </Pressable>
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={t(
+            photo ? 'onboarding.photo.changePhoto' : 'onboarding.photo.addPhoto',
+          )}
+          onPress={() => void chooseFromGallery()}
+          className="h-[214px] w-[214px] rounded-full bg-surface p-[8px]"
+        >
           {photo ? (
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel={t('onboarding.photo.removePhoto')}
-              onPress={() => setPhoto(null)}
-              className="absolute right-[4px] top-[12px] h-[36px] w-[36px] items-center justify-center rounded-full border-2 border-surface bg-ink"
-            >
-              <Glyph.CloseSmall size={12} />
-            </Pressable>
-          ) : null}
-        </View>
+            <Image
+              source={{ uri: photo }}
+              className="h-full w-full rounded-full"
+              contentFit="cover"
+            />
+          ) : (
+            <PortraitPlaceholder />
+          )}
+        </Pressable>
         <View className="max-w-[290px] items-center">
           <Text weight={600} className="text-center text-[30px] leading-[33px] tracking-[-0.96px]">
             {t('onboarding.photo.title')}

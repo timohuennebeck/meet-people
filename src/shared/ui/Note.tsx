@@ -63,13 +63,15 @@ export function WarningNote({ children }: { children: string }) {
   );
 }
 
-/** `#E6F0FE` note with a filled brand icon bubble — the create-plan hint. */
+/**
+ * `#E6F0FE` note led by a filled brand glyph — the create-plan hint. The icon
+ * sits on the tinted panel itself rather than in a bubble, so callers pass it
+ * already brand-coloured and filled.
+ */
 export function InfoNote({ children, icon }: { children: string; icon: ReactNode }) {
   return (
     <View className="flex-row items-center gap-[12px] rounded-well bg-brand-mist p-[16px]">
-      <View className="h-[40px] w-[40px] shrink-0 items-center justify-center rounded-full bg-brand">
-        {icon}
-      </View>
+      <View className="shrink-0">{icon}</View>
       <Text className="flex-1 text-[14.5px] leading-[19.6px] text-brand-deep">{children}</Text>
     </View>
   );

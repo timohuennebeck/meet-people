@@ -56,14 +56,6 @@ export function SelfieCaptureScreen() {
             {t('verification.capture.prompt')}
           </Text>
 
-          {/* The oval the face should sit inside — 250×316 with a 2px ring outside. */}
-          <View className="absolute inset-0 items-center justify-center" pointerEvents="none">
-            <View
-              className="h-[320px] w-[254px] rounded-[130px] border-2"
-              style={{ borderColor: 'rgba(255,255,255,0.85)' }}
-            />
-          </View>
-
           <View className="absolute bottom-[56px] left-0 right-0 items-center gap-[16px]">
             <Pressable
               accessibilityRole="button"
@@ -72,9 +64,10 @@ export function SelfieCaptureScreen() {
                 haptics.commit();
                 void shoot();
               }}
-              // 78px white disc with a 5px translucent ring drawn outside it.
+              // 78px white disc with a 5px translucent ring drawn outside it,
+              // light enough to read as grey against the camera feed.
               className="h-[88px] w-[88px] rounded-full border-[5px] bg-white"
-              style={{ borderColor: 'rgba(255,255,255,0.3)' }}
+              style={{ borderColor: 'rgba(255,255,255,0.55)' }}
             />
             <Text className="text-[14.5px]" style={{ color: 'rgba(255,255,255,0.85)' }}>
               {t('verification.capture.disclaimer')}

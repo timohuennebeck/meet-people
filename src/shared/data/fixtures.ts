@@ -51,6 +51,13 @@ export const VIEWER: User = {
   joinedAt: '2026-03-01T00:00:00.000Z',
 };
 
+/**
+ * The address the account is registered under, as typed into the design's
+ * sign-up field. It is not part of `User`: an e-mail belongs to the account
+ * rather than to the profile other people see.
+ */
+export const VIEWER_EMAIL = 'mara.k@mail.com';
+
 export const PHIL: User = {
   id: 'u-phil',
   name: 'Phil',

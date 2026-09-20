@@ -82,7 +82,15 @@ export function CreateSeatsScreen() {
                 onPress={() => setSeats((count) => Math.min(MAX_SEATS, count + 1))}
               />
             </View>
-            <Text className="text-[17px] text-ink-dim">
+            {/* The caption is what moves: its `{{others}}` count is drawn with
+                proportional figures and the label is only as wide as its text,
+                so a centred line re-centres on every step. Tabular figures keep
+                the digits one width and stretching the label to the card makes
+                the centring independent of how long the line is. */}
+            <Text
+              className="self-stretch text-center text-[17px] text-ink-dim"
+              style={{ fontVariant: ['tabular-nums'] }}
+            >
               {t('create.seats.caption', { others: String(seats - 1) })}
             </Text>
           </View>
