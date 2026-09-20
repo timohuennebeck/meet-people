@@ -13,7 +13,12 @@ export interface CircleButtonProps {
   /** Diameter in px. The design uses 34 in step headers and 40 in nav headers. */
   size?: number;
   className?: string;
-  accessibilityLabel?: string;
+  /**
+   * Required: the glyph inside carries no accessible name of its own, and the
+   * same circle is a back chevron on one screen and an overflow, close or
+   * compose button on the next.
+   */
+  accessibilityLabel: string;
 }
 
 /** The round, tinted tap target that holds a back chevron or overflow glyph. */
@@ -24,12 +29,10 @@ export function CircleButton({
   className,
   accessibilityLabel,
 }: CircleButtonProps) {
-  const { t } = useTranslation();
-
   return (
     <Pressable
       accessibilityRole="button"
-      accessibilityLabel={accessibilityLabel ?? t('common.back')}
+      accessibilityLabel={accessibilityLabel}
       onPress={onPress}
       className={cn('shrink-0 items-center justify-center rounded-full bg-surface-chip', className)}
       style={({ pressed }) => [{ width: size, height: size }, pressed ? { opacity: 0.6 } : null]}
@@ -71,7 +74,11 @@ export function ProgressHeader({
 
   return (
     <View className={cn('h-[34px] shrink-0 flex-row items-center gap-[12px]', className)}>
-      <CircleButton size={34} onPress={onBack}>
+      <CircleButton
+        size={34}
+        accessibilityLabel={dismissible ? t('common.close') : t('common.back')}
+        onPress={onBack}
+      >
         {dismissible ? <CloseHeader size={11} /> : <ChevronLeft size={11} strokeWidth={1.9} />}
       </CircleButton>
       <View className="h-[6px] flex-1 overflow-hidden rounded-[4px] bg-hair-rail">
@@ -101,9 +108,11 @@ export interface NavHeaderProps {
  * screen rather than the remaining space, exactly as in the design.
  */
 export function NavHeader({ title, onBack, trailing, className }: NavHeaderProps) {
+  const { t } = useTranslation();
+
   return (
     <View className={cn('relative h-[40px] shrink-0 flex-row items-center', className)}>
-      <CircleButton size={40} onPress={onBack}>
+      <CircleButton size={40} accessibilityLabel={t('common.back')} onPress={onBack}>
         <ChevronLeft size={13} />
       </CircleButton>
       <Text
@@ -128,9 +137,11 @@ export interface SearchHeaderProps {
  * language search screen, where the title is centred between two equal gutters.
  */
 export function SearchHeader({ title, onBack }: SearchHeaderProps) {
+  const { t } = useTranslation();
+
   return (
     <View className="h-[34px] shrink-0 flex-row items-center gap-[12px]">
-      <CircleButton size={34} onPress={onBack}>
+      <CircleButton size={34} accessibilityLabel={t('common.back')} onPress={onBack}>
         <ChevronLeft size={11} strokeWidth={1.9} />
       </CircleButton>
       <Text weight={600} className="flex-1 text-center text-[16px]">

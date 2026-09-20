@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { View } from 'react-native';
 
+import { setLocale } from '@shared/i18n';
 import { Button, SelectableRow, Spacer } from '@shared/ui';
 
 import { APP_LANGUAGES, STEPS } from '../lib/steps';
@@ -33,7 +34,12 @@ export function AppLanguageScreen() {
             title={language.name}
             flag={language.flag}
             selected={selected === language.code}
-            onPress={() => setSelected(language.code)}
+            onPress={() => {
+              setSelected(language.code);
+              // The rest of onboarding is already translated, so the switch
+              // takes effect on the next step rather than after sign-up.
+              setLocale(language.code);
+            }}
           />
         ))}
       </View>

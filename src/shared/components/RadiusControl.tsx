@@ -56,6 +56,7 @@ export function RadiusControl({
 
         <Slider
           value={PRESET_FRACTION[radius as (typeof PRESETS)[number]] ?? 0.26}
+          valueText={`${radius} ${unit}`}
           onChange={(fraction) => {
             // Snap to the nearest preset, which is all the design exposes.
             const nearest = PRESETS.reduce((best, preset) =>

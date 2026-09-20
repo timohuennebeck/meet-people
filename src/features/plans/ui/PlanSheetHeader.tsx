@@ -1,3 +1,4 @@
+import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { View } from 'react-native';
 
@@ -44,6 +45,7 @@ export function PlanSheetHeader({
   titleGap = 4,
 }: PlanSheetHeaderProps) {
   const { t } = useTranslation();
+  const router = useRouter();
 
   const meta = showDistance ? `${plan.whenLabel} · ${plan.place.distanceLabel}` : plan.whenLabel;
 
@@ -52,7 +54,8 @@ export function PlanSheetHeader({
       <PlanPhoto
         height={photoHeight}
         mascotSize={mascotSize}
-        dismissible
+        onDismiss={() => router.back()}
+        dismissLabel={t('common.close')}
         leading={
           joined ? (
             <Badge label={t('plan.joinedBadge')} className="bg-category-sport" />

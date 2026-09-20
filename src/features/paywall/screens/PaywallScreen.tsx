@@ -94,7 +94,12 @@ export function PaywallScreen() {
   return (
     <Screen padding="paywall" className="bg-surface-alt">
       <View className="h-[34px] shrink-0 flex-row items-center">
-        <CircleButton size={34} className="bg-surface-dusk" onPress={() => finish(false)}>
+        <CircleButton
+          size={34}
+          className="bg-surface-dusk"
+          accessibilityLabel={t('common.close')}
+          onPress={() => finish(false)}
+        >
           <Glyph.CloseHeader size={12} />
         </CircleButton>
       </View>

@@ -34,7 +34,13 @@ function BrandPill() {
   );
 }
 
-/** The day filters: today, tomorrow, this weekend. */
+/**
+ * The day filters: today, tomorrow, this weekend.
+ *
+ * Selection is local state only — the mock source has no day index to narrow
+ * by, so the chips carry their selected state and nothing more until the query
+ * behind them can filter. See `planKeys.list`.
+ */
 const FILTERS = ['today', 'tomorrow', 'weekend'] as const;
 type Filter = (typeof FILTERS)[number];
 
@@ -50,7 +56,7 @@ export function ExploreScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const [filter, setFilter] = useState<Filter>('today');
-  const { data: plans } = usePlans(filter);
+  const { data: plans } = usePlans();
 
   const cards = plans ?? [];
 
@@ -66,6 +72,7 @@ export function ExploreScreen() {
           category={plan.category}
           x={plan.pin.x}
           y={plan.pin.y}
+          title={plan.title}
           // Only the focused plan names itself on the map.
           label={
             plan.id === cards[0]?.id && plan.pinLabel

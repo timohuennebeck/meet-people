@@ -1,6 +1,6 @@
 import { LinearGradient } from 'expo-linear-gradient';
 import type { ReactNode } from 'react';
-import { View } from 'react-native';
+import { Pressable, View } from 'react-native';
 
 import { cn } from '@shared/lib/cn';
 import { gradients } from '@shared/theme/tokens';
@@ -33,8 +33,12 @@ export interface PlanPhotoProps {
   leadingInset?: number;
   /** Badge pinned to the top-right corner. */
   trailing?: ReactNode;
-  /** Renders the round × that dismisses a sheet. */
-  dismissible?: boolean;
+  /**
+   * Renders the round × that dismisses a sheet. It is the only visible way out
+   * of a transparent modal, so it needs a handler and an accessible name.
+   */
+  onDismiss?: () => void;
+  dismissLabel?: string;
   className?: string;
 }
 
@@ -49,7 +53,8 @@ export function PlanPhoto({
   leading,
   leadingInset = 12,
   trailing,
-  dismissible = false,
+  onDismiss,
+  dismissLabel,
   className,
 }: PlanPhotoProps) {
   return (
@@ -81,16 +86,21 @@ export function PlanPhoto({
           {trailing}
         </View>
       ) : null}
-      {dismissible ? (
-        <View
+      {onDismiss ? (
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={dismissLabel}
+          onPress={onDismiss}
           className="absolute right-[10px] top-[10px] h-[32px] w-[32px] items-center justify-center rounded-full"
-          style={{ backgroundColor: 'rgba(255,255,255,0.9)' }}
-          pointerEvents="none"
+          style={({ pressed }) => [
+            { backgroundColor: 'rgba(255,255,255,0.9)' },
+            pressed ? { opacity: 0.6 } : null,
+          ]}
         >
           <Text weight={600} className="text-[16px]">
             ×
           </Text>
-        </View>
+        </Pressable>
       ) : null}
     </View>
   );

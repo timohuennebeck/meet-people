@@ -42,7 +42,7 @@ export interface HostRequestListProps {
  */
 export function HostRequestList({ plan, full }: HostRequestListProps) {
   const { t } = useTranslation();
-  const { mutate: accept } = useAcceptRequest();
+  const { mutate: accept } = useAcceptRequest(plan.id);
 
   if (full) {
     return (
@@ -85,7 +85,7 @@ export function HostRequestList({ plan, full }: HostRequestListProps) {
               label={t('plan.accept')}
               // Unverified applicants get the outlined pill, a softer yes.
               outlined={!request.user.verified}
-              onPress={() => accept({ planId: plan.id, requestId: request.id })}
+              onPress={() => accept(request.id)}
             />
           }
         />

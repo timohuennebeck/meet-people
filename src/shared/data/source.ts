@@ -44,23 +44,25 @@ const LATENCY_MS = 120;
  * Resolves a value after the simulated latency, validating it on the way out.
  *
  * Fixtures are trusted, so in production the parse is skipped and the value
- * passes straight through. In development it runs, which keeps the schemas
- * honest about the shapes the UI actually consumes — and is the check that
- * catches drift the day this resolves against Supabase instead.
+ * passes straight through. In development it runs and the *parsed* value is
+ * what resolves, so defaults and coercions apply here exactly as they will the
+ * day this reads from Supabase instead — and drift surfaces as a console error
+ * rather than silently rendering a shape the schema rejects.
  */
 function settle<T>(schema: z.ZodType<T>, value: T): Promise<T> {
+  let resolved = value;
   if (__DEV__) {
     const result = schema.safeParse(value);
-    if (!result.success) {
-      console.error('[data] Value does not match its schema:', result.error.issues);
-    }
+    if (result.success) resolved = result.data;
+    else console.error('[data] Value does not match its schema:', result.error.issues);
   }
-  return new Promise((resolve) => setTimeout(() => resolve(value), LATENCY_MS));
+  return new Promise((resolve) => setTimeout(() => resolve(resolved), LATENCY_MS));
 }
 
 export const dataSource = {
   plans: {
-    list: (): Promise<Plan[]> => settle(planSchema.array(), plans),
+    // A copy, so the cache never holds the same array this module mutates.
+    list: (): Promise<Plan[]> => settle(planSchema.array(), [...plans]),
 
     detail: (planId: string): Promise<Plan> => {
       const plan = plans.find((candidate) => candidate.id === planId);
@@ -144,7 +146,7 @@ export const dataSource = {
       settle(conversationSchema.array(), fixtures.CONVERSATIONS),
 
     thread: (conversationId: string): Promise<Message[]> =>
-      settle(messageSchema.array(), threads.get(conversationId) ?? []),
+      settle(messageSchema.array(), [...(threads.get(conversationId) ?? [])]),
 
     send: (conversationId: string, body: string): Promise<Message> => {
       const message: Message = {

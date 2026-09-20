@@ -18,6 +18,8 @@ export interface MapPinProps {
   /** Position in the design's 402×874 canvas. */
   x: number;
   y: number;
+  /** The plan this pin opens — its accessible name, since the pin is just a face. */
+  title: string;
   /** Label bubble beside the pin — only the focused plan shows one. */
   label?: { title: string; meta: string };
   onPress?: () => void;
@@ -27,11 +29,11 @@ export interface MapPinProps {
  * `62px · 4px category ring · 2px white gutter` — a plan on the map, optionally
  * with the white bubble that names it.
  */
-export function MapPin({ avatarUri, category, x, y, label, onPress }: MapPinProps) {
+export function MapPin({ avatarUri, category, x, y, title, label, onPress }: MapPinProps) {
   return (
     <Pressable
       accessibilityRole="button"
-      accessibilityLabel={label?.title}
+      accessibilityLabel={title}
       onPress={onPress}
       className="absolute flex-row items-center gap-[8px]"
       style={{ left: x, top: y }}

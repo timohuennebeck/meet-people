@@ -30,12 +30,12 @@ export function JoinRequestScreen() {
   const router = useRouter();
   const { id } = useLocalSearchParams<{ id: string }>();
   const { data: plan } = usePlan(id ?? '');
-  const { mutate: setMembership } = useSetMembership();
+  const { mutate: setMembership } = useSetMembership(id ?? '');
 
   const host = plan?.host;
 
   const send = () => {
-    if (plan) setMembership({ planId: plan.id, membership: 'requested' });
+    if (plan) setMembership('requested');
     router.back();
   };
 

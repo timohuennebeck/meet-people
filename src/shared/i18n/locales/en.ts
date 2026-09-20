@@ -23,6 +23,12 @@ export const en: Translation = {
     stepOf: '{{step}} of {{total}}',
     years: 'years',
     or: 'or',
+    close: 'Close',
+    more: 'More options',
+    newPlan: 'New plan',
+    remove: 'Remove {{label}}',
+    raiseLower: 'Raise the minimum',
+    lowerLower: 'Lower the minimum',
   },
 
   welcome: {

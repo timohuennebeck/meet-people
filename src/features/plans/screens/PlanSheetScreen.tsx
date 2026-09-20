@@ -221,7 +221,7 @@ export function PlanSheetScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
   const { data: plan } = usePlan(id ?? '');
-  const { mutate: setMembership } = useSetMembership();
+  const { mutate: setMembership } = useSetMembership(id ?? '');
 
   if (!plan) {
     return (
@@ -240,10 +240,7 @@ export function PlanSheetScreen() {
       {plan.membership === 'host' ? (
         <HostState plan={plan} />
       ) : plan.membership === 'requested' ? (
-        <RequestedState
-          plan={plan}
-          onWithdraw={() => setMembership({ planId: plan.id, membership: 'guest' })}
-        />
+        <RequestedState plan={plan} onWithdraw={() => setMembership('guest')} />
       ) : plan.membership === 'joined' ? (
         <JoinedState plan={plan} onLeave={() => router.push(`/plan/${plan.id}/leave`)} />
       ) : (

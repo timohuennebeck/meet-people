@@ -32,11 +32,14 @@ export function LeavePlanScreen() {
   const router = useRouter();
   const { id } = useLocalSearchParams<{ id: string }>();
   const { data: plan } = usePlan(id ?? '');
-  const { mutate: setMembership } = useSetMembership();
+  const { mutate: setMembership } = useSetMembership(id ?? '');
 
   const leave = () => {
-    if (plan) setMembership({ planId: plan.id, membership: 'guest' });
-    router.dismissAll();
+    if (plan) setMembership('guest');
+    // `dismissAll` pops to the top of the *nearest* stack, which is the plan's
+    // own — it would land back on the sheet for the plan just left. The map is
+    // the target, so dismiss the whole modal group instead.
+    router.dismissTo('/(tabs)');
   };
 
   // "com Phil, Sara e você" — the viewer is named by the template's tail, so

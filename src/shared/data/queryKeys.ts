@@ -15,8 +15,12 @@ function key<const T extends readonly unknown[]>(parts: T) {
 export const planKeys = {
   all: ['plans'] as const,
   lists: () => [...planKeys.all, 'list'] as const,
-  /** Plans on the map for a given day filter. */
-  list: (filter: string) => key([...planKeys.lists(), filter] as const),
+  /**
+   * Plans on the map. The day filter is deliberately not part of the key: the
+   * source cannot narrow by day yet, so keying on it would cache the same four
+   * plans three times over. It becomes `list(filter)` when the query does.
+   */
+  list: () => key(planKeys.lists()),
   details: () => [...planKeys.all, 'detail'] as const,
   detail: (planId: string) => key([...planKeys.details(), planId] as const),
 } as const;

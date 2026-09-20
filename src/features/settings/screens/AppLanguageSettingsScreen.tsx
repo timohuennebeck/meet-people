@@ -2,6 +2,7 @@ import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { ScrollView, View } from 'react-native';
 
+import { setLocale } from '@shared/i18n';
 import { APP_LANGUAGES } from '@shared/lib/languages';
 import { NavHeader, Screen, SectionLabel, SelectableRow, Text } from '@shared/ui';
 
@@ -38,7 +39,10 @@ export function AppLanguageSettingsScreen() {
               subtitle={language.endonym}
               flag={language.flag}
               selected={current.startsWith(language.code)}
-              onPress={() => update({ appLanguage: language.code })}
+              onPress={() => {
+                update({ appLanguage: language.code });
+                setLocale(language.code);
+              }}
             />
           ))}
         </View>

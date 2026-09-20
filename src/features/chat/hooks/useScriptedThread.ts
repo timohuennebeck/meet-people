@@ -25,24 +25,38 @@ export function useScriptedThread(
   nextReply: (index: number) => ScriptedReply,
 ): ScriptedThread {
   const [draft, setDraft] = useState('');
-  const [typingAuthorId, setTypingAuthorId] = useState<string | null>(null);
+  // Tagged with the conversation it belongs to, so switching threads in place
+  // derives an empty indicator during render rather than clearing it in an
+  // effect a frame later.
+  const [typing, setTyping] = useState<{ conversationId: string; authorId: string } | null>(null);
+  const typingAuthorId = typing?.conversationId === conversationId ? typing.authorId : null;
 
   const replyIndex = useRef(0);
-  const timers = useRef<ReturnType<typeof setTimeout>[]>([]);
+  const timers = useRef(new Set<ReturnType<typeof setTimeout>>());
+  /** Replies still in flight; the indicator clears only when the last one lands. */
+  const pending = useRef(0);
 
   const { mutate: sendMessage } = useSendMessage(conversationId);
   const { mutate: receiveMessage } = useReceiveMessage(conversationId);
 
-  useEffect(
-    () => () => {
-      timers.current.forEach(clearTimeout);
-      timers.current = [];
-    },
-    [],
-  );
+  // Keyed on the conversation, so switching threads in place starts its script
+  // from the top rather than inheriting the previous thread's position.
+  useEffect(() => {
+    const scheduled = timers.current;
+    replyIndex.current = 0;
+    pending.current = 0;
+    return () => {
+      scheduled.forEach(clearTimeout);
+      scheduled.clear();
+    };
+  }, [conversationId]);
 
   const schedule = useCallback((delay: number, run: () => void) => {
-    timers.current.push(setTimeout(run, delay));
+    const handle = setTimeout(() => {
+      timers.current.delete(handle);
+      run();
+    }, delay);
+    timers.current.add(handle);
   }, []);
 
   const send = useCallback(
@@ -55,14 +69,18 @@ export function useScriptedThread(
 
       const reply = nextReply(replyIndex.current);
       replyIndex.current += 1;
+      pending.current += 1;
 
-      schedule(reply.typingAfter, () => setTypingAuthorId(reply.authorId));
+      schedule(reply.typingAfter, () => setTyping({ conversationId, authorId: reply.authorId }));
       schedule(reply.replyAfter, () => {
-        setTypingAuthorId(null);
+        pending.current -= 1;
+        // Only the last reply in flight clears the indicator, so a second send
+        // does not switch it off while its own reply is still coming.
+        if (pending.current === 0) setTyping(null);
         receiveMessage({ authorId: reply.authorId, body: reply.body });
       });
     },
-    [draft, nextReply, receiveMessage, schedule, sendMessage],
+    [conversationId, draft, nextReply, receiveMessage, schedule, sendMessage],
   );
 
   return { draft, setDraft, typingAuthorId, send };

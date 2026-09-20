@@ -54,7 +54,12 @@ export function ThreadScreen() {
         className="shrink-0 flex-row items-center gap-[12px] px-[16px] pb-[12px]"
         style={{ paddingTop: Math.max(54, insets.top) }}
       >
-        <CircleButton size={36} className="bg-surface-fill" onPress={() => router.back()}>
+        <CircleButton
+          size={36}
+          className="bg-surface-fill"
+          accessibilityLabel={t('common.back')}
+          onPress={() => router.back()}
+        >
           <Glyph.ChevronLeft size={13} />
         </CircleButton>
 
@@ -89,7 +94,7 @@ export function ThreadScreen() {
           </Text>
         </View>
 
-        <CircleButton size={36} className="bg-surface-fill">
+        <CircleButton size={36} className="bg-surface-fill" accessibilityLabel={t('common.more')}>
           <Glyph.DotsVertical size={16} />
         </CircleButton>
       </View>

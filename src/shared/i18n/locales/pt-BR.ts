@@ -22,6 +22,12 @@ export const ptBR = {
     stepOf: '{{step}} de {{total}}',
     years: 'anos',
     or: 'ou',
+    close: 'Fechar',
+    more: 'Mais opções',
+    newPlan: 'Novo plano',
+    remove: 'Remover {{label}}',
+    raiseLower: 'Aumentar o mínimo',
+    lowerLower: 'Diminuir o mínimo',
   },
 
   welcome: {

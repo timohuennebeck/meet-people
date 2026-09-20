@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { Pressable, View } from 'react-native';
 
 import { cn } from '@shared/lib/cn';
@@ -66,7 +67,10 @@ export interface ChipProps {
   size?: ChipSize;
   tone?: ChipTone;
   onPress?: () => void;
-  /** Adds the trailing × that removes a committed tag. */
+  /**
+   * Adds the trailing × that removes a committed tag. Only the × removes — the
+   * label itself is not a delete target, and keeps `onPress` if one is given.
+   */
   onRemove?: () => void;
   /** Stretches the chip to share width evenly with its siblings. */
   grow?: boolean;
@@ -83,6 +87,7 @@ export function Chip({
   grow = false,
   className,
 }: ChipProps) {
+  const { t } = useTranslation();
   const recipe = CHIPS[size];
   const palette = TONES[tone];
   const weight = palette.selectedWeight ? 600 : recipe.weight;
@@ -92,7 +97,17 @@ export function Chip({
       <Text weight={weight} className={cn(recipe.text, palette.text, grow && 'text-center')}>
         {label}
       </Text>
-      {onRemove ? <CloseSmall size={11} /> : null}
+      {onRemove ? (
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={t('common.remove', { label })}
+          // The glyph is 11px, so the target is grown outwards rather than in.
+          hitSlop={10}
+          onPress={onRemove}
+        >
+          <CloseSmall size={11} />
+        </Pressable>
+      ) : null}
     </>
   );
 
@@ -104,7 +119,7 @@ export function Chip({
     className,
   );
 
-  if (!onPress && !onRemove) {
+  if (!onPress) {
     return (
       <View className={classes} style={tone === 'raised' ? shadows.chipSoft : undefined}>
         {content}
@@ -115,7 +130,7 @@ export function Chip({
   return (
     <Pressable
       accessibilityRole="button"
-      onPress={onRemove ?? onPress}
+      onPress={onPress}
       className={classes}
       style={({ pressed }) => [
         tone === 'raised' ? shadows.chipSoft : null,

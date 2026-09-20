@@ -146,6 +146,7 @@ export function AgeRangeControl({
 
         <RangeSlider
           range={[ageToFraction(range[0]), ageToFraction(range[1])]}
+          valueText={`${range[0]}–${range[1]} ${unitLabel}`}
           onChange={([low, high]) => onChange?.([fractionToAge(low), fractionToAge(high)])}
         />
 

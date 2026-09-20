@@ -37,6 +37,16 @@ const INITIAL: SessionState = {
 
 const SessionContext = createContext<SessionContextValue | null>(null);
 
+/** The flags are four booleans, so a field-by-field compare is the whole story. */
+function isSameSession(a: SessionState, b: SessionState): boolean {
+  return (
+    a.isAuthenticated === b.isAuthenticated &&
+    a.hasOnboarded === b.hasOnboarded &&
+    a.isVerified === b.isVerified &&
+    a.isSubscribed === b.isSubscribed
+  );
+}
+
 /**
  * Holds the flags the router's `Protected` guards read.
  *
@@ -77,27 +87,48 @@ export function SessionProvider({ children }: { children: ReactNode }) {
     return () => data.subscription.unsubscribe();
   }, []);
 
-  const persist = useCallback((next: SessionState) => {
-    setState(next);
-    void AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(next)).catch((error) =>
+  // Mirror every settled change back to storage. Held until the restore has run
+  // so the initial flags cannot overwrite what was read back.
+  useEffect(() => {
+    if (!isReady) return;
+    void AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(state)).catch((error) =>
       console.warn('[session] Could not persist session:', error),
     );
+  }, [state, isReady]);
+
+  /**
+   * Merges a patch into the newest state rather than a captured snapshot, so two
+   * flags set in the same tick both survive, and returns the previous object
+   * unchanged when nothing moved — the setters below stay referentially stable,
+   * which keeps `useEffect(() => setVerified(true), [setVerified])` from looping.
+   */
+  const update = useCallback((patch: Partial<SessionState>) => {
+    setState((previous) => {
+      const next = { ...previous, ...patch };
+      return isSameSession(previous, next) ? previous : next;
+    });
+  }, []);
+
+  const signIn = useCallback(() => update({ isAuthenticated: true }), [update]);
+  const completeOnboarding = useCallback(() => update({ hasOnboarded: true }), [update]);
+  const setVerified = useCallback((isVerified: boolean) => update({ isVerified }), [update]);
+  const setSubscribed = useCallback((isSubscribed: boolean) => update({ isSubscribed }), [update]);
+  const signOut = useCallback(() => {
+    void supabase?.auth.signOut();
+    setState(INITIAL);
   }, []);
 
   const value = useMemo<SessionContextValue>(
     () => ({
       ...state,
       isReady,
-      signIn: () => persist({ ...state, isAuthenticated: true }),
-      signOut: () => {
-        void supabase?.auth.signOut();
-        persist(INITIAL);
-      },
-      completeOnboarding: () => persist({ ...state, hasOnboarded: true }),
-      setVerified: (isVerified) => persist({ ...state, isVerified }),
-      setSubscribed: (isSubscribed) => persist({ ...state, isSubscribed }),
+      signIn,
+      signOut,
+      completeOnboarding,
+      setVerified,
+      setSubscribed,
     }),
-    [state, isReady, persist],
+    [state, isReady, signIn, signOut, completeOnboarding, setVerified, setSubscribed],
   );
 
   return <SessionContext.Provider value={value}>{children}</SessionContext.Provider>;

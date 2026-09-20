@@ -23,7 +23,11 @@ export function ConversationsScreen() {
         <Text weight={600} className="text-[30px] tracking-[-0.96px]">
           {t('chat.tabTitle')}
         </Text>
-        <CircleButton size={40} onPress={() => router.push('/create')}>
+        <CircleButton
+          size={40}
+          accessibilityLabel={t('common.newPlan')}
+          onPress={() => router.push('/create')}
+        >
           <Glyph.PlusGlyph size={17} color={colors.brand} strokeWidth={2.2} />
         </CircleButton>
       </View>
