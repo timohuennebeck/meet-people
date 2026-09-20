@@ -139,7 +139,7 @@ entitlement.
 **Where logic lives.** Plain table reads and writes from the app wherever RLS is enough (profiles,
 preferences, interests, consent, blocks). Edge functions wherever a secret or a third party is
 involved (RevenueCat, auth admin, the verification reviewer). Database triggers only where a rule
-must hold under concurrency and cannot be expressed as a policy: seat capacity (§3.5) and the
+must hold under concurrency and cannot be expressed as a policy: the seat limit (§3.5) and the
 free-tier quota (§3.7). Everything else is a call the app made and whose result it sees.
 
 ---
@@ -201,7 +201,7 @@ Seed:
 | `maintenance_mode`         | `false`   | the same                                    |
 | `verification_sla_hours`   | `3`       | "Normalmente menos de 3 horas" (screen 14c) |
 | `selfie_retention_days`    | `7`       | the retention job (§3.8)                    |
-| `plan_capacity_max`        | `20`      | the create flow's seat stepper              |
+| `plan_seats_max`           | `20`      | the create flow's seat stepper              |
 | `free_radius_max_mi`       | `3`       | radius clamp for non-Plus users (§3.7)      |
 
 Three properties matter. It is readable by **`anon` as well as `authenticated`** — a version gate
@@ -232,8 +232,8 @@ create table public.profiles (
   pronouns                public.pronouns not null default 'unspecified',
   gender                  public.gender,                         -- null = visible to everyone
   bio                     text check (char_length(bio) <= 400),
-  neighbourhood           text,                                  -- never a street address
-  country_code            char(2),
+  neighbourhood           text,                                  -- derived from the point, see below
+  origin_country          char(2),                               -- ISO 3166-1 alpha-2; "De onde você é?"
   onboarding_completed_at timestamptz,
   deleted_at              timestamptz,                           -- anonymised, see §3.9
   created_at              timestamptz not null default now(),
@@ -252,7 +252,7 @@ create index on public.profile_locations using gist (point);
 -- What other users read. Verification is derived here, not stored on the profile (§3.8).
 create view public.public_profiles as
   select p.id, p.name, extract(year from age(p.birthdate))::int as age, p.avatar_storage_path,
-         p.pronouns, p.gender, p.bio, p.neighbourhood, p.country_code,
+         p.pronouns, p.gender, p.bio, p.neighbourhood, p.origin_country,
          public.verification_status_of(p.id) = 'verified' as verified
   from public.profiles p
   where p.deleted_at is null;
@@ -266,6 +266,17 @@ Why not blur the point instead? An earlier draft snapped it to a ~500 m grid. Th
 the smallest radius is 1 mi (~1,600 m), so a 500 m snap is up to a third of it, and the design
 shows labels like "a 400 m" that would visibly drift. Isolation solves the leak without costing
 accuracy.
+
+**Nobody types their neighbourhood.** Step 2 asks for location permission and promises "Ninguém vê
+seu endereço, só o bairro"; the app reverse-geocodes the point it just got (`expo-location`'s
+`reverseGeocodeAsync`, the `district` field) and writes the label to `profiles.neighbourhood` in
+the same call that writes `profile_locations.point`. It is rewritten whenever the point is, and
+never edited on its own. Stored rather than computed per read because it is on every profile card
+and the label must not flicker between geocoder answers.
+
+`origin_country` is where the person is _from_ — the step is "De onde você é?" and the answer
+becomes the flag on their photo — not where they live, which for now is the same city for
+everyone. An earlier draft called it `country_code`, which reads as residence.
 
 `gender` is nullable and edited from settings, because the design has no onboarding step for it and
 we are not inventing a screen. **Null means visible to every audience** — nobody is hidden for
@@ -333,7 +344,7 @@ create table public.plans (
   join_mode        public.join_mode not null default 'approval',
   starts_at        timestamptz not null,
   duration_minutes int check (duration_minutes > 0),
-  capacity         smallint not null check (capacity between 2 and 20),
+  seats            smallint not null check (seats between 2 and 20),   -- total, host included
   age_min          smallint check (age_min >= 18),
   age_max          smallint check (age_max <= 99),
   cancelled_at     timestamptz,
@@ -387,9 +398,11 @@ create table public.plan_attendance (
 );
 ```
 
-**The capacity trigger.** Nothing in the current migration stops a full plan being over-seated. A
-`before insert on plan_participants` trigger counts seats (`left_at is null`) against
-`plans.capacity` in the same transaction and raises when it would overflow. The race is not theoretical: a host tapping Accept
+**The seats trigger.** Nothing in the current migration stops a full plan being over-seated. A
+`before insert on plan_participants` trigger counts occupied seats (`left_at is null`) against
+`plans.seats` in the same transaction and raises when it would overflow. `seats` is the total the
+host chose on the seats step, host included — "vagas" in the product's own words — and the free
+count every sheet shows is derived from it. The race is not theoretical: a host tapping Accept
 on two requests in quick succession is exactly the concurrency case already fixed on the client, and
 the database has no equivalent guard.
 
@@ -818,32 +831,32 @@ membership value the client has to compute.
 
 ## 6. Screen → data map
 
-| Screen                                | Reads                                  | Writes                                             |
-| ------------------------------------- | -------------------------------------- | -------------------------------------------------- |
-| Welcome                               | `legal_documents` (current versions)   | `signInAnonymously`, `profiles` upsert, acceptance |
-| 1 App-Sprache · Settings 3a           | client constants                       | `preferences.app_language`                         |
-| 2 Standort                            | —                                      | `profile_locations`, `profiles.neighbourhood`      |
-| 3 Radius · Settings 2                 | `preferences`                          | `preferences.radius`, `distance_unit`              |
-| 3b Altersspanne · Settings 6          | `preferences`                          | `preferences.age_min/max`, `audience_gender`       |
-| 4 Interessen · Settings 5             | `profile_interests`                    | `profile_interests`                                |
-| 5 Sprachen · Settings 3b              | `profile_languages`                    | `profile_languages`                                |
-| 6 Herkunftsland                       | client constants                       | `profiles.country_code`                            |
-| 6/6b/7 Konto                          | `legal_documents`                      | `updateUser` / `linkIdentity`, acceptance          |
-| 10 Name · 11 Geburtstag · 12 Pronomen | —                                      | `profiles.name`, `birthdate`, `pronouns`           |
-| 13 Foto                               | —                                      | `avatars` object, `profiles.avatar_storage_path`   |
-| 14a/b Selfie · 14c Prüfung            | `verification_submissions`             | `verification` object, submission row              |
-| 16 Regeln                             | —                                      | `profiles.onboarding_completed_at`                 |
-| 17 Paywall · 30a aufgebraucht         | RevenueCat offerings + `entitlements`  | purchase via the SDK                               |
-| 0 Prévia (Home)                       | `nearby_plans()`                       | —                                                  |
-| 1 Offen · 2 Beitritt anfragen         | `nearby_plans()` / plan detail         | `join_requests` (quota trigger applies)            |
-| 3 Anfrage gesendet · 5 Absagen        | plan detail                            | delete `join_requests` / set `left_at`             |
-| 1–3 Host-Sheets                       | plan detail, `join_requests`           | resolve requests, `plan_participants`              |
-| Create 1–6 · Veröffentlicht           | `places` (recent, nearby)              | `places`, `plans` (+ host seat trigger)            |
-| 12a Conversas                         | `conversation_list` view               | —                                                  |
-| 1:1 / Gruppe                          | `messages` + Realtime, presence        | `messages`, `conversation_members.last_read_at`    |
-| 17a Profil                            | `public_profiles`, `plan_attendance`   | `blocks`, `reports`                                |
-| 15d Personensuche                     | `public_profiles` search, minus blocks | —                                                  |
-| Settings · Konto löschen              | —                                      | `delete-account`                                   |
+| Screen                                | Reads                                  | Writes                                                 |
+| ------------------------------------- | -------------------------------------- | ------------------------------------------------------ |
+| Welcome                               | `legal_documents` (current versions)   | `signInAnonymously`, `profiles` upsert, acceptance     |
+| 1 App-Sprache · Settings 3a           | client constants                       | `preferences.app_language`                             |
+| 2 Standort                            | —                                      | `profile_locations` + reverse-geocoded `neighbourhood` |
+| 3 Radius · Settings 2                 | `preferences`                          | `preferences.radius`, `distance_unit`                  |
+| 3b Altersspanne · Settings 6          | `preferences`                          | `preferences.age_min/max`, `audience_gender`           |
+| 4 Interessen · Settings 5             | `profile_interests`                    | `profile_interests`                                    |
+| 5 Sprachen · Settings 3b              | `profile_languages`                    | `profile_languages`                                    |
+| 6 Herkunftsland                       | client constants                       | `profiles.origin_country`                              |
+| 6/6b/7 Konto                          | `legal_documents`                      | `updateUser` / `linkIdentity`, acceptance              |
+| 10 Name · 11 Geburtstag · 12 Pronomen | —                                      | `profiles.name`, `birthdate`, `pronouns`               |
+| 13 Foto                               | —                                      | `avatars` object, `profiles.avatar_storage_path`       |
+| 14a/b Selfie · 14c Prüfung            | `verification_submissions`             | `verification` object, submission row                  |
+| 16 Regeln                             | —                                      | `profiles.onboarding_completed_at`                     |
+| 17 Paywall · 30a aufgebraucht         | RevenueCat offerings + `entitlements`  | purchase via the SDK                                   |
+| 0 Prévia (Home)                       | `nearby_plans()`                       | —                                                      |
+| 1 Offen · 2 Beitritt anfragen         | `nearby_plans()` / plan detail         | `join_requests` (quota trigger applies)                |
+| 3 Anfrage gesendet · 5 Absagen        | plan detail                            | delete `join_requests` / set `left_at`                 |
+| 1–3 Host-Sheets                       | plan detail, `join_requests`           | resolve requests, `plan_participants`                  |
+| Create 1–6 · Veröffentlicht           | `places` (recent, nearby)              | `places`, `plans` (+ host seat trigger)                |
+| 12a Conversas                         | `conversation_list` view               | —                                                      |
+| 1:1 / Gruppe                          | `messages` + Realtime, presence        | `messages`, `conversation_members.last_read_at`        |
+| 17a Profil                            | `public_profiles`, `plan_attendance`   | `blocks`, `reports`                                    |
+| 15d Personensuche                     | `public_profiles` search, minus blocks | —                                                      |
+| Settings · Konto löschen              | —                                      | `delete-account`                                       |
 
 ---
 
@@ -858,7 +871,7 @@ supabase/migrations/
                                             profiles.verification_status + verified_at and adds
                                             verification_submissions + verification_status_of()
                                             first, because public_profiles calls it
-  003_safety_and_capacity.sql            blocks + is_blocked(), reports, capacity trigger,
+  003_safety_and_seats.sql               blocks + is_blocked(), reports, seats trigger,
                                             participants.left_at, plan_attendance,
                                             messages FK restrict, messages.body → content
   004_trust_legal_billing.sql            legal_documents + acceptances, entitlements,
@@ -951,3 +964,6 @@ Not database work, but the schema above assumes them:
    data-minimisation argument for the Política de privacidade?
 9. Is the free tier three _requests_ a week (as the trigger counts — joining an `open` plan is
    unlimited) or three _joins_ a week? §3.5 explains the difference; the copy says "pedidos".
+10. `plans.category` is read everywhere — it is the badge on every plan photo and the ring colour on
+    every map pin — but no create step writes it. Either the column and both visuals go, or step 1
+    gains a four-chip category row. The schema keeps it until decided.
