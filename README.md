@@ -84,8 +84,9 @@ anything:
   instead — the same visual relationship to the bottom of the usable area.
 - The Profile tab is a new screen. The design only drew another person's
   profile (17a); the signed-in user's own profile is derived from it.
-- The design's alternate account screen (6b, Google above a divider with inline
-  e-mail and password) is not built — the primary variant (6) is.
+- The design offers two layouts for the account step. Both are built: the
+  default flow uses `AccountScreen` (6), and `AccountInlineScreen` (6b) sits at
+  `/(onboarding)/account-inline` so the variant can be compared and swapped in.
 
 ## Data
 
