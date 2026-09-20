@@ -564,6 +564,16 @@ A direct conversation is unique per pair, which is what the ordered columns and 
 constraint above are for — without them the app will happily open a second thread with the same
 person.
 
+**No client creates a conversation.** A plan's group chat follows the plan: `plans_open_chat`
+opens it when the plan is inserted, and `plan_members_sync_chat` seats whoever becomes `seated`
+and removes whoever leaves — which is what the leave screen already promised. A direct thread is
+opened by one function, `open_direct_conversation(other)`, which returns the existing thread if
+there is one and otherwise creates it. **A thread with someone you have sat in a plan with is
+free; a thread with anyone else is `PLUS_REQUIRED`.** That is one rule read two ways: it is what
+Plus sells, and it is what keeps a stranger from opening a thread with everyone on the map.
+Verified live: a shared plan opens the thread, a cold one refuses, Plus opens it, and the same
+pair always comes back to the same thread.
+
 ### 3.7 Billing and the free-tier quota
 
 **RevenueCat is the authority; the database holds a mirror.** The mirror exists so Postgres can
@@ -624,12 +634,13 @@ create function public.has_plus(uid uuid default auth.uid()) returns boolean
       and (current_period_end is null or current_period_end > now())) $$;
 ```
 
-| Paywall promise                        | Enforced in                                             |
-| -------------------------------------- | ------------------------------------------------------- |
-| Pedidos ilimitados                     | the quota trigger below skips the cap when `has_plus()` |
-| Veja quem quer te encontrar            | **not enforced — see below**                            |
-| Planos da cidade inteira               | `nearby_plans()` clamps radius to `free_radius_max_mi`  |
-| Filtros de idioma, idade e verificados | `nearby_plans()` ignores filter args unless Plus        |
+| Paywall promise                               | Enforced in                                                  |
+| --------------------------------------------- | ------------------------------------------------------------ |
+| Pedidos ilimitados                            | the quota trigger below skips the cap when `has_plus()`      |
+| Veja quem quer te encontrar                   | **not enforced — see below**                                 |
+| Planos da cidade inteira                      | `nearby_plans()` clamps radius to `free_radius_max_mi`       |
+| Filtros de idioma, idade e verificados        | `nearby_plans()` ignores filter args unless Plus             |
+| _Mensagens com quem você ainda não encontrou_ | `open_direct_conversation()` — not yet on the paywall's copy |
 
 **The free quota.** `private.request_quota_spent()` counts the user's requests — rows with a
 `requested_at` inside `free_request_window_days`, minus the declined ones — and both membership
@@ -1002,12 +1013,13 @@ require a permanent account, enforced in the policies rather than the UI.
 | `delete-account`     | app        | anonymise the profile, purge storage, `auth.admin.deleteUser`                      |
 | `purge-selfies`      | schedule   | delete verification objects past `selfie_retention_days`                           |
 
-| RPC                     | Returns                                                                            |
-| ----------------------- | ---------------------------------------------------------------------------------- |
-| `nearby_plans(...)`     | spatial query + age/gender filters + blocks + viewer membership, in one round trip |
-| `has_plus(uid)`         | boolean, used by policies and triggers                                             |
-| `export_my_data()`      | one JSON document for the caller                                                   |
-| `distance_to(place_id)` | metres from the caller's point, without exposing either coordinate                 |
+| RPC                               | Returns                                                                            |
+| --------------------------------- | ---------------------------------------------------------------------------------- |
+| `nearby_plans(...)`               | spatial query + age/gender filters + blocks + viewer membership, in one round trip |
+| `has_plus(uid)`                   | boolean, used by policies and triggers                                             |
+| `export_my_data()`                | one JSON document for the caller                                                   |
+| `distance_to(place_id)`           | metres from the caller's point, without exposing either coordinate                 |
+| `open_direct_conversation(other)` | the pair's thread id, created if new; `PLUS_REQUIRED` for a cold one               |
 
 Two jobs that were drafted as edge functions are `pg_cron` calls into SQL functions instead:
 `private.close_stale_plans()` every half hour, and `private.materialise_plan_series(10)` nightly.
@@ -1079,6 +1091,11 @@ supabase/migrations/
   20260920000800_language_enum_members_places.sql
                                          the language_code enum, plan_members in place of
                                             join_requests + plan_participants, places.provider_place_id
+  20260920000900_quota_counts_requests.sql
+                                         `requested_at`, declined requests refunded, one counter
+  20260920001000_chat_follows_the_plan.sql
+                                         group chats by trigger, direct threads by RPC, cold ones
+                                            Plus
 supabase/seed.sql                        app_config, eight people with home points, seven places,
                                             four plans matching the design fixtures, one standing
                                             meetup, two chat threads

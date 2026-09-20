@@ -256,29 +256,31 @@ on conflict (id) do nothing;
 -- Chat
 --
 -- The two threads the design scripts: the run's group chat and a direct one with
--- Sara. Timestamps are minutes apart and relative to now, so the conversations
--- list always has something recent at the top.
+-- Sara. The group chat is not created here — `plans_open_chat` made it when the
+-- plan was inserted, and `plan_members_sync_chat` seated its members — so the
+-- seed only finds it, and writes the direct thread that no trigger makes.
+-- Timestamps are minutes apart and relative to now, so the conversations list
+-- always has something recent at the top.
 -- ---------------------------------------------------------------------------
 
-insert into public.conversations (id, plan_id) values
-  ('66666666-6666-4666-8666-000000000001', '33333333-3333-4333-8333-000000000001'),
-  ('66666666-6666-4666-8666-000000000002', null)
+-- Give the run's chat a fixed id so the messages below can name it.
+update public.conversations set id = '66666666-6666-4666-8666-000000000001'
+where plan_id = '33333333-3333-4333-8333-000000000001';
+
+-- Left deliberately stale, so the run's thread shows an unread badge.
+update public.conversation_members set last_read_at = now() - interval '1 day'
+where conversation_id = '66666666-6666-4666-8666-000000000001'
+  and profile_id = '11111111-1111-4111-8111-000000000001';
+
+insert into public.conversations (id, direct_lower_id, direct_higher_id) values
+  ('66666666-6666-4666-8666-000000000002',
+   '11111111-1111-4111-8111-000000000001', '11111111-1111-4111-8111-000000000003')
 on conflict (id) do nothing;
 
-insert into public.conversation_members (conversation_id, profile_id, last_read_at) values
-  ('66666666-6666-4666-8666-000000000001', '11111111-1111-4111-8111-000000000004', now()),
-  ('66666666-6666-4666-8666-000000000001', '11111111-1111-4111-8111-000000000003', now()),
-  ('66666666-6666-4666-8666-000000000001', '11111111-1111-4111-8111-000000000005', now()),
-  -- Left deliberately stale, so the run's thread shows an unread badge.
-  ('66666666-6666-4666-8666-000000000001', '11111111-1111-4111-8111-000000000001', now() - interval '1 day'),
-  ('66666666-6666-4666-8666-000000000002', '11111111-1111-4111-8111-000000000001', now()),
-  ('66666666-6666-4666-8666-000000000002', '11111111-1111-4111-8111-000000000003', now())
+insert into public.conversation_members (conversation_id, profile_id) values
+  ('66666666-6666-4666-8666-000000000002', '11111111-1111-4111-8111-000000000001'),
+  ('66666666-6666-4666-8666-000000000002', '11111111-1111-4111-8111-000000000003')
 on conflict do nothing;
-
-update public.conversations set
-  direct_lower_id = '11111111-1111-4111-8111-000000000001',
-  direct_higher_id = '11111111-1111-4111-8111-000000000003'
-where id = '66666666-6666-4666-8666-000000000002';
 
 insert into public.messages (conversation_id, author_id, content, created_at) values
   ('66666666-6666-4666-8666-000000000001', '11111111-1111-4111-8111-000000000004',
