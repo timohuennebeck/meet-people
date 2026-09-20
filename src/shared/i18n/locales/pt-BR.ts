@@ -59,6 +59,8 @@ export const ptBR = {
       benefitPrivacy: 'Ninguém vê seu endereço, só o bairro.',
       allow: 'Permitir localização',
       chooseNeighbourhood: 'Escolher bairro',
+      locating: 'Buscando sua localização…',
+      unavailable: 'Sem a localização, o mapa não mostra o que está perto de você.',
     },
     radius: {
       title: 'Até onde você\nquer ir?',

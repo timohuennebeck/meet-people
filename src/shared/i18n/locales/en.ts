@@ -60,6 +60,8 @@ export const en: Translation = {
       benefitPrivacy: 'Nobody sees your address, only your neighbourhood.',
       allow: 'Allow location',
       chooseNeighbourhood: 'Choose neighbourhood',
+      locating: 'Finding your location…',
+      unavailable: 'Without your location, the map cannot show what is nearby.',
     },
     radius: {
       title: 'How far will\nyou go?',

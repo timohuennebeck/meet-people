@@ -111,10 +111,11 @@ export function saveAvatar(uri: string): void {
  * write-only and the neighbourhood on the profile is the only part of it the
  * app ever sees again.
  *
- * Unused today: the location step is a permission ask with no permission behind
- * it, because `expo-location` is not a dependency of this app. The moment it is,
- * that screen has a point to hand over and a `district` to pass as the
- * neighbourhood — see the note in `LocationScreen`.
+ * Called by `LocationScreen`, which asks for permission, takes a balanced-accuracy
+ * fix and reverse-geocodes it. The `district` it reads back is the neighbourhood:
+ * nobody types theirs, and the step promises "ninguém vê seu endereço, só o
+ * bairro". A denial is not an error — the step continues without a point, and
+ * the map simply has nothing to measure from.
  */
 export function saveLocation(
   point: { latitude: number; longitude: number },
