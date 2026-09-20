@@ -11,7 +11,6 @@ export const ptBR = {
     skip: 'Pular',
     publish: 'Publicar',
     back: 'Voltar',
-    later: 'Talvez depois',
     notNow: 'Agora não',
     preferNotToSay: 'Prefiro não dizer',
     done: 'Pronto',
@@ -24,10 +23,16 @@ export const ptBR = {
     close: 'Fechar',
     verified: 'Verificado',
     more: 'Mais opções',
-    newPlan: 'Novo plano',
     remove: 'Remover {{label}}',
     raiseLower: 'Aumentar o mínimo',
     lowerLower: 'Diminuir o mínimo',
+  },
+
+  /** How a language row's subtitle labels each proficiency level. */
+  languageLevel: {
+    native: 'Nativo',
+    fluent: 'Bem',
+    learning: 'Aprendendo',
   },
 
   welcome: {
@@ -615,7 +620,7 @@ export const ptBR = {
         'As notificações avisam de pedidos e mensagens; as métricas são anônimas e mostram onde o app trava. Dá para desligar as notificações no aparelho a qualquer momento.',
       s8Heading: 'Fale com a gente',
       s8Body:
-        'Dúvidas sobre privacidade? Escreva para privacidade@treff.app — respondemos em até 30 dias.',
+        'Dúvidas sobre privacidade? Escreva para privacy@treff.app — respondemos em até 30 dias.',
     },
   },
 

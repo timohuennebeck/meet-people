@@ -66,7 +66,6 @@ export const palette = {
     pale: '#C3CAD6',
     stone: '#D6DCE6',
     slate: '#B4BAC6',
-    dot: '#C9D0DC',
   },
   category: {
     sport: '#32C36A',

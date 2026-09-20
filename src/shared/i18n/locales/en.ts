@@ -12,7 +12,6 @@ export const en: Translation = {
     skip: 'Skip',
     publish: 'Publish',
     back: 'Back',
-    later: 'Maybe later',
     notNow: 'Not now',
     preferNotToSay: 'Prefer not to say',
     done: 'Done',
@@ -25,10 +24,15 @@ export const en: Translation = {
     close: 'Close',
     verified: 'Verified',
     more: 'More options',
-    newPlan: 'New plan',
     remove: 'Remove {{label}}',
     raiseLower: 'Raise the minimum',
     lowerLower: 'Lower the minimum',
+  },
+
+  languageLevel: {
+    native: 'Native',
+    fluent: 'Fluent',
+    learning: 'Learning',
   },
 
   welcome: {

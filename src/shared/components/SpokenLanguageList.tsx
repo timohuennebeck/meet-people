@@ -1,7 +1,8 @@
+import { useTranslation } from 'react-i18next';
 import { View } from 'react-native';
 
 import { usePreferences, useUpdatePreferences } from '@features/settings/data/usePreferences';
-import { LEVEL_LABEL, pickLanguages } from '@shared/lib/languages';
+import { LEVEL_LABEL_KEY, pickLanguages } from '@shared/lib/languages';
 import { SelectableRow } from '@shared/ui';
 
 export interface SpokenLanguageListProps {
@@ -15,6 +16,7 @@ export interface SpokenLanguageListProps {
  * rest show the language's own name.
  */
 export function SpokenLanguageList({ codes }: SpokenLanguageListProps) {
+  const { t } = useTranslation();
   const { data: preferences } = usePreferences();
   const { mutate: update } = useUpdatePreferences();
 
@@ -37,7 +39,7 @@ export function SpokenLanguageList({ codes }: SpokenLanguageListProps) {
           <SelectableRow
             key={language.code}
             title={language.name}
-            subtitle={chosen ? LEVEL_LABEL[chosen.level] : language.endonym}
+            subtitle={chosen ? t(LEVEL_LABEL_KEY[chosen.level]) : language.endonym}
             flag={language.flag}
             selected={Boolean(chosen)}
             onPress={() => toggle(language.code, language.flag)}

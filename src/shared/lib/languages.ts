@@ -95,11 +95,14 @@ export const COUNTRIES: readonly LanguageOption[] = [
   { code: 'pl', flag: 'pl', name: 'Polônia', endonym: 'Polska' },
 ];
 
-/** How the design labels each proficiency level in a language row's subtitle. */
-export const LEVEL_LABEL = {
-  native: 'Nativo',
-  fluent: 'Bem',
-  learning: 'Aprendendo',
+/**
+ * The translation key that labels each proficiency level in a language row's
+ * subtitle. The wording itself lives in the locale files.
+ */
+export const LEVEL_LABEL_KEY = {
+  native: 'languageLevel.native',
+  fluent: 'languageLevel.fluent',
+  learning: 'languageLevel.learning',
 } as const;
 
 /** Looks up a language's display name, falling back to its code. */
