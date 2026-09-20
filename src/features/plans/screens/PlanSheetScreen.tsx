@@ -24,6 +24,7 @@ import { usePlan, useSetMembership } from '../data/usePlans';
 import { hasEnded } from '../lib/attendance';
 import { openSeatCount, seatsFor } from '../lib/seats';
 import { HostRequestList } from '../ui/HostRequestList';
+import { PlanLanguages } from '../ui/PlanLanguages';
 import { PlanSheetHeader } from '../ui/PlanSheetHeader';
 
 /** The host summary the open and joined sheets both open with. */
@@ -66,6 +67,11 @@ function OpenState({ plan, onJoin }: { plan: Plan; onJoin: () => void }) {
       <PlanSheetHeader plan={plan} photoHeight={220} mascotSize={148} titleGap={6} />
 
       <PlanHost plan={plan} />
+
+      {/* Between the host and the seats, the same chips the card carries: the
+          guest deciding whether to ask for a seat is the reader this answer
+          was written for, so it must not be lost on the way into the sheet. */}
+      <PlanLanguages codes={plan.languages} />
 
       <PlanSeats plan={plan} />
 
@@ -150,6 +156,8 @@ function JoinedState({
       <PlanSheetHeader plan={plan} photoHeight={180} mascotSize={132} joined />
 
       <PlanHost plan={plan} />
+
+      <PlanLanguages codes={plan.languages} />
 
       <PlanSeats plan={plan} />
 

@@ -21,7 +21,6 @@ export function CreateWhatScreen() {
   return (
     <CreateStepLayout
       step={1}
-      progress={0.2}
       title={t('create.what.title')}
       subtitle={t('create.what.subtitle')}
       footer={<Button label={t('common.continue')} onPress={() => router.push('/create/where')} />}

@@ -408,6 +408,12 @@ export const en: Translation = {
       approvalBody: 'You accept each person.',
       hint: 'Without approval, plans fill up faster.',
     },
+    language: {
+      title: 'Which language?',
+      subtitle: 'Pick one or more. It shows on the plan card.',
+      yours: 'Your language',
+      spokenNearby: 'Spoken by {{speakers}} of {{total}} nearby',
+    },
     seats: {
       title: "Who's coming along?",
       subtitle: 'Seats including you.',

@@ -42,7 +42,6 @@ export function CreateWhereScreen() {
   return (
     <CreateStepLayout
       step={2}
-      progress={0.4}
       title={t('create.where.title')}
       subtitle={t('create.where.subtitle')}
       footer={

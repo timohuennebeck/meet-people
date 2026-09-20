@@ -7,7 +7,7 @@ import { cn } from '@shared/lib/cn';
 import { colors } from '@shared/theme/tokens';
 import { Button, Card, Glyph, Text } from '@shared/ui';
 
-import { CREATE_TOTAL, CreateStepLayout } from '../../ui/CreateStepLayout';
+import { CreateStepLayout } from '../../ui/CreateStepLayout';
 
 const MIN_SEATS = 2;
 const MAX_SEATS = 20;
@@ -43,7 +43,7 @@ function StepperButton({
   );
 }
 
-/** Create step 5 — how many seats, counting the host. */
+/** Create step 6 — how many seats, counting the host. */
 export function CreateSeatsScreen() {
   const { t } = useTranslation();
   const router = useRouter();
@@ -51,13 +51,11 @@ export function CreateSeatsScreen() {
 
   return (
     <CreateStepLayout
-      step={5}
-      progress={1}
-      total={CREATE_TOTAL}
+      step={6}
       title={t('create.seats.title')}
       subtitle={t('create.seats.subtitle')}
       footer={
-        <Button label={t('common.publish')} onPress={() => router.push('/create/audience')} />
+        <Button label={t('common.continue')} onPress={() => router.push('/create/audience')} />
       }
     >
       <View className="mt-[22px] flex-1">

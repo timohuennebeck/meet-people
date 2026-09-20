@@ -176,6 +176,7 @@ export const GAME_PLAN: Plan = {
   id: 'plan-kotti',
   title: 'Tarde de jogos no Café Kotti',
   description: 'Partidas tranquilas, todos os níveis são bem-vindos. Levo dois tabuleiros.',
+  languages: ['pt', 'en', 'de'],
   joinMode: 'approval',
   membership: 'guest',
   host: PHIL,
@@ -231,6 +232,7 @@ export const GAME_PLAN: Plan = {
 export const RUN_PLAN: Plan = {
   id: 'plan-run',
   title: 'Corrida leve de 3 mi no canal',
+  languages: ['pt', 'en'],
   joinMode: 'approval',
   membership: 'guest',
   host: LEA,
@@ -260,6 +262,7 @@ export const RUN_PLAN: Plan = {
 export const WALK_PLAN: Plan = {
   id: 'plan-walk',
   title: 'Caminhada em volta do Schlachtensee',
+  languages: ['pt'],
   joinMode: 'approval',
   membership: 'host',
   host: VIEWER,
@@ -283,6 +286,7 @@ export const WALK_PLAN: Plan = {
 export const COFFEE_PLAN: Plan = {
   id: 'plan-coffee',
   title: 'Café no domingo',
+  languages: ['en', 'es'],
   joinMode: 'open',
   membership: 'guest',
   host: ELIF,

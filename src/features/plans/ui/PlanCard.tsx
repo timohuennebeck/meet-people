@@ -7,6 +7,7 @@ import { cn } from '@shared/lib/cn';
 import { colors, shadows } from '@shared/theme/tokens';
 import { Avatar, PlanPhoto, Text } from '@shared/ui';
 
+import { PlanLanguages } from './PlanLanguages';
 import { openSeatCount } from '../lib/seats';
 
 /** One detail line under a plan's title: icon, then a single line of copy. */
@@ -123,6 +124,11 @@ export function PlanCard({ plan, variant, onPress }: PlanCardProps) {
                 })} · ${t('plan.hostLine', { name: plan.host.name })}`}
               </DetailLine>
             </View>
+
+            {/* Which languages the evening runs in, under the seat and host
+                line and above the actions — the last thing read before the
+                decision to open the plan at all. */}
+            <PlanLanguages codes={plan.languages} className="mt-[2px]" />
           </View>
 
           <View className="flex-row items-center gap-[8px] px-[4px] pb-[4px]">

@@ -79,6 +79,13 @@ export const planSchema = z.object({
   id: z.string(),
   title: z.string(),
   description: z.string().optional(),
+  /**
+   * Which languages the plan will be held in, as codes from the catalogue in
+   * `@shared/lib/languages`. Load-bearing rather than decorative: it decides
+   * whether someone new in town can follow the evening at all, so the card
+   * shows it rather than keeping it behind the tap.
+   */
+  languages: z.array(z.string()),
   joinMode: joinModeSchema,
   membership: membershipSchema,
   host: userSchema,

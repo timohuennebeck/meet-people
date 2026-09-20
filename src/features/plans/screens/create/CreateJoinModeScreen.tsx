@@ -61,10 +61,11 @@ export function CreateJoinModeScreen() {
   return (
     <CreateStepLayout
       step={4}
-      progress={0.8}
       title={t('create.joinMode.title')}
       subtitle={t('create.joinMode.subtitle')}
-      footer={<Button label={t('common.continue')} onPress={() => router.push('/create/seats')} />}
+      footer={
+        <Button label={t('common.continue')} onPress={() => router.push('/create/language')} />
+      }
     >
       <View className="mt-[22px] flex-1 gap-[12px]">
         <ModeOption

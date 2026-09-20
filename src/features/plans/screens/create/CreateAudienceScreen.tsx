@@ -10,9 +10,9 @@ import {
 } from '@shared/components/AgeRangeControl';
 import { Button, Spacer, TextButton } from '@shared/ui';
 
-import { CREATE_TOTAL, CreateStepLayout } from '../../ui/CreateStepLayout';
+import { CreateStepLayout } from '../../ui/CreateStepLayout';
 
-/** Create step 6 — an optional age range for the plan, then publish. */
+/** Create step 7 — an optional age range for the plan, then publish. */
 export function CreateAudienceScreen() {
   const { t } = useTranslation();
   const router = useRouter();
@@ -22,9 +22,7 @@ export function CreateAudienceScreen() {
 
   return (
     <CreateStepLayout
-      step={6}
-      progress={1}
-      total={CREATE_TOTAL}
+      step={7}
       title={t('create.audience.title')}
       subtitle={t('create.audience.subtitle')}
       footer={

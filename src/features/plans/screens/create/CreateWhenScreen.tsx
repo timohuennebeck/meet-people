@@ -84,7 +84,6 @@ export function CreateWhenScreen() {
   return (
     <CreateStepLayout
       step={3}
-      progress={0.6}
       title={t('create.when.title')}
       subtitle={t('create.when.subtitle', { place: 'Café Kotti' })}
       footer={
