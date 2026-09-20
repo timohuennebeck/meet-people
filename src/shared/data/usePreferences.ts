@@ -1,8 +1,8 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
-import { preferenceKeys } from '@shared/data/queryKeys';
-import type { Preferences } from '@shared/data/schemas';
-import { dataSource } from '@shared/data/source';
+import { preferenceKeys } from './queryKeys';
+import type { Preferences } from './schemas';
+import { dataSource } from './source';
 
 /** The signed-in user's discovery and app preferences. */
 export function usePreferences() {

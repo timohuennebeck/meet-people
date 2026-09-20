@@ -77,7 +77,7 @@ export function LeavePlanScreen() {
       <HostCard
         avatarUri={plan?.host?.avatarUrl ?? ''}
         name={plan?.title ?? ''}
-        detail={`${plan?.whenLabel.split(' · ')[0] ?? ''} · ${t('plan.leave.attendees', {
+        detail={`${plan?.whenLabel ?? ''} · ${t('plan.leave.attendees', {
           names: attendees,
         })}`}
         verified={false}

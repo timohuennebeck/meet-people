@@ -7,11 +7,12 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useOpenDirect } from '@features/chat/data/useChat';
 import { isDataError } from '@shared/data/errors';
+import { useViewer } from '@shared/data/useViewer';
 import { cn } from '@shared/lib/cn';
 import { colors } from '@shared/theme/tokens';
 import { Button, CircleButton, Glyph, SealNote, Text } from '@shared/ui';
 
-import { useMe, useRecordProfileView, useUser } from '../data/useUsers';
+import { useRecordProfileView, useUser } from '../data/useUsers';
 import { ProfileHeader, ProfileInterests } from '../ui/ProfileHeader';
 
 /** `radius:18px · #F7F9FC` tile — one of the three stats under the header. */
@@ -33,7 +34,7 @@ export function PersonProfileScreen() {
   const insets = useSafeAreaInsets();
   const { id } = useLocalSearchParams<{ id: string }>();
   const { data: user } = useUser(id ?? '');
-  const { data: me } = useMe();
+  const { data: me } = useViewer();
   const openDirect = useOpenDirect();
   const { mutate: recordView } = useRecordProfileView();
   const recorded = useRef(false);

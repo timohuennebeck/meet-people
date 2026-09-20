@@ -11,8 +11,8 @@ import { useEffect, useMemo } from 'react';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
-import { usePreferences } from '@features/settings/data/usePreferences';
 import { createQueryClient } from '@shared/data/queryClient';
+import { usePreferences } from '@shared/data/usePreferences';
 import { setLocale } from '@shared/i18n';
 import { AnalyticsProvider } from '@shared/providers/AnalyticsProvider';
 import { BillingProvider } from '@shared/providers/BillingProvider';

@@ -2,9 +2,10 @@ import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { ScrollView, View } from 'react-native';
 
-import { VIEWER_EMAIL } from '@shared/data/fixtures';
+import { usePreferences } from '@shared/data/usePreferences';
 import { APP_LANGUAGES, languageName } from '@shared/lib/languages';
 import { legalHref } from '@shared/lib/legal';
+import { useSession } from '@shared/providers/SessionProvider';
 import {
   Flag,
   FlagStack,
@@ -16,8 +17,6 @@ import {
   Text,
   TextButton,
 } from '@shared/ui';
-
-import { usePreferences } from '../data/usePreferences';
 
 /** `#EAF1FE` pill showing the account's verification state. */
 function VerifiedPill({ label }: { label: string }) {
@@ -45,6 +44,7 @@ export function SettingsScreen() {
   const { t } = useTranslation();
   const router = useRouter();
   const { data: preferences } = usePreferences();
+  const { email } = useSession();
 
   const languageCodes = (preferences?.spokenLanguages ?? []).map((language) => language.flag);
   const languageNames = (preferences?.spokenLanguages ?? [])
@@ -117,7 +117,7 @@ export function SettingsScreen() {
         </Group>
 
         <Group label={t('settings.groupAccount')}>
-          <ListRow label={t('settings.accountSecurity')} value={VIEWER_EMAIL} />
+          <ListRow label={t('settings.accountSecurity')} value={email ?? ''} />
           <ListRow
             divided
             label={t('settings.verificationBadge')}

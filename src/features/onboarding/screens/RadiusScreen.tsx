@@ -1,11 +1,11 @@
 import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 
-import { usePreferences, useUpdatePreferences } from '@features/settings/data/usePreferences';
 import { RadiusControl } from '@shared/components/RadiusControl';
 import { RadiusMap } from '@shared/components/RadiusMap';
 import { StepScaffold } from '@shared/components/StepScaffold';
 import type { DistanceUnit } from '@shared/data/schemas';
+import { usePreferences, useUpdatePreferences } from '@shared/data/usePreferences';
 import { STEPS } from '@shared/lib/steps';
 import { Button, Spacer } from '@shared/ui';
 

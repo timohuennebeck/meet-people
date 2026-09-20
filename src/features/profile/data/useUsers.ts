@@ -4,14 +4,6 @@ import { isDataError } from '@shared/data/errors';
 import { userKeys } from '@shared/data/queryKeys';
 import { dataSource } from '@shared/data/source';
 
-/** The signed-in user. */
-export function useMe() {
-  return useQuery({
-    ...userKeys.me(),
-    queryFn: () => dataSource.users.me(),
-  });
-}
-
 /** Another person's profile. */
 export function useUser(userId: string) {
   return useQuery({

@@ -2,8 +2,8 @@ import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { View } from 'react-native';
 
-import { usePreferences, useUpdatePreferences } from '@features/settings/data/usePreferences';
 import { StepScaffold } from '@shared/components/StepScaffold';
+import { usePreferences, useUpdatePreferences } from '@shared/data/usePreferences';
 import { MAX_INTEREST_LENGTH, MAX_INTERESTS } from '@shared/lib/limits';
 import { STEPS } from '@shared/lib/steps';
 import { Button, Chip, Spacer, TagInput } from '@shared/ui';

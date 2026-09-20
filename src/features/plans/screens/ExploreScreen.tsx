@@ -5,8 +5,8 @@ import { useTranslation } from 'react-i18next';
 import { Pressable, ScrollView, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { AVATARS, VIEWER } from '@shared/data/fixtures';
-import { isOnDayFilter, type DayFilter } from '@shared/lib/datetime';
+import { useViewer } from '@shared/data/useViewer';
+import { formatTime, isOnDayFilter, type DayFilter } from '@shared/lib/datetime';
 import { gradients, shadows } from '@shared/theme/tokens';
 import { Avatar, Chip, Glyph, GlowingMascot, Text } from '@shared/ui';
 
@@ -86,11 +86,12 @@ function NothingOnThisDay({ filter }: { filter: DayFilter }) {
  * is the same visual relationship to the bottom of the usable area.
  */
 export function ExploreScreen() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const [filter, setFilter] = useState<DayFilter>('today');
   const { data: plans } = usePlans();
+  const { data: viewer } = useViewer();
 
   // One query, three views of it: the chips re-slice what is already here
   // rather than re-keying the list. `startsAt` is the ISO instant the row
@@ -119,7 +120,7 @@ export function ExploreScreen() {
             plan.id === cards[0]?.id && plan.pinLabel
               ? {
                   title: plan.pinLabel,
-                  meta: `18:30 · ${plan.participants.length}${plan.capacity === null ? '' : `/${plan.capacity}`}`,
+                  meta: `${formatTime(new Date(plan.startsAt), i18n.language)} · ${plan.participants.length}${plan.capacity === null ? '' : `/${plan.capacity}`}`,
                 }
               : undefined
           }
@@ -147,13 +148,13 @@ export function ExploreScreen() {
           </Pressable>
           <Pressable
             accessibilityRole="button"
-            accessibilityLabel={VIEWER.name}
+            accessibilityLabel={viewer?.name ?? t('common.profile')}
             onPress={() => router.push('/(tabs)/profile')}
             // 44px avatar with a 3px white ring drawn outside it.
             className="h-[50px] w-[50px] overflow-hidden rounded-full border-[3px] border-white bg-surface"
             style={shadows.chip}
           >
-            <Avatar uri={AVATARS.viewer} size={44} />
+            <Avatar uri={viewer?.avatarUrl ?? ''} size={44} />
           </Pressable>
         </View>
       </View>

@@ -51,5 +51,3 @@ export const STEPS = {
   phone: at(8),
   code: at(9),
 } as const satisfies Record<string, StepPosition>;
-
-export type StepName = keyof typeof STEPS;

@@ -1,9 +1,9 @@
 import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 
-import { usePreferences, useUpdatePreferences } from '@features/settings/data/usePreferences';
 import { AgePresets, AgeRangeControl } from '@shared/components/AgeRangeControl';
 import { StepScaffold } from '@shared/components/StepScaffold';
+import { usePreferences, useUpdatePreferences } from '@shared/data/usePreferences';
 import { STEPS } from '@shared/lib/steps';
 import { Button, Spacer } from '@shared/ui';
 

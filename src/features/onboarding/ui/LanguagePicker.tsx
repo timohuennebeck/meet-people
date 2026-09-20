@@ -3,7 +3,7 @@ import { useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Dimensions, Modal, Pressable, View } from 'react-native';
 
-import { usePreferences, useUpdatePreferences } from '@features/settings/data/usePreferences';
+import { usePreferences, useUpdatePreferences } from '@shared/data/usePreferences';
 import { setLocale } from '@shared/i18n';
 import { cn } from '@shared/lib/cn';
 import { haptics } from '@shared/lib/haptics';

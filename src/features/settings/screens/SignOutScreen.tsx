@@ -2,7 +2,7 @@ import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 
 import { MascotScreen } from '@shared/components/MascotScreen';
-import { VIEWER, VIEWER_EMAIL } from '@shared/data/fixtures';
+import { useViewer } from '@shared/data/useViewer';
 import { useSession } from '@shared/providers/SessionProvider';
 import { Button, HostCard, TextButton } from '@shared/ui';
 
@@ -19,7 +19,8 @@ import { Button, HostCard, TextButton } from '@shared/ui';
 export function SignOutScreen() {
   const { t } = useTranslation();
   const router = useRouter();
-  const { signOut } = useSession();
+  const { signOut, email } = useSession();
+  const { data: viewer } = useViewer();
 
   const leave = () => {
     signOut();
@@ -44,10 +45,10 @@ export function SignOutScreen() {
       }
     >
       <HostCard
-        avatarUri={VIEWER.avatarUrl}
-        name={VIEWER.name}
-        detail={VIEWER_EMAIL}
-        verified={VIEWER.verified}
+        avatarUri={viewer?.avatarUrl ?? ''}
+        name={viewer?.name ?? ''}
+        detail={email ?? ''}
+        verified={viewer?.verified ?? false}
       />
     </MascotScreen>
   );

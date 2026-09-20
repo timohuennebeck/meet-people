@@ -4,8 +4,8 @@ import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { View } from 'react-native';
 
-import { useUpdatePreferences } from '@features/settings/data/usePreferences';
 import { StepScaffold } from '@shared/components/StepScaffold';
+import { useUpdatePreferences } from '@shared/data/usePreferences';
 import { STEPS } from '@shared/lib/steps';
 import { gradientAngles, gradients, shadows } from '@shared/theme/tokens';
 import { Button, Mascot, Spacer, Text, TextButton } from '@shared/ui';

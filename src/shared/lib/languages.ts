@@ -34,19 +34,9 @@ export const APP_LANGUAGES = [
   { code: 'it', flag: 'it', name: 'Italiano', endonym: 'Italiano' },
 ] as const satisfies readonly FlagOption[];
 
-/** Languages a user can list as one they speak. */
-export const SPOKEN_LANGUAGES = [
-  { code: 'de', flag: 'de', name: 'Alemão', endonym: 'Deutsch' },
-  { code: 'en', flag: 'gb', name: 'Inglês', endonym: 'English' },
-  { code: 'pt', flag: 'pt', name: 'Português', endonym: 'Português' },
-  { code: 'tr', flag: 'tr', name: 'Turco', endonym: 'Türkçe' },
-  { code: 'es', flag: 'es', name: 'Espanhol', endonym: 'Español' },
-  { code: 'pl', flag: 'pl', name: 'Polonês', endonym: 'Polski' },
-] as const satisfies readonly FlagOption[];
-
 /**
  * The full catalogue the "search another language" step looks through. The
- * shortlists above are the handful each screen offers up front; this is what
+ * shortlist above is the handful each screen offers up front; this is what
  * typing reaches.
  */
 export const SEARCHABLE_LANGUAGES = [
@@ -73,11 +63,9 @@ export const SEARCHABLE_LANGUAGES = [
   { code: 'uk', flag: 'ua', name: 'Ucraniano', endonym: 'Українська' },
 ] as const satisfies readonly FlagOption[];
 
-/** Every code the three language catalogues above hold, as literals. */
+/** Every code the two language catalogues above hold, as literals. */
 type CatalogueCode =
-  | (typeof APP_LANGUAGES)[number]['code']
-  | (typeof SPOKEN_LANGUAGES)[number]['code']
-  | (typeof SEARCHABLE_LANGUAGES)[number]['code'];
+  (typeof APP_LANGUAGES)[number]['code'] | (typeof SEARCHABLE_LANGUAGES)[number]['code'];
 
 /**
  * Passes a code through unchanged, but only if the `language_code` Postgres

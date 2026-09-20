@@ -1,6 +1,6 @@
 import { View } from 'react-native';
 
-import { usePreferences, useUpdatePreferences } from '@features/settings/data/usePreferences';
+import { usePreferences, useUpdatePreferences } from '@shared/data/usePreferences';
 import { pickLanguages } from '@shared/lib/languages';
 import { SelectableRow } from '@shared/ui';
 

@@ -3,9 +3,8 @@ import { useTranslation } from 'react-i18next';
 
 import { RadiusControl } from '@shared/components/RadiusControl';
 import { RadiusMap } from '@shared/components/RadiusMap';
+import { usePreferences, useUpdatePreferences } from '@shared/data/usePreferences';
 import { Button, NavHeader, Screen, Spacer, StepSubtitle } from '@shared/ui';
-
-import { usePreferences, useUpdatePreferences } from '../data/usePreferences';
 
 /** Settings → Radius. The same controls as the onboarding step, saved in place. */
 export function RadiusSettingsScreen() {

@@ -2,11 +2,12 @@ import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { Pressable, ScrollView, View } from 'react-native';
 
-import { usePreferences } from '@features/settings/data/usePreferences';
+import { usePreferences } from '@shared/data/usePreferences';
+import { useViewer } from '@shared/data/useViewer';
 import { colors } from '@shared/theme/tokens';
 import { Button, CircleButton, Glyph, SealNote, Text } from '@shared/ui';
 
-import { useMe, useProfileViewCount } from '../data/useUsers';
+import { useProfileViewCount } from '../data/useUsers';
 import { ProfileHeader, ProfileInterests } from '../ui/ProfileHeader';
 
 /**
@@ -51,7 +52,7 @@ function ProfileViewsRow({ count, onPress }: { count: number; onPress: () => voi
 export function MyProfileScreen() {
   const { t } = useTranslation();
   const router = useRouter();
-  const { data: me } = useMe();
+  const { data: me } = useViewer();
   const { data: preferences } = usePreferences();
   const { data: viewCount } = useProfileViewCount();
 

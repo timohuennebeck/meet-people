@@ -8,11 +8,11 @@ import { dataSource } from './source';
  * optimistic updates — the participant chat adds to a plan's seat grid, the
  * author chat stamps on a bubble before the server has one.
  *
- * It shares `userKeys.me()` with the profile feature's `useMe`, so the two
- * dedupe into a single fetch rather than becoming two sources of truth about
- * the same person. It lives in `shared` because two features need it, and it
- * replaces what used to be a direct import of the `VIEWER` fixture — which was
- * the right person only while the fixtures were the only source.
+ * It is keyed on `userKeys.me()`, so every screen asking for the viewer
+ * dedupes into a single fetch rather than becoming a second source of truth
+ * about the same person. It lives in `shared` because several features need
+ * it, and it replaces what used to be a direct import of the `VIEWER` fixture
+ * — which was the right person only while the fixtures were the only source.
  */
 export function useViewer() {
   return useQuery({

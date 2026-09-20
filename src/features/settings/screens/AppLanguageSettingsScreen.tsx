@@ -2,11 +2,10 @@ import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { ScrollView, View } from 'react-native';
 
+import { usePreferences, useUpdatePreferences } from '@shared/data/usePreferences';
 import { setLocale } from '@shared/i18n';
 import { APP_LANGUAGES } from '@shared/lib/languages';
 import { NavHeader, Screen, SectionLabel, SelectableRow, Text } from '@shared/ui';
-
-import { usePreferences, useUpdatePreferences } from '../data/usePreferences';
 
 /**
  * Settings → App language. Changes the interface only; the languages the user

@@ -2,10 +2,9 @@ import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { View } from 'react-native';
 
+import { usePreferences, useUpdatePreferences } from '@shared/data/usePreferences';
 import { MAX_INTEREST_LENGTH, MAX_INTERESTS } from '@shared/lib/limits';
 import { Button, Chip, NavHeader, Screen, SectionLabel, Spacer, TagInput, Text } from '@shared/ui';
-
-import { usePreferences, useUpdatePreferences } from '../data/usePreferences';
 
 /** Suggestions offered under the field. */
 const SUGGESTIONS = ['Música ao vivo', 'Museus'];

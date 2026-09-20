@@ -18,8 +18,6 @@ export const colors = flattenPalette();
 export const gradients = {
   /** Map backdrop behind pins and sheets. */
   map: [palette.map.top, palette.map.bottom],
-  /** Map backdrop that fades to white at the bottom (join-request sheet). */
-  mapFade: ['#FCEBCF', '#FDF3E2', '#FFFFFF'],
   /** Placeholder behind the mascot on plan photos. */
   photo: ['#EDF4FF', '#DEEAFB'],
   /** Top-of-screen wash on welcome and success screens. */
@@ -48,7 +46,6 @@ export const gradientAngles = {
 /** Gradient stop positions matching the design's `%` offsets. */
 export const gradientStops = {
   welcome: [0, 0.4, 0.62],
-  mapFade: [0, 0.4, 1],
   profile: [0, 0.46, 1],
   success: [0, 0.58],
   published: [0, 0.55],
@@ -108,14 +105,6 @@ export const shadows = {
     shadowOpacity: 0.16,
     shadowRadius: 40,
     elevation: 12,
-  },
-  /** `0 -10px 40px rgba(21,24,31,.18)` — bottom sheets. */
-  sheet: {
-    shadowColor: '#15181F',
-    shadowOffset: { width: 0, height: -10 },
-    shadowOpacity: 0.18,
-    shadowRadius: 40,
-    elevation: 20,
   },
   /** `0 6px 16px rgba(21,24,31,.12)` — primary buttons inside sheets. */
   primaryButton: {

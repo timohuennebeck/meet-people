@@ -17,6 +17,8 @@ export interface SessionState {
 }
 
 interface SessionContextValue extends SessionState {
+  /** The account's e-mail, for the screens that name it back. Null when signed out. */
+  email: string | null;
   /** False until the first answer about the stored session has arrived. */
   isReady: boolean;
   signIn: () => void;
@@ -257,6 +259,7 @@ export function SessionProvider({ children }: { children: ReactNode }) {
       // With no project configured there is no session to have, and the
       // fixtures are the whole app — see `DEMO`.
       isAuthenticated: supabase ? Boolean(session) : true,
+      email: session?.user.email ?? null,
       isReady,
       signIn,
       signOut,
