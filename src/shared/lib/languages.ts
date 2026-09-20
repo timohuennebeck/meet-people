@@ -95,16 +95,6 @@ export const COUNTRIES: readonly LanguageOption[] = [
   { code: 'pl', flag: 'pl', name: 'Polônia', endonym: 'Polska' },
 ];
 
-/**
- * The translation key that labels each proficiency level in a language row's
- * subtitle. The wording itself lives in the locale files.
- */
-export const LEVEL_LABEL_KEY = {
-  native: 'languageLevel.native',
-  fluent: 'languageLevel.fluent',
-  learning: 'languageLevel.learning',
-} as const;
-
 /** Looks up a language's display name, falling back to its code. */
 export function languageName(code: string): string {
   return SEARCHABLE_LANGUAGES.find((language) => language.code === code)?.name ?? code;

@@ -1,20 +1,10 @@
 import { Pressable, View } from 'react-native';
 
-import type { PlanCategory } from '@shared/data/schemas';
 import { colors, shadows } from '@shared/theme/tokens';
 import { Avatar, Text } from '@shared/ui';
 
-/** Ring colour per category, matching the badge colours on plan photos. */
-const RING: Record<PlanCategory, string> = {
-  sport: colors.categorySport,
-  games: colors.categoryGames,
-  walk: colors.categoryWalk,
-  coffee: colors.categoryCoffee,
-};
-
 export interface MapPinProps {
   avatarUri: string;
-  category: PlanCategory;
   /** Position in the design's 402×874 canvas. */
   x: number;
   y: number;
@@ -26,10 +16,10 @@ export interface MapPinProps {
 }
 
 /**
- * `62px · 4px category ring · 2px white gutter` — a plan on the map, optionally
+ * `62px · 4px brand ring · 2px white gutter` — a plan on the map, optionally
  * with the white bubble that names it.
  */
-export function MapPin({ avatarUri, category, x, y, title, label, onPress }: MapPinProps) {
+export function MapPin({ avatarUri, x, y, title, label, onPress }: MapPinProps) {
   return (
     <Pressable
       accessibilityRole="button"
@@ -40,7 +30,7 @@ export function MapPin({ avatarUri, category, x, y, title, label, onPress }: Map
     >
       <View
         className="h-[62px] w-[62px] overflow-hidden rounded-full border-[4px] bg-surface p-[2px]"
-        style={[{ borderColor: RING[category] }, shadows.pin]}
+        style={[{ borderColor: colors.brand }, shadows.pin]}
       >
         <Avatar uri={avatarUri} size={50} />
       </View>

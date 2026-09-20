@@ -165,8 +165,6 @@ function HostState({ plan }: { plan: Plan }) {
 
   // A plan with five seats lays them out smaller to fit the row.
   const wide = plan.capacity > 4;
-  // Freshly published: nobody has asked yet and nothing is taken.
-  const fresh = !hasRequests && !full;
 
   const seatRow = (
     <SeatList
@@ -187,8 +185,6 @@ function HostState({ plan }: { plan: Plan }) {
         photoHeight={hasRequests ? 220 : 160}
         mascotSize={hasRequests ? 148 : 118}
         hosting
-        // A freshly published plan carries only the host badge.
-        showCategory={!fresh}
         showDistance={false}
       />
 
@@ -200,7 +196,7 @@ function HostState({ plan }: { plan: Plan }) {
             <Text weight={600} className="text-[12px] tracking-[0.4px] text-ink-faint">
               {t('plan.seatsLabel')}
             </Text>
-            <Text weight={600} className="text-[13px] text-category-games">
+            <Text weight={600} className="text-[13px] text-ink-slate">
               {t('plan.seatsFree', { count: open })}
             </Text>
           </View>

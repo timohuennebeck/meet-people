@@ -90,7 +90,7 @@ export function SeatSummary({ filled, open }: { filled: string; open: string }) 
       <Text weight={600} className="text-[14px]">
         {filled}
       </Text>
-      <Text weight={600} className="text-[14px] text-category-games">
+      <Text weight={600} className="text-[14px] text-ink-slate">
         {open}
       </Text>
     </View>

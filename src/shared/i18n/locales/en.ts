@@ -29,12 +29,6 @@ export const en: Translation = {
     lowerLower: 'Lower the minimum',
   },
 
-  languageLevel: {
-    native: 'Native',
-    fluent: 'Fluent',
-    learning: 'Learning',
-  },
-
   welcome: {
     titleHighlight: 'Tonight',
     titleRest: 'got plans yet?',
@@ -311,11 +305,6 @@ export const en: Translation = {
     noRequestsTitle: 'No requests yet',
     noRequestsBody:
       'Your plan just landed on the map. People within 2 mi will see it over the next few hours.',
-    categorySport: 'SPORT',
-    categoryGames: 'GAMES',
-    categoryWalk: 'WALK',
-    categoryCoffee: 'COFFEE',
-
     request: {
       title: 'Say hi to {{name}}',
       subtitle: 'They decide who joins.',

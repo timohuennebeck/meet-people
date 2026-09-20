@@ -28,13 +28,6 @@ export const ptBR = {
     lowerLower: 'Diminuir o mínimo',
   },
 
-  /** How a language row's subtitle labels each proficiency level. */
-  languageLevel: {
-    native: 'Nativo',
-    fluent: 'Bem',
-    learning: 'Aprendendo',
-  },
-
   welcome: {
     titleHighlight: 'Hoje à noite',
     titleRest: 'já tem planos?',
@@ -312,11 +305,6 @@ export const ptBR = {
     noRequestsTitle: 'Nenhum pedido ainda',
     noRequestsBody:
       'Seu plano acabou de entrar no mapa. Quem está a até 2 mi vê nas próximas horas.',
-    categorySport: 'ESPORTE',
-    categoryGames: 'JOGOS',
-    categoryWalk: 'CAMINHADA',
-    categoryCoffee: 'CAFÉ',
-
     request: {
       title: 'Diga oi para {{name}}',
       subtitle: 'Ele decide quem entra.',

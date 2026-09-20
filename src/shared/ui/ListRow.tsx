@@ -85,7 +85,7 @@ export function ListRow({
 
 export interface SelectableRowProps {
   title: string;
-  /** Second line — a proficiency level, or the language's endonym. */
+  /** Second line — the language's endonym. */
   subtitle?: string;
   /** ISO 3166-1 alpha-2 code for the leading flag. */
   flag?: string;

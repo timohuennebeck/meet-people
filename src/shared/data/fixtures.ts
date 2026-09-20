@@ -34,8 +34,8 @@ export const AVATARS = {
   pinCoffee: portrait('pin-kaffee', 600),
 } as const;
 
-const GERMAN: SpokenLanguage = { code: 'de', flag: 'de', level: 'native' };
-const ENGLISH: SpokenLanguage = { code: 'en', flag: 'gb', level: 'fluent' };
+const GERMAN: SpokenLanguage = { code: 'de', flag: 'de' };
+const ENGLISH: SpokenLanguage = { code: 'en', flag: 'gb' };
 
 export const VIEWER: User = {
   id: 'u-viewer',
@@ -169,7 +169,6 @@ export const GAME_PLAN: Plan = {
   id: 'plan-kotti',
   title: 'Tarde de jogos no Café Kotti',
   description: 'Partidas tranquilas, todos os níveis são bem-vindos. Levo dois tabuleiros.',
-  category: 'games',
   joinMode: 'approval',
   membership: 'guest',
   host: PHIL,
@@ -225,7 +224,6 @@ export const GAME_PLAN: Plan = {
 export const RUN_PLAN: Plan = {
   id: 'plan-run',
   title: 'Corrida leve de 3 mi no canal',
-  category: 'sport',
   joinMode: 'approval',
   membership: 'guest',
   host: LEA,
@@ -255,7 +253,6 @@ export const RUN_PLAN: Plan = {
 export const WALK_PLAN: Plan = {
   id: 'plan-walk',
   title: 'Caminhada em volta do Schlachtensee',
-  category: 'walk',
   joinMode: 'approval',
   membership: 'host',
   host: VIEWER,
@@ -279,7 +276,6 @@ export const WALK_PLAN: Plan = {
 export const COFFEE_PLAN: Plan = {
   id: 'plan-coffee',
   title: 'Café no domingo',
-  category: 'coffee',
   joinMode: 'open',
   membership: 'guest',
   host: ELIF,

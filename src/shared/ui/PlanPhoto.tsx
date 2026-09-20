@@ -2,23 +2,11 @@ import { LinearGradient } from 'expo-linear-gradient';
 import type { ReactNode } from 'react';
 import { Pressable, View } from 'react-native';
 
-import type { PlanCategory } from '@shared/data/schemas';
 import { cn } from '@shared/lib/cn';
 import { gradientAngles, gradients } from '@shared/theme/tokens';
 
 import { Mascot } from './Mascot';
 import { Text } from './Text';
-
-/**
- * Category colours. Every plan photo carries one of these as its top-left
- * badge — sport green, games slate, walk orange, coffee pink.
- */
-export const CATEGORY_STYLE: Record<PlanCategory, string> = {
-  sport: 'bg-category-sport',
-  games: 'bg-category-games',
-  walk: 'bg-category-walk',
-  coffee: 'bg-category-coffee',
-};
 
 export interface PlanPhotoProps {
   /** Frame height: 140 on a map card, 160–220 inside a sheet. */
@@ -26,7 +14,7 @@ export interface PlanPhotoProps {
   /** Mascot size, which the design scales with the frame. */
   mascotSize: number;
   radius?: number;
-  /** Badges pinned to the top-left corner. */
+  /** Status badges pinned to the top-left corner ("VOCÊ É HOST", "VOCÊ ESTÁ DENTRO"). */
   leading?: ReactNode;
   /** Inset for the leading badges: 10 on a map card, 12 inside a sheet. */
   leadingInset?: number;

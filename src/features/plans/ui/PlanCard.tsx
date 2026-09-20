@@ -5,9 +5,8 @@ import { Pressable, View } from 'react-native';
 import type { Plan } from '@shared/data/schemas';
 import { cn } from '@shared/lib/cn';
 import { colors, shadows } from '@shared/theme/tokens';
-import { Avatar, Badge, CATEGORY_STYLE, PlanPhoto, Text } from '@shared/ui';
+import { Avatar, PlanPhoto, Text } from '@shared/ui';
 
-import { categoryLabel } from '../lib/category';
 import { openSeatCount } from '../lib/seats';
 
 /** One detail line under a plan's title: icon, then a single line of copy. */
@@ -86,13 +85,6 @@ export function PlanCard({ plan, variant, onPress }: PlanCardProps) {
         height={140}
         mascotSize={100}
         radius={18}
-        leadingInset={10}
-        leading={
-          <Badge
-            label={categoryLabel(t, plan.category)}
-            className={CATEGORY_STYLE[plan.category]}
-          />
-        }
         trailing={
           variant === 'full' && openSeats > 0 ? (
             <View

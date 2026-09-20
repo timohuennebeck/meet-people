@@ -164,15 +164,15 @@ export function Chip({
 
 export interface BadgeProps {
   label: string;
-  /** Background fill — a category colour, or translucent white. */
+  /** Background fill — the joined green, or translucent white. */
   className?: string;
   /** Label colour; defaults to white, which every filled badge uses. */
   textClassName?: string;
 }
 
 /**
- * `6px 10px · 11px/600 · .4em tracking` — the category and status badges laid
- * over a plan photo ("ESPORTE", "VOCÊ É HOST", "3 vagas livres").
+ * `6px 10px · 11px/600 · .4em tracking` — the status badges laid over a plan
+ * photo ("VOCÊ ESTÁ DENTRO", "VOCÊ É HOST", "3 vagas livres").
  */
 export function Badge({ label, className, textClassName = 'text-white' }: BadgeProps) {
   return (

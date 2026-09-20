@@ -3,24 +3,17 @@ import { useTranslation } from 'react-i18next';
 import { View } from 'react-native';
 
 import type { Plan } from '@shared/data/schemas';
-import { Badge, CATEGORY_STYLE, PlanPhoto, Text } from '@shared/ui';
-
-import { categoryLabel } from '../lib/category';
+import { Badge, PlanPhoto, Text } from '@shared/ui';
 
 export interface PlanSheetHeaderProps {
   plan: Plan;
   /** Photo height: 220 open, 180 for status sheets, 160 for the host sheet. */
   photoHeight: number;
   mascotSize: number;
-  /** Replaces the category badge with the green "you're in" badge. */
+  /** Shows the green "you're in" badge on the photo. */
   joined?: boolean;
-  /** Adds the white "VOCÊ É HOST" badge next to the category. */
+  /** Shows the white "VOCÊ É HOST" badge on the photo. */
   hosting?: boolean;
-  /**
-   * Whether to show the category badge alongside the host badge. The freshly
-   * published host sheet carries only "VOCÊ É HOST".
-   */
-  showCategory?: boolean;
   /**
    * Appends the distance to the meta line. Guests see how far the plan is;
    * the host, who set the place, does not.
@@ -40,7 +33,6 @@ export function PlanSheetHeader({
   mascotSize,
   joined = false,
   hosting = false,
-  showCategory = true,
   showDistance = true,
   titleGap = 4,
 }: PlanSheetHeaderProps) {
@@ -58,24 +50,14 @@ export function PlanSheetHeader({
         dismissLabel={t('common.close')}
         leading={
           joined ? (
-            <Badge label={t('plan.joinedBadge')} className="bg-category-sport" />
-          ) : (
-            <>
-              {showCategory ? (
-                <Badge
-                  label={categoryLabel(t, plan.category)}
-                  className={CATEGORY_STYLE[plan.category]}
-                />
-              ) : null}
-              {hosting ? (
-                <Badge
-                  label={t('plan.hostBadge')}
-                  className="bg-white/[0.92]"
-                  textClassName="text-ink"
-                />
-              ) : null}
-            </>
-          )
+            <Badge label={t('plan.joinedBadge')} className="bg-joined" />
+          ) : hosting ? (
+            <Badge
+              label={t('plan.hostBadge')}
+              className="bg-white/[0.92]"
+              textClassName="text-ink"
+            />
+          ) : null
         }
       />
 

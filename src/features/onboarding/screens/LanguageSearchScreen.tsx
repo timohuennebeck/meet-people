@@ -25,10 +25,7 @@ export function LanguageSearchScreen() {
   const add = (language: LanguageOption) => {
     if (!spoken.some((entry) => entry.code === language.code)) {
       update({
-        spokenLanguages: [
-          ...spoken,
-          { code: language.code, flag: language.flag, level: 'learning' },
-        ],
+        spokenLanguages: [...spoken, { code: language.code, flag: language.flag }],
       });
     }
     router.back();

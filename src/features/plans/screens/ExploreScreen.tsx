@@ -78,7 +78,6 @@ export function ExploreScreen() {
         <MapPin
           key={plan.id}
           avatarUri={plan.host.avatarUrl}
-          category={plan.category}
           x={plan.pin.x}
           y={plan.pin.y}
           title={plan.title}

@@ -38,6 +38,8 @@ export const palette = {
     ghost: '#8A91A0',
     trace: '#9AA2B1',
     mute: '#A7ADBA',
+    /** The open-seat count beside a seat row ("2 vagas livres"). */
+    slate: '#4A5163',
   },
   surface: {
     DEFAULT: '#FFFFFF',
@@ -67,12 +69,6 @@ export const palette = {
     stone: '#D6DCE6',
     slate: '#B4BAC6',
   },
-  category: {
-    sport: '#32C36A',
-    games: '#4A5163',
-    walk: '#FF8A3D',
-    coffee: '#FF5C7A',
-  },
   danger: { DEFAULT: '#E14B4B', deep: '#C0483C' },
   warn: {
     DEFAULT: '#F0A22E',
@@ -84,6 +80,8 @@ export const palette = {
   /** Map backdrop, top to bottom. */
   map: { top: '#FBE8CE', bottom: '#FDF4EA' },
   online: '#34C759',
+  /** The green "VOCÊ ESTÁ DENTRO" badge on a joined plan's photo. */
+  joined: '#32C36A',
   white: '#FFFFFF',
 } as const;
 

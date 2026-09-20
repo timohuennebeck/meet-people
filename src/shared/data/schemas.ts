@@ -6,9 +6,6 @@ import { z } from 'zod';
  * a screen surfaces here instead of as a blank render.
  */
 
-export const planCategorySchema = z.enum(['sport', 'games', 'walk', 'coffee']);
-export type PlanCategory = z.infer<typeof planCategorySchema>;
-
 export const joinModeSchema = z.enum(['open', 'approval']);
 export type JoinMode = z.infer<typeof joinModeSchema>;
 
@@ -19,14 +16,11 @@ export type Membership = z.infer<typeof membershipSchema>;
 export const pronounsSchema = z.enum(['she', 'he', 'they', 'unspecified']);
 export type Pronouns = z.infer<typeof pronounsSchema>;
 
-export const languageLevelSchema = z.enum(['native', 'fluent', 'learning']);
-
 export const spokenLanguageSchema = z.object({
   /** BCP-47 language code, e.g. `de`, `en`. */
   code: z.string().min(2),
   /** ISO 3166-1 alpha-2 code for the flag shown beside it. */
   flag: z.string().length(2),
-  level: languageLevelSchema,
 });
 export type SpokenLanguage = z.infer<typeof spokenLanguageSchema>;
 
@@ -85,7 +79,6 @@ export const planSchema = z.object({
   id: z.string(),
   title: z.string(),
   description: z.string().optional(),
-  category: planCategorySchema,
   joinMode: joinModeSchema,
   membership: membershipSchema,
   host: userSchema,
