@@ -349,13 +349,13 @@ create index on public.places using gist (point);
 
 create table public.plans (
   id               uuid primary key default gen_random_uuid(),
-  host_id          uuid not null references public.profiles(id) on delete cascade,
+  host_id          uuid references public.profiles(id) on delete cascade,  -- null = a standing meetup (§3.11)
   place_id         uuid not null references public.places(id) on delete restrict,
   title            text not null check (char_length(title) between 1 and 60),
   join_mode        public.join_mode not null default 'approval',
   starts_at        timestamptz not null,
   duration_minutes int check (duration_minutes > 0),
-  seats            smallint not null check (seats between 2 and 20),   -- total, host included
+  seats            smallint check (seats between 2 and 20),   -- total, host included; null = uncapped (§3.11)
   age_min          smallint check (age_min >= 18),
   age_max          smallint check (age_max <= 99),
   cancelled_at     timestamptz,
@@ -372,6 +372,23 @@ map viewport, computed at render time.
 
 `places.profile_id` records who added a place. The insert policy is still `with check (true)`
 for any signed-in user, which is a spam vector; the author at least makes cleanup possible.
+
+```sql
+-- Which languages the plan will actually be held in. Mirrors
+-- `profile_languages`, minus the level: a plan is in a language or it is not.
+create table public.plan_languages (
+  plan_id        uuid not null references public.plans(id) on delete cascade,
+  language_code  text not null,
+  primary key (plan_id, language_code)
+);
+create index on public.plan_languages (language_code);
+```
+
+**Language is not decoration here.** Lisbon's newcomers are most of who this is
+for, and "is this in Portuguese or English?" decides whether someone can go at
+all. It is on the plan card, so it is answered before the tap rather than after.
+A plan must declare at least one — enforced in the create flow and by the
+publish RPC rather than by a constraint, since the rows arrive after the plan.
 
 ### 3.5 Participation: seats, requests, waitlist, attendance
 
@@ -809,6 +826,78 @@ Kept, but each is a gap the app has to close, not a spare column:
 
 ---
 
+### 3.11 Standing meetups
+
+Two changes to `plans` above carry this section: `host_id` and `seats` are both
+nullable.
+
+**A standing meetup has no host.** Nobody organises a sunset. The formats worth
+repeating — a walk on the same route every Wednesday, an easy 5k in the same
+park on Saturday, coffee at the same place on Sunday — have no organiser
+function at all; they are schelling points. Saying "whoever turns up, turns up"
+is both truer and safer than putting a name against a plan nobody is actually
+running. A plan with a `series_id` and no `host_id` renders a standing-meetup
+badge where the host card goes.
+
+That nullability has three consequences, all of which fall out cleanly: the
+join mode can only be `open`, because there is nobody to approve anything; the
+`seat_plan_host` trigger skips, because there is no host to seat; and the
+attendance check skips too, since confirming who came is the host's question.
+
+```sql
+create table public.plan_series (
+  id               uuid primary key default gen_random_uuid(),
+  place_id         uuid not null references public.places(id) on delete restrict,
+  title            text not null check (char_length(title) between 1 and 60),
+  join_mode        public.join_mode not null default 'open',
+  seats            smallint check (seats between 2 and 20),   -- null = uncapped
+  -- ISO day: 1 = Monday … 7 = Sunday, matching `extract(isodow from …)`.
+  repeats_on       smallint not null check (repeats_on between 1 and 7),
+  start_time       time not null,
+  duration_minutes int check (duration_minutes > 0),
+  active           boolean not null default true,
+  created_at       timestamptz not null default now()
+);
+
+create table public.plan_series_languages (
+  series_id      uuid not null references public.plan_series(id) on delete cascade,
+  language_code  text not null,
+  primary key (series_id, language_code)
+);
+
+alter table public.plans add column series_id uuid references public.plan_series(id);
+create index on public.plans (series_id) where series_id is not null;
+```
+
+`repeats_on` plus `start_time` rather than a recurrence rule: a weekday and a
+time expresses every format above, and RRULE can arrive the day something needs
+it. A scheduled function materialises the next occurrence a few days ahead and
+copies the series' languages onto it — **materialises**, not computes, because
+joins, requests and the group chat all hang off a real `plans.id` and a virtual
+occurrence has nothing to attach to.
+
+### 3.12 Uncapped events
+
+`plans.seats` is nullable, and null means no limit. This is not a bigger number:
+it is a second shape of plan, because the seat grid draws one avatar per seat
+and "3 vagas livres" stops meaning anything past about a dozen people.
+
+|                  | Small plan             | Uncapped event            |
+| ---------------- | ---------------------- | ------------------------- |
+| `seats`          | 2–20                   | `null`                    |
+| The sheet shows  | every face, in a grid  | a count and a stacked row |
+| `join_mode`      | `open` or `approval`   | `open` only               |
+| Waitlist         | once full              | never                     |
+| Seats trigger    | counts against `seats` | skipped                   |
+| Attendance check | a list of names        | skipped                   |
+
+**Hosting one requires a verified profile.** An uncapped, open, un-approved
+plan is the most abusable object in the schema, and verification is the gate
+already built for exactly this kind of trust question — `verification_status_of()`
+is what the publish path checks.
+
+---
+
 ## 4. Row-level security
 
 Every table has RLS enabled. Pattern for user-owned tables:
@@ -829,6 +918,8 @@ create policy "own preferences: write" on public.preferences for all
 | `profile_interests`, `profile_languages` | any signed-in                         | own                            |
 | `preferences`                            | own                                   | own                            |
 | `places`                                 | any signed-in                         | insert (author recorded)       |
+| `plan_languages`                         | with their plan                       | plan's host only               |
+| `plan_series`, `plan_series_languages`   | everyone (incl. `anon`)               | none (secret key only)         |
 | `plans`                                  | live plans, minus blocks              | insert / update own as host    |
 | `plan_participants`                      | any signed-in, minus blocks           | update own `left_at` (leaving) |
 | `join_requests`                          | author or host                        | insert own, host resolves      |
@@ -921,6 +1012,9 @@ supabase/migrations/
                                             the reviewed_at trigger, retention job
   005_derived_reads.sql                  conversation_list, nearby_plans(), has_plus(),
                                             export_my_data(), quota trigger, realtime publication
+  006_languages_and_series.sql           plan_languages, plan_series + languages,
+                                            plans.series_id, host_id and seats made
+                                            nullable, the materialising job
 supabase/seed.sql                        app_config (eight keys), terms + privacy in pt-BR and
                                             en, a dev user with onboarding complete, four plans
                                             matching the design fixtures
