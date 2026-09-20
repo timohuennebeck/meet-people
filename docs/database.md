@@ -148,25 +148,28 @@ free-tier quota (§3.7). Everything else is a call the app made and whose result
 
 Conventions: `snake_case`, plural table names, `uuid` keys (`gen_random_uuid()`), `timestamptz`,
 `updated_at` maintained by `moddatetime`, enums for closed sets, RLS enabled on every table
-(policies in §4). `profile_id` always references `profiles(id) on delete cascade` — with the one
-deliberate exception in §3.6, where a cascade would tear holes in other people's chat history.
+(policies in §4). `profile_id` always references `profiles(id)`, cascading on delete — with two deliberate
+exceptions that `set null` instead: `messages.author_id` (§3.6), where a cascade would tear holes
+in other people's chat history, and `places.profile_id` (§3.4), where a place is shared between
+plans and outlives whoever added it.
 
 ### 3.1 Enums
 
 Already in the first migration:
 
 ```sql
-create type public.plan_category       as enum ('sport','games','walk','coffee');
+
 create type public.join_mode           as enum ('open','approval');
 create type public.request_status      as enum ('pending','accepted','declined');
 create type public.pronouns            as enum ('she','he','they','unspecified');
-create type public.language_level      as enum ('native','fluent','learning');
+
 create type public.distance_unit       as enum ('mi','km');
 create type public.audience_gender     as enum ('everyone','women','men','non_binary');
 create type public.verification_status as enum ('none','pending','verified','rejected');
 ```
 
-`plan_category` and `language_level` are dropped in `002` — see §3.10.
+The first migration was rewritten rather than patched when §3.10 cut `plan_category` and
+`language_level`: it has never run anywhere but a laptop, and `npm run db:reset` replays it.
 
 To add:
 
@@ -241,7 +244,7 @@ create table public.profiles (
   gender                  public.gender,                         -- null = visible to everyone
   bio                     text check (char_length(bio) <= 400),
   neighbourhood           text,                                  -- derived from the point, see below
-  origin_country          char(2),                               -- ISO 3166-1 alpha-2; "De onde você é?"
+  country_code            char(2),                               -- ISO 3166-1 alpha-2; "De onde você é?"
   onboarding_completed_at timestamptz,
   deleted_at              timestamptz,                           -- anonymised, see §3.9
   created_at              timestamptz not null default now(),
@@ -260,7 +263,7 @@ create index on public.profile_locations using gist (point);
 -- What other users read. Verification is derived here, not stored on the profile (§3.8).
 create view public.public_profiles as
   select p.id, p.name, extract(year from age(p.birthdate))::int as age, p.avatar_storage_path,
-         p.pronouns, p.gender, p.bio, p.neighbourhood, p.origin_country,
+         p.pronouns, p.gender, p.bio, p.neighbourhood, p.country_code,
          public.verification_status_of(p.id) = 'verified' as verified
   from public.profiles p
   where p.deleted_at is null;
@@ -282,9 +285,10 @@ the same call that writes `profile_locations.point`. It is rewritten whenever th
 never edited on its own. Stored rather than computed per read because it is on every profile card
 and the label must not flicker between geocoder answers.
 
-`origin_country` is where the person is _from_ — the step is "De onde você é?" and the answer
+`country_code` is where the person is _from_ — the step is "De onde você é?" and the answer
 becomes the flag on their photo — not where they live, which for now is the same city for
-everyone. An earlier draft called it `country_code`, which reads as residence.
+everyone. The name is kept because the app already calls it `countryCode`; the column comment
+carries the meaning.
 
 `gender` is nullable and edited from settings, because the design has no onboarding step for it and
 we are not inventing a screen. **Null means visible to every audience** — nobody is hidden for
@@ -338,7 +342,7 @@ create table public.places (
   name        text not null,
   address     text not null,
   point       extensions.geography(point, 4326) not null,
-  created_by  uuid references public.profiles(id) on delete set null,
+  profile_id  uuid references public.profiles(id) on delete set null,   -- who added it; see §3
   created_at  timestamptz not null default now()
 );
 create index on public.places using gist (point);
@@ -366,8 +370,8 @@ is locale formatting, derived client-side from `starts_at`. And `pin` is a coord
 design's 402×874 canvas; in production it is a projection of the place's lat/lng onto the current
 map viewport, computed at render time.
 
-`places.created_by` is new: the current migration lets any signed-in user insert a place with
-`with check (true)`, which is a spam vector. Recording the author at least makes cleanup possible.
+`places.profile_id` records who added a place. The insert policy is still `with check (true)`
+for any signed-in user, which is a spam vector; the author at least makes cleanup possible.
 
 ### 3.5 Participation: seats, requests, waitlist, attendance
 
@@ -412,8 +416,9 @@ count every sheet shows is derived from it. The race is not theoretical: a host 
 on two requests in quick succession is exactly the concurrency case already fixed on the client, and
 the database has no equivalent guard.
 
-**The waitlist is derived, not stored.** `waitlisted boolean` in the current migration cannot
-express "next in line", and an earlier draft of this plan stored a `waitlist_position` instead.
+**The waitlist is derived, not stored.** An earlier migration had a `waitlisted boolean`, which
+cannot express "next in line", and an earlier draft of this plan stored a `waitlist_position`
+instead.
 That was wrong in the other direction: a stored position has to be renumbered by a trigger every
 time someone ahead withdraws or is declined, and the first version of that trigger is where the
 off-by-one lives. Once a plan is full, the queue simply _is_ the pending requests in `created_at`
@@ -477,8 +482,7 @@ create table public.messages (
 create index on public.messages (conversation_id, created_at desc);
 ```
 
-`messages.author_id` is `on delete restrict`, **not** the `cascade` in the current migration. With
-a cascade, the "Excluir conta" row in settings would erase that person's messages out of every
+`messages.author_id` is `on delete restrict`, not `cascade`. With a cascade, the "Excluir conta" row in settings would erase that person's messages out of every
 group conversation they were in, leaving holes in other people's history. Deletion anonymises
 instead (§3.9).
 
@@ -877,7 +881,7 @@ membership value the client has to compute.
 | 3b Altersspanne · Settings 6          | `preferences`                          | `preferences.age_min/max`, `audience_gender`           |
 | 4 Interessen · Settings 5             | `profile_interests`                    | `profile_interests`                                    |
 | 5 Sprachen · Settings 3b              | `profile_languages`                    | `profile_languages`                                    |
-| 6 Herkunftsland                       | client constants                       | `profiles.origin_country`                              |
+| 6 Herkunftsland                       | client constants                       | `profiles.country_code`                                |
 | 6/6b/7 Konto                          | `legal_documents`                      | `updateUser` / `linkIdentity`, acceptance              |
 | 10 Name · 11 Geburtstag · 12 Pronomen | —                                      | `profiles.name`, `birthdate`, `pronouns`               |
 | 13 Foto                               | —                                      | `avatars` object, `profiles.avatar_storage_path`       |
@@ -901,15 +905,14 @@ membership value the client has to compute.
 
 ```
 supabase/migrations/
-  20260920000000_initial_schema.sql      ✅ applied: enums, profiles, preferences, places,
-                                            plans, participants, requests, chat, RLS, triggers
+  20260920000000_initial_schema.sql      ✅ local only: enums, profiles, preferences, places,
+                                            plans, participants, requests, chat, RLS, triggers —
+                                            rewritten to match §3's column set, since it has
+                                            never been deployed
   002_privacy_split.sql                  profile_locations, gender, deleted_at, tightened
-                                            profile policies, missing indexes; DROPS
-                                            profiles.verification_status + verified_at and adds
+                                            profile policies, missing indexes;
                                             verification_submissions + verification_status_of()
-                                            first, because public_profiles calls it; drops
-                                            plans.category + description, profile_languages.level
-                                            and the plan_category + language_level enums
+                                            first, because public_profiles calls it
   003_safety_and_seats.sql               blocks + is_blocked(), reports, seats trigger,
                                             participants.left_at, plan_attendance,
                                             messages FK restrict, messages.body → content

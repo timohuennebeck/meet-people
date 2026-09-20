@@ -10,14 +10,11 @@ create extension if not exists "postgis" with schema extensions;
 -- Enums
 -- ---------------------------------------------------------------------------
 
-create type plan_category as enum ('sport', 'games', 'walk', 'coffee');
 create type join_mode as enum ('open', 'approval');
 create type request_status as enum ('pending', 'accepted', 'declined');
 create type pronouns as enum ('she', 'he', 'they', 'unspecified');
-create type language_level as enum ('native', 'fluent', 'learning');
 create type distance_unit as enum ('mi', 'km');
 create type audience_gender as enum ('everyone', 'women', 'men', 'non_binary');
-create type verification_status as enum ('none', 'pending', 'verified', 'rejected');
 
 -- ---------------------------------------------------------------------------
 -- Profiles
@@ -34,9 +31,8 @@ create table profiles (
   neighbourhood text,
   -- Coarse location used for radius search. Never returned to other users.
   location extensions.geography(point, 4326),
+  -- Where the person is from ("De onde você é?"), shown as a flag; not residence.
   country_code char(2),
-  verification_status verification_status not null default 'none',
-  verified_at timestamptz,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
@@ -58,7 +54,6 @@ create table profile_interests (
 create table profile_languages (
   profile_id uuid not null references profiles on delete cascade,
   language_code text not null,
-  level language_level not null,
   primary key (profile_id, language_code)
 );
 
@@ -88,6 +83,8 @@ create table places (
   name text not null,
   address text not null,
   location extensions.geography(point, 4326) not null,
+  -- Who added it. A place is shared between plans, so it outlives its author.
+  profile_id uuid references profiles on delete set null,
   created_at timestamptz not null default now()
 );
 
@@ -96,12 +93,11 @@ create table plans (
   host_id uuid not null references profiles on delete cascade,
   place_id uuid not null references places on delete restrict,
   title text not null check (char_length(title) between 1 and 60),
-  description text check (char_length(description) <= 500),
-  category plan_category not null,
   join_mode join_mode not null default 'approval',
   starts_at timestamptz not null,
   duration_minutes integer check (duration_minutes > 0),
-  capacity smallint not null check (capacity between 2 and 20),
+  -- Total seats, host included — "vagas" in the product's words.
+  seats smallint not null check (seats between 2 and 20),
   age_min smallint check (age_min >= 18),
   age_max smallint check (age_max <= 99),
   cancelled_at timestamptz,
@@ -127,8 +123,6 @@ create table join_requests (
   profile_id uuid not null references profiles on delete cascade,
   message text check (char_length(message) <= 300),
   status request_status not null default 'pending',
-  -- True once the plan is full and the applicant is next in line.
-  waitlisted boolean not null default false,
   created_at timestamptz not null default now(),
   resolved_at timestamptz,
   unique (plan_id, profile_id)
@@ -158,8 +152,10 @@ create table conversation_members (
 create table messages (
   id uuid primary key default gen_random_uuid(),
   conversation_id uuid not null references conversations on delete cascade,
-  author_id uuid not null references profiles on delete cascade,
-  body text not null check (char_length(body) between 1 and 2000),
+  -- Restrict, not cascade: deleting an account must not tear that person's
+  -- lines out of everyone else's conversations. Deletion anonymises instead.
+  author_id uuid not null references profiles on delete restrict,
+  content text not null check (char_length(content) between 1 and 2000),
   created_at timestamptz not null default now()
 );
 
@@ -304,7 +300,7 @@ create trigger profiles_updated_at before update on profiles
 create trigger plans_updated_at before update on plans
   for each row execute function set_updated_at();
 
--- Seat the host the moment a plan is created, so capacity maths is consistent.
+-- Seat the host the moment a plan is created, so seat maths is consistent.
 create function seat_plan_host() returns trigger
   language plpgsql security definer set search_path = ''
   as $$
