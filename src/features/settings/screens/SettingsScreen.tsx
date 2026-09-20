@@ -2,6 +2,7 @@ import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { ScrollView, View } from 'react-native';
 
+import { VIEWER_EMAIL } from '@shared/data/fixtures';
 import { APP_LANGUAGES, languageName } from '@shared/lib/languages';
 import { legalHref } from '@shared/lib/legal';
 import {
@@ -116,7 +117,7 @@ export function SettingsScreen() {
         </Group>
 
         <Group label={t('settings.groupAccount')}>
-          <ListRow label={t('settings.accountSecurity')} value="sara@mail.com" />
+          <ListRow label={t('settings.accountSecurity')} value={VIEWER_EMAIL} />
           <ListRow
             divided
             label={t('settings.verificationBadge')}
