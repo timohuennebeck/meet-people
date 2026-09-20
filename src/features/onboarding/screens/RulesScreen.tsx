@@ -3,7 +3,12 @@ import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { View } from 'react-native';
-import Animated, { FadeInDown } from 'react-native-reanimated';
+import Animated, {
+  Easing,
+  FadeInUp,
+  withTiming,
+  type EntryAnimationsValues,
+} from 'react-native-reanimated';
 
 import { StepScaffold } from '@shared/components/StepScaffold';
 import { STEPS } from '@shared/lib/steps';
@@ -12,11 +17,42 @@ import { Button, Glyph, Mascot, Spacer, Text, TextButton } from '@shared/ui';
 
 const RULE_COUNT = 3;
 
+/**
+ * `translateX(112%) rotate(5deg) → none` over `.62s cubic-bezier(.2,.8,.25,1)`,
+ * with the fade finishing at 60% — the design's `ruleInA` keyframes. Each card
+ * is dealt in from the right like the next card off a deck, which is why it
+ * arrives tilted and straightens as it lands.
+ *
+ * Written out rather than composed from `SlideInRight`, which has no rotation.
+ */
+const DURATION = 620;
+
+function dealIn(values: EntryAnimationsValues) {
+  'worklet';
+  const easing = Easing.bezier(0.2, 0.8, 0.25, 1);
+  return {
+    initialValues: {
+      opacity: 0,
+      transform: [{ translateX: values.targetWidth * 1.12 }, { rotate: '5deg' }],
+    },
+    animations: {
+      opacity: withTiming(1, { duration: DURATION * 0.6, easing }),
+      transform: [
+        { translateX: withTiming(0, { duration: DURATION, easing }) },
+        { rotate: withTiming('0deg', { duration: DURATION, easing }) },
+      ],
+    },
+  };
+}
+
 /** A confirmed rule, listed under the card as the user works through them. */
 function ConfirmedRule({ title, index }: { title: string; index: number }) {
   return (
     <Animated.View
-      entering={FadeInDown.duration(450).delay(index * 40)}
+      // `ruleRowIn`: down from 8px above over .45s, not the default 25px.
+      entering={FadeInUp.duration(450)
+        .delay(index * 40)
+        .withInitialValues({ opacity: 0, transform: [{ translateY: -8 }] })}
       className="flex-row items-center gap-[11px] rounded-[16px] bg-brand-row px-[15px] py-[12px]"
     >
       <View className="h-[22px] w-[22px] shrink-0 items-center justify-center rounded-full bg-brand">
@@ -87,9 +123,11 @@ export function RulesScreen() {
       }
     >
       <Animated.View
-        // Re-keying on the index replays the card's entrance for each rule.
+        // Re-keying on the index replays the card's entrance for each rule —
+        // the design alternates two identical keyframe names for the same
+        // reason, since CSS will not restart an animation that is already on.
         key={index}
-        entering={FadeInDown.duration(620)}
+        entering={dealIn}
         className="mt-[20px] h-[296px] shrink-0 rounded-[30px] bg-surface p-[20px]"
         style={shadows.ruleCard}
       >

@@ -7,6 +7,8 @@ import { AVATARS } from '@shared/data/fixtures';
 import { gradients, gradientStops, shadows } from '@shared/theme/tokens';
 import { Avatar, AvatarStack, Button, Highlight, Mascot, Screen, Text } from '@shared/ui';
 
+import { LegalLink } from '../ui/LegalLink';
+
 /**
  * Two floating plan cards that overlap the mascot, pinned to the design's
  * offsets (`left:-4px top:26px` and `right:-6px bottom:44px`).
@@ -100,7 +102,11 @@ export function WelcomeScreen() {
           onPress={() => router.push('/(onboarding)/app-language')}
         />
 
-        <Pressable accessibilityRole="button" onPress={() => router.push('/(onboarding)/account')}>
+        <Pressable
+          accessibilityRole="button"
+          className="active:opacity-60"
+          onPress={() => router.push('/(onboarding)/account')}
+        >
           <Text weight={500} className="mt-[15px] text-center text-[16px] text-ink-body">
             {t('welcome.haveAccount')}{' '}
             <Text weight={600} className="text-[16px] text-brand">
@@ -111,13 +117,13 @@ export function WelcomeScreen() {
 
         <Text className="mt-[13px] text-center text-[13px] leading-[19.5px] text-ink-dim">
           {t('welcome.legalPrefix')}{' '}
-          <Text weight={500} className="text-[13px] text-brand">
-            {t('welcome.terms')}
-          </Text>{' '}
+          <LegalLink doc="terms" label={t('welcome.terms')} className="text-[13px] text-brand" />{' '}
           {t('welcome.legalJoin')}{' '}
-          <Text weight={500} className="text-[13px] text-brand">
-            {t('welcome.privacy')}
-          </Text>
+          <LegalLink
+            doc="privacy"
+            label={t('welcome.privacy')}
+            className="text-[13px] text-brand"
+          />
           {t('welcome.legalSuffix')}
         </Text>
       </View>
