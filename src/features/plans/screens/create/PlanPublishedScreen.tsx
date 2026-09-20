@@ -7,6 +7,7 @@ import { View } from 'react-native';
 import { gradients, gradientStops } from '@shared/theme/tokens';
 import {
   Button,
+  CircleButton,
   Glyph,
   LabelledDivider,
   Mascot,
@@ -40,6 +41,19 @@ export function PlanPublishedScreen() {
         locations={gradientStops.published}
         className="absolute inset-0"
       />
+
+      {/* The plan is already published by the time this screen is reached, so
+          the × is a way out of the flow rather than a cancel — it lands on the
+          map, the same place "Concluído" does. */}
+      <View className="shrink-0 flex-row">
+        <CircleButton
+          size={40}
+          accessibilityLabel={t('common.close')}
+          onPress={() => router.replace('/(tabs)')}
+        >
+          <Glyph.CloseHeader size={12} />
+        </CircleButton>
+      </View>
 
       <View className="relative flex-1 items-center justify-center">
         <Mascot size={210} />
