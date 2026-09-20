@@ -925,6 +925,7 @@ create policy "own preferences: write" on public.preferences for all
 | `join_requests`                          | author or host                        | insert own, host resolves      |
 | `plan_attendance`                        | own                                   | none (derived server-side)     |
 | `conversations`, `conversation_members`  | members                               | update own `last_read_at`      |
+| `direct_conversations`                   | the pair themselves                   | none (written with the thread) |
 | `messages`                               | members, minus blocked direct threads | insert own                     |
 | `blocks`                                 | own                                   | insert / delete own            |
 | `reports`                                | own                                   | insert own                     |
@@ -932,6 +933,15 @@ create policy "own preferences: write" on public.preferences for all
 | `billing_events`                         | none                                  | none (edge functions)          |
 | `verification_submissions`               | own                                   | none (edge function + Studio)  |
 | `legal_acceptances`                      | own                                   | insert own                     |
+
+**Every helper in the table above lives in a `private` schema, not in `public`.** PostgREST
+publishes each function in `public` as an RPC endpoint, so a `security definer` helper written for a
+policy is also a URL. `materialise_plan_series()` would have let anyone mint plans;
+`close_stale_plans()` would have let anyone stamp attendance; every trigger function was reachable
+and meaningless. Moving them is enough on its own — `private` is not an exposed schema, so nothing
+in it has an endpoint, while policies and triggers resolve by OID and never noticed. Five functions
+stay in `public` because a screen calls them: `nearby_plans`, `distance_to`, `export_my_data`,
+`attendance_rate_of` and `current_legal_document`, and only the last one keeps `anon`.
 
 Anonymous users (`(auth.jwt() ->> 'is_anonymous')::boolean`) get the same policies. They can
 complete steps 1–6 and nothing else: creating a plan, sending a request and opening a chat all
@@ -947,7 +957,6 @@ require a permanent account, enforced in the policies rather than the UI.
 | `sync-entitlement`   | app        | pull from the RevenueCat REST API right after a purchase, closing the webhook race |
 | `delete-account`     | app        | anonymise the profile, purge storage, `auth.admin.deleteUser`                      |
 | `purge-selfies`      | schedule   | delete verification objects past `selfie_retention_days`                           |
-| `close-stale-plans`  | schedule   | derive `plan_attendance` rows once a plan's end time has passed                    |
 
 | RPC                     | Returns                                                                            |
 | ----------------------- | ---------------------------------------------------------------------------------- |
@@ -955,6 +964,12 @@ require a permanent account, enforced in the policies rather than the UI.
 | `has_plus(uid)`         | boolean, used by policies and triggers                                             |
 | `export_my_data()`      | one JSON document for the caller                                                   |
 | `distance_to(place_id)` | metres from the caller's point, without exposing either coordinate                 |
+
+Two jobs that were drafted as edge functions are `pg_cron` calls into SQL functions instead:
+`private.close_stale_plans()` every half hour, and `private.materialise_plan_series(10)` nightly.
+Neither needs the network, a secret or a deploy step, so the round trip out to Deno and back was
+buying nothing. `purge-selfies` stays an edge function because deleting a storage object is not
+something SQL can do.
 
 `nearby_plans` is the workhorse. Doing it as separate table reads would mean four round trips and a
 membership value the client has to compute.
@@ -996,37 +1011,47 @@ membership value the client has to compute.
 
 ```
 supabase/migrations/
-  20260920000000_initial_schema.sql      ✅ local only: enums, profiles, preferences, places,
-                                            plans, participants, requests, chat, RLS, triggers —
-                                            rewritten to match §3's column set, since it has
-                                            never been deployed
-  002_privacy_split.sql                  profile_locations, gender, deleted_at, tightened
-                                            profile policies, missing indexes;
-                                            verification_submissions + verification_status_of()
-                                            first, because public_profiles calls it
-  003_safety_and_seats.sql               blocks + is_blocked(), reports, seats trigger,
-                                            participants.left_at, plan_attendance,
-                                            messages FK restrict, messages.body → content
-  004_trust_legal_billing.sql            legal_documents + acceptances, entitlements,
-                                            billing_events, app_config, storage policies,
-                                            the reviewed_at trigger, retention job
-  005_derived_reads.sql                  conversation_list, nearby_plans(), has_plus(),
-                                            export_my_data(), quota trigger, realtime publication
-  006_languages_and_series.sql           plan_languages, plan_series + languages,
-                                            plans.series_id, host_id and seats made
-                                            nullable, the materialising job
-supabase/seed.sql                        app_config (eight keys), terms + privacy in pt-BR and
-                                            en, a dev user with onboarding complete, four plans
-                                            matching the design fixtures
+  20260920000000_initial_schema.sql      enums, every table, every index
+  20260920000100_functions_and_triggers.sql
+                                         verification_status_of(), is_blocked(), has_plus(),
+                                            config_int(), the public_profiles and
+                                            conversation_list views, the seats / interests /
+                                            quota / block / legal triggers
+  20260920000150_derived_reads_and_jobs.sql
+                                         nearby_plans(), close_stale_plans(),
+                                            materialise_plan_series(), export_my_data()
+  20260920000200_row_level_security.sql  RLS on every table, every policy, realtime publication
+  20260920000300_function_exposure.sql   the `private` schema: moves every helper and trigger
+                                            function out of the REST surface, and narrows who may
+                                            call the four that stay
+supabase/seed.sql                        app_config, eight people with home points, seven places,
+                                            four plans matching the design fixtures, one standing
+                                            meetup, two chat threads
 ```
+
+Four files rather than the six the earlier draft planned, and not split the same way. The original
+order — `002_privacy_split`, `003_safety_and_seats` and so on — was a history of patches to a
+schema that had already shipped. Nothing had shipped, so there was no history to preserve, and
+creating `profiles.location` in one migration only to move it out in the next would have been a
+story about a mistake nobody made. These four are grouped by what they are instead: tables, then
+the functions the policies need, then the reads the screens need, then who is allowed to call any
+of it.
 
 `002` is the urgent one: it closes a live privacy hole, and everything after it assumes profiles
 are already locked down. `003` must precede `005`, because the blocks exclusion lives inside
 `nearby_plans`.
 
-Status: **nothing is applied to a hosted project.** There is no linked Supabase project yet; the
-one migration in the repo has only ever run locally. Each new file ships with `npm run db:reset`
-green and `npm run db:types` regenerated and committed.
+Status: **applied and seeded** on the hosted `meet-app` project (`lwiexavsvbydlpfzxpvy`,
+eu-west-1). `nearby_plans()` returns the four design plans at the distances the mockups print —
+374 m to Café Kotti, 812 m to Königsplatz, 3 861 m to Schlachtensee — plus the standing meetup, and
+the privacy inversion holds under test: a signed-in user reads eight rows from `public_profiles`,
+one row from `profiles`, and **zero** from `profile_locations`.
+
+Two things the linter still flags, both deliberate. `public_profiles` and `conversation_list` are
+security-definer views, which is the entire mechanism — they exist to read what the caller cannot.
+And `billing_events` has RLS on with no policy at all, which is what "the webhook's table" looks
+like from outside. One thing it flags that is **not** yet done: leaked-password protection is off in
+Auth, and turning it on is a dashboard setting rather than a migration.
 
 Suggested build order in the app:
 
