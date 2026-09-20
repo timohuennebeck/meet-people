@@ -472,13 +472,19 @@ off-by-one lives. Once a plan is full, the queue simply _is_ the pending request
 order — `row_number() over (partition by plan_id order by created_at)` — and the host sheet's
 "+1 vaga" admits the lowest row number. Nothing to maintain, nothing to drift.
 
-**What counts as a request.** The free tier counts rows that arrive as `requested`, and only
-`approval` plans create one — joining an `open` plan seats the person directly. As written, a free user therefore gets
-three approval requests a week _plus unlimited open joins_. That is defensible ("Pedidos
-ilimitados" is literally about requests) and it favours open plans, which is probably what the
-product wants; but it is a decision, not an accident, and the plan had made it silently. If the
-intent was three _joins_ a week, `admit_member()` counts `seated` rows too. Open
-question 9.
+**What counts as a request — decided.** The thing being capped is the thing that costs someone
+_else_ something. A request lands on a host who has to read it and decide; an open join costs
+nobody. So the free tier is **three requests to approval plans a week, rolling**, and hosting,
+joining an open plan and turning up to a standing meetup are free and stay free — hosts are supply,
+and supply is never taxed. Counting joins would have penalised exactly the behaviour the map needs
+most, and made it feel closed to the people it has to keep.
+
+A request the host **declines is refunded**: "I spent my three on people who said no" is the
+worst possible first week. `plan_members.requested_at` records that a row was ever a request and
+when — an accepted request and a direct open join both end up `seated`, and nothing else on the
+row would tell them apart. `private.request_quota_spent()` counts `requested_at` inside the
+window, `status <> 'declined'`, and is the one place both triggers ask. Verified live: a fourth
+request in the window is `NO_CREDITS`, a decline frees the slot, an open join never counts.
 
 **Attendance is derived from cancellations.** Rule 1 is "Combinado é combinado — avise a tempo se
 não puder", so the thing worth measuring is cancellation discipline. Leaving a plan stamps
@@ -621,14 +627,22 @@ create function public.has_plus(uid uuid default auth.uid()) returns boolean
 | Paywall promise                        | Enforced in                                             |
 | -------------------------------------- | ------------------------------------------------------- |
 | Pedidos ilimitados                     | the quota trigger below skips the cap when `has_plus()` |
-| Veja quem quer te encontrar            | the read policy on inbound requests                     |
+| Veja quem quer te encontrar            | **not enforced — see below**                            |
 | Planos da cidade inteira               | `nearby_plans()` clamps radius to `free_radius_max_mi`  |
 | Filtros de idioma, idade e verificados | `nearby_plans()` ignores filter args unless Plus        |
 
-**The free quota.** `admit_member()` counts the user's `requested` rows inside
-`free_request_window_days` and raises `NO_CREDITS` past `free_request_limit` unless `has_plus()`.
-Both numbers come from `app_config`, so "3 per week" moves without a migration or a release. No
-ledger table: `plan_members` already answers the question.
+**The free quota.** `private.request_quota_spent()` counts the user's requests — rows with a
+`requested_at` inside `free_request_window_days`, minus the declined ones — and both membership
+triggers raise `NO_CREDITS` when it is spent, unless `has_plus()`. Both numbers come from
+`app_config`, so "3 per week" moves without a migration or a release. No ledger table:
+`plan_members` already answers the question.
+
+**"Veja quem quer te encontrar" is the one promise this plan does not keep, on purpose.** Read as
+"a free host cannot see who requested their plan", it taxes hosts — the one thing §3.5 says never
+to do — and a host who cannot see requests cannot accept them, so plans do not fill and the map
+empties. On Hinge the mechanic gates _likes on you_, and this app has no like. Either the copy
+means something else (a Plus-only "people who wanted to meet you" list across plans, which needs a
+screen nobody has drawn) or it should come off the paywall. Open question 12.
 
 Deliberately not stored: receipts and purchase tokens. RevenueCat holds those; copying them buys
 nothing and adds a liability.
@@ -1169,8 +1183,11 @@ Not database work, but the schema above assumes them:
    `has_plus()` needs to know which answer.
 8. Should transcripts of a plan's chat be kept indefinitely, or trimmed after N days — the
    data-minimisation argument for the Política de privacidade?
-9. Is the free tier three _requests_ a week (as the trigger counts — joining an `open` plan is
-   unlimited) or three _joins_ a week? §3.5 explains the difference; the copy says "pedidos".
+9. ~~Requests or joins?~~ Decided: three _requests_ a week, declined ones refunded, open joins
+   and standing meetups free (§3.5).
 10. ~~`plans.category`~~ Decided: removed, with the photo badge and the per-category pin ring.
 11. `profiles.bio` is drawn on the profile screen and nothing edits it (§3.10). Cut it like
     `category`, or add it to an edit-profile screen the design does not have?
+12. "Veja quem quer te encontrar" on the paywall: what does it gate? Not inbound requests — that
+    taxes hosts (§3.7). A cross-plan "who wanted to meet you" list is the nearest honest reading,
+    and it has no screen.
