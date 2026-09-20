@@ -60,13 +60,16 @@ the build number).
 ### Local Supabase
 
 ```bash
-npm run db:start         # prints the API URL and anon key
+npm run db:start         # prints the API URL and publishable key
 npm run db:reset         # re-applies migrations
 npm run db:types         # regenerates database.types.ts
 ```
 
-Copy the printed URL and anon key into `.env` as `EXPO_PUBLIC_SUPABASE_URL` and
-`EXPO_PUBLIC_SUPABASE_ANON_KEY`.
+Copy the printed URL and publishable key into `.env` as
+`EXPO_PUBLIC_SUPABASE_URL` and `EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY`. The
+publishable key (`sb_publishable_…`) replaces the legacy JWT anon key: it is
+meant to ship in the client and can be rotated without reissuing every token.
+Against the hosted project, take it from Project Settings → API Keys.
 
 The schema, and the reasoning behind it, is in [`docs/database.md`](docs/database.md).
 

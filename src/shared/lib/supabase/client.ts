@@ -18,7 +18,7 @@ import type { Database } from './database.types';
  * Native has no browser redirect to inspect.
  */
 export const supabase: SupabaseClient<Database> | null = hasSupabase
-  ? createClient<Database>(env.supabaseUrl!, env.supabaseAnonKey!, {
+  ? createClient<Database>(env.supabaseUrl!, env.supabasePublishableKey!, {
       auth: {
         storage: AsyncStorage,
         autoRefreshToken: true,
