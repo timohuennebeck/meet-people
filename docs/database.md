@@ -146,8 +146,8 @@ free-tier quota (§3.7). Everything else is a call the app made and whose result
 
 ## 3. Schema
 
-A table earns its place when its rows carry attributes of their own. `plan_participants` has a
-`joined_at` and a `left_at`; `join_requests` has a message and a status. A table holding nothing but
+A table earns its place when its rows carry attributes of their own. `plan_members` has a status,
+a message and three timestamps; `conversation_members` has a per-member `last_read_at`. A table holding nothing but
 a foreign key and one short string is a join written out longhand, and seven of those were folded
 back into columns — see `supabase/migrations/20260920000600_collapse_side_tables.sql` for the list
 and the reasoning. What is left below is twenty tables, not twenty-seven.
@@ -166,7 +166,7 @@ Already in the first migration:
 ```sql
 
 create type public.join_mode           as enum ('open','approval');
-create type public.request_status      as enum ('pending','accepted','declined');
+create type public.member_status       as enum ('requested','declined','seated','left');
 create type public.pronouns            as enum ('she','he','they','unspecified');
 
 create type public.distance_unit       as enum ('mi','km');
@@ -186,6 +186,16 @@ create type public.legal_doc_kind      as enum ('terms','privacy');
 create type public.report_reason       as enum ('harassment','no_show','fake_profile','inappropriate','other');
 create type public.entitlement_status  as enum ('active','in_trial','in_grace','billing_issue','paused','expired','refunded');
 create type public.platform            as enum ('ios','android');
+
+-- The languages the app has a flag and a name for — `SPOKEN_LANGUAGES` in
+-- `src/shared/lib/languages.ts`. An array cannot carry a foreign key, but it can
+-- carry an enum, and the database now refuses a code the client could not
+-- render. Adding one is `alter type … add value`, which ships with the app
+-- update that adds the flag anyway. A table only earns its place when a second
+-- surface needs the *names* in the database; nothing does yet.
+create type public.language_code       as enum (
+  'ar','da','de','el','en','es','fr','he','hi','it',
+  'ja','ko','nl','pl','pt','ru','sv','tr','uk','zh');
 ```
 
 ### 3.2 Reference data and remote config (read-only for clients)
@@ -256,7 +266,7 @@ create table public.profiles (
   deleted_at              timestamptz,                           -- anonymised, see §3.9
   -- Two lists that were tables. Neither row carried anything but itself.
   interests               text[] not null default '{}',
-  languages               text[] not null default '{}',
+  languages               public.language_code[] not null default '{}',
   -- And the whole of what was `preferences`: one row per profile, private to its
   -- owner, same policy and same lifetime as the row it hung off.
   radius                  numeric(5,2) not null default 2,
@@ -271,7 +281,7 @@ create table public.profiles (
   constraint adult check (birthdate is null or birthdate <= current_date - interval '18 years'),
   constraint interest_cap check (cardinality(interests) <= 10),
   constraint interests_folded_unique check (private.folded_unique(interests)),
-  constraint languages_folded_unique check (private.folded_unique(languages)),
+  constraint languages_unique check (private.unique_elements(languages)),
   constraint age_range_ordered check (age_min <= age_max)
 );
 create index on public.profiles using gin (interests);
@@ -348,6 +358,9 @@ create table public.places (
   address     text not null,
   point       extensions.geography(point, 4326) not null,
   profile_id  uuid references public.profiles(id) on delete set null,   -- who added it; see §3
+  -- The maps provider's id, so a search result maps onto one row. Null for a
+  -- place someone added by hand.
+  provider_place_id text unique,
   created_at  timestamptz not null default now()
 );
 create index on public.places using gist (point);
@@ -375,6 +388,13 @@ is locale formatting, derived client-side from `starts_at`. And `pin` is a coord
 design's 402×874 canvas; in production it is a projection of the place's lat/lng onto the current
 map viewport, computed at render time.
 
+**Why `places` exists when Google Maps will supply the search.** Two things a provider cannot do:
+give a plan a stable row to reference — five plans at Café Kotti share one place — and put the
+coordinate _inside Postgres_, where the radius query and its index are. Google's terms also forbid
+caching most fields beyond thirty days; `place_id` is the one you may keep indefinitely. So a
+place picked from a search is upserted by `provider_place_id`, and `places` is the row the plan
+points at.
+
 `places.profile_id` records who added a place. The insert policy is still `with check (true)`
 for any signed-in user, which is a spam vector; the author at least makes cleanup possible.
 
@@ -382,7 +402,7 @@ for any signed-in user, which is a spam vector; the author at least makes cleanu
 -- Which languages the plan will actually be held in. A column on `plans`, the
 -- same way a profile carries its own: a plan is in a language or it is not, so
 -- there was never an attribute for a join table to hold.
-alter table public.plans add column languages text[] not null default '{}';
+alter table public.plans add column languages public.language_code[] not null default '{}';
 create index on public.plans using gin (languages);
 ```
 
@@ -395,42 +415,53 @@ publish RPC rather than by a constraint, since the rows arrive after the plan.
 ### 3.5 Participation: seats, requests, waitlist, attendance
 
 ```sql
-create table public.plan_participants (
-  plan_id    uuid not null references public.plans(id) on delete cascade,
-  profile_id uuid not null references public.profiles(id) on delete cascade,
-  is_host    boolean not null default false,
-  joined_at  timestamptz not null default now(),
-  left_at     timestamptz,                    -- leaving keeps the row; see attendance below
-  -- How the evening went, filled in by `close-stale-plans` once it has. Null
-  -- until then. This was `plan_attendance`, a table keyed exactly the same way
-  -- and derived entirely from the `left_at` above it.
-  outcome     public.attendance_outcome,
+-- One row per person per plan: the whole of their relationship to it.
+create table public.plan_members (
+  plan_id     uuid not null references public.plans(id) on delete cascade,
+  profile_id  uuid not null references public.profiles(id) on delete cascade,
+  status      public.member_status not null,   -- requested | declined | seated | left
+  is_host     boolean not null default false,
+  message     text check (char_length(message) <= 300),   -- the note to the host, on a request
+  created_at  timestamptz not null default now(),         -- first contact; the quota counts this
+  seated_at   timestamptz,
+  left_at     timestamptz,                                -- leaving keeps the row; see attendance below
+  updated_at  timestamptz not null default now(),
+  outcome     public.attendance_outcome,                  -- filled in by close-stale-plans
   recorded_at timestamptz,
-  primary key (plan_id, profile_id)
+  primary key (plan_id, profile_id),
+  constraint host_is_seated  check (not is_host or status = 'seated'),
+  constraint seated_has_time check (status not in ('seated','left') or seated_at is not null),
+  constraint left_has_time   check ((status = 'left') = (left_at is not null))
 );
-create index on public.plan_participants (profile_id);
-
-create table public.join_requests (
-  id           uuid primary key default gen_random_uuid(),
-  plan_id      uuid not null references public.plans(id) on delete cascade,
-  profile_id   uuid not null references public.profiles(id) on delete cascade,
-  message      text check (char_length(message) <= 300),
-  status       public.request_status not null default 'pending',
-  created_at   timestamptz not null default now(),
-  resolved_at  timestamptz,
-  unique (plan_id, profile_id)
-);
-create index on public.join_requests (plan_id) where status = 'pending';
-create index on public.join_requests (profile_id, created_at desc);   -- the weekly quota count
+create index on public.plan_members (profile_id, created_at desc);          -- the weekly quota count
+create index on public.plan_members (plan_id, created_at) where status = 'requested';   -- the queue
 ```
 
-**The seats trigger.** Nothing in the current migration stops a full plan being over-seated. A
-`before insert on plan_participants` trigger counts occupied seats (`left_at is null`) against
-`plans.seats` in the same transaction and raises when it would overflow. `seats` is the total the
-host chose on the seats step, host included — "vagas" in the product's own words — and the free
-count every sheet shows is derived from it. The race is not theoretical: a host tapping Accept
-on two requests in quick succession is exactly the concurrency case already fixed on the client, and
-the database has no equivalent guard.
+This was two tables — `join_requests` (asked, pending, declined) and `plan_participants` (seated,
+left) — with a trigger copying a row from one to the other when the host tapped Accept. One table
+with a status tells the whole story in one row: accepting is an update, the waitlist is the
+`requested` rows in order, the seats check counts `seated`, and the free quota counts `requested`.
+
+**What a client may write is a column grant, not a trigger guessing who called.** `authenticated`
+may insert its own row with a `status` and a `message`, may change `status`, and may delete its
+own `requested` row. `is_host`, the timestamps and `outcome` are not grantable to it at all — the
+host trigger, the state machine and the nightly job set them, running as the owner. Setting
+`is_host` from a client is `permission denied for table plan_members` before any policy runs.
+
+**The state machine is two triggers.** `admit_member()` on insert: a `requested` row needs an
+`approval` plan and passes the block check and the quota; a `seated` row needs an `open` plan and a
+free seat. `move_member()` on update: `requested → seated | declined` is the host's move and
+re-counts the seats under a row lock; `seated → left` is the person's own and stamps `left_at`;
+`left | declined → requested | seated` is asking again, with the same rules as a fresh row.
+Anything else is `BAD_TRANSITION`. Who is asking is `auth.uid()`, which the scheduler never has;
+the one server-side write that happens _during_ a request — a block declining what was pending —
+marks its transaction trusted first.
+
+**The seats check.** `plans.seats` is the total the host chose on the seats step, host included —
+"vagas" in the product's own words — and the free count every sheet shows is derived from it. Both
+transitions into `seated` count the seated rows against it under `select … for update` on the plan,
+so a host tapping Accept on two requests in quick succession — the concurrency case the client
+already handles — meets a row lock rather than a race.
 
 **The waitlist is derived, not stored.** An earlier migration had a `waitlisted boolean`, which
 cannot express "next in line", and an earlier draft of this plan stored a `waitlist_position`
@@ -441,17 +472,17 @@ off-by-one lives. Once a plan is full, the queue simply _is_ the pending request
 order — `row_number() over (partition by plan_id order by created_at)` — and the host sheet's
 "+1 vaga" admits the lowest row number. Nothing to maintain, nothing to drift.
 
-**What counts as a request.** The free tier caps `join_requests`, and only `approval` plans create
-one — joining an `open` plan seats the person directly. As written, a free user therefore gets
+**What counts as a request.** The free tier counts rows that arrive as `requested`, and only
+`approval` plans create one — joining an `open` plan seats the person directly. As written, a free user therefore gets
 three approval requests a week _plus unlimited open joins_. That is defensible ("Pedidos
 ilimitados" is literally about requests) and it favours open plans, which is probably what the
 product wants; but it is a decision, not an accident, and the plan had made it silently. If the
-intent was three _joins_ a week, the trigger moves to `plan_participants` and counts both. Open
+intent was three _joins_ a week, `admit_member()` counts `seated` rows too. Open
 question 9.
 
 **Attendance is derived from cancellations.** Rule 1 is "Combinado é combinado — avise a tempo se
 não puder", so the thing worth measuring is cancellation discipline. Leaving a plan stamps
-`plan_participants.left_at` rather than deleting the row — an earlier draft deleted it, which
+`plan_members.left_at` rather than deleting the row — an earlier draft deleted it, which
 erased the one fact attendance is derived from. `close-stale-plans` then reads every seat once the
 plan's end time has passed: no `left_at` is `attended`, a `left_at` is `cancelled`. No new UI,
 nothing a hostile host can weaponise, nothing gameable by faking a location.
@@ -594,10 +625,10 @@ create function public.has_plus(uid uuid default auth.uid()) returns boolean
 | Planos da cidade inteira               | `nearby_plans()` clamps radius to `free_radius_max_mi`  |
 | Filtros de idioma, idade e verificados | `nearby_plans()` ignores filter args unless Plus        |
 
-**The free quota.** A `before insert on join_requests` trigger counts the user's requests inside
+**The free quota.** `admit_member()` counts the user's `requested` rows inside
 `free_request_window_days` and raises `NO_CREDITS` past `free_request_limit` unless `has_plus()`.
 Both numbers come from `app_config`, so "3 per week" moves without a migration or a release. No
-ledger table: `join_requests` already answers the question.
+ledger table: `plan_members` already answers the question.
 
 Deliberately not stored: receipts and purchase tokens. RevenueCat holds those; copying them buys
 nothing and adds a liability.
@@ -777,15 +808,15 @@ announces the block. Both sides simply stop existing for each other. And the exc
 RPC and the read policies, never in client filtering — otherwise a blocked person is still present
 in every response the client merely renders differently.
 
-| Surface                          | Rule                                                                              | Enforced in                                |
-| -------------------------------- | --------------------------------------------------------------------------------- | ------------------------------------------ |
-| Map, "Planos da cidade inteira"  | plans hosted by either side are not returned                                      | `nearby_plans()`                           |
-| Plan sheet, seat list            | a blocked participant is not listed; the seat reads as taken                      | `plan_participants` read policy            |
-| Join requests                    | neither side can request the other's plan                                         | `before insert` trigger on `join_requests` |
-| People search, `public_profiles` | not returned                                                                      | the view's `where`                         |
-| Conversations list               | a direct conversation with them is not listed                                     | `conversation_list` view                   |
-| Messages                         | a direct thread is unreadable; **group messages stay visible**                    | `messages` read policy (direct only)       |
-| Realtime                         | the client subscribes per conversation, so a hidden thread is never subscribed to | —                                          |
+| Surface                          | Rule                                                                              | Enforced in                          |
+| -------------------------------- | --------------------------------------------------------------------------------- | ------------------------------------ |
+| Map, "Planos da cidade inteira"  | plans hosted by either side are not returned                                      | `nearby_plans()`                     |
+| Plan sheet, seat list            | a blocked participant is not listed; the seat reads as taken                      | `plan_members` read policy           |
+| Join requests                    | neither side can request the other's plan                                         | `admit_member()` on `plan_members`   |
+| People search, `public_profiles` | not returned                                                                      | the view's `where`                   |
+| Conversations list               | a direct conversation with them is not listed                                     | `conversation_list` view             |
+| Messages                         | a direct thread is unreadable; **group messages stay visible**                    | `messages` read policy (direct only) |
+| Realtime                         | the client subscribes per conversation, so a hidden thread is never subscribed to | —                                    |
 
 Group messages stay visible deliberately. Hiding one member's lines out of a plan's chat leaves
 everyone else's replies answering nothing, and the person who blocked chose to be in that plan; the
@@ -816,12 +847,12 @@ reads but no screen can ever write is fixture data wearing a schema**, and it go
 screen exists. Removed on that rule, each with its reader left in the app until `source.ts` points
 at Supabase, when the missing field simply renders nothing:
 
-| Column                     | Read by                          | Why nothing writes it                                        |
-| -------------------------- | -------------------------------- | ------------------------------------------------------------ |
-| `plans.category`           | photo badge, map-pin ring colour | no create step chooses one; both visuals go too              |
-| `plans.description`        | the plan sheet                   | the create flow is title, place, time, mode, seats, audience |
-| `profile_languages.level`  | the language row subtitle        | both writers hardcoded `'learning'`                          |
-| `plan_participants.source` | —                                | every row would say `'derived'` until host confirmation      |
+| Column                    | Read by                          | Why nothing writes it                                        |
+| ------------------------- | -------------------------------- | ------------------------------------------------------------ |
+| `plans.category`          | photo badge, map-pin ring colour | no create step chooses one; both visuals go too              |
+| `plans.description`       | the plan sheet                   | the create flow is title, place, time, mode, seats, audience |
+| `profile_languages.level` | the language row subtitle        | both writers hardcoded `'learning'`                          |
+| `plan_members.source`     | —                                | every row would say `'derived'` until host confirmation      |
 
 Kept, but each is a gap the app has to close, not a spare column:
 
@@ -868,7 +899,7 @@ create table public.plan_series (
   created_at       timestamptz not null default now()
 );
 
-alter table public.plan_series add column languages text[] not null default '{}';
+alter table public.plan_series add column languages public.language_code[] not null default '{}';
 
 alter table public.plans add column series_id uuid references public.plan_series(id);
 create index on public.plans (series_id) where series_id is not null;
@@ -914,25 +945,24 @@ create policy "own profile: write" on public.profiles for all
   using (auth.uid() = id) with check (auth.uid() = id);
 ```
 
-| Table                                   | read                                  | client write                   |
-| --------------------------------------- | ------------------------------------- | ------------------------------ |
-| `app_config`, `legal_documents`         | everyone (incl. `anon`)               | none (secret key only)         |
-| `profiles`                              | own                                   | insert / update own            |
-| `public_profiles` (view)                | any signed-in, minus blocks           | —                              |
-| `profile_locations`                     | **nobody**                            | insert / update own            |
-| `places`                                | any signed-in                         | insert (author recorded)       |
-| `plan_series`                           | everyone (incl. `anon`)               | none (secret key only)         |
-| `plans`                                 | live plans, minus blocks              | insert / update own as host    |
-| `plan_participants`                     | any signed-in, minus blocks           | update own `left_at` (leaving) |
-| `join_requests`                         | author or host                        | insert own, host resolves      |
-| `conversations`, `conversation_members` | members                               | update own `last_read_at`      |
-| `messages`                              | members, minus blocked direct threads | insert own                     |
-| `blocks`                                | own                                   | insert / delete own            |
-| `reports`                               | own                                   | insert own                     |
-| `entitlements`                          | own                                   | **none** (webhook only)        |
-| `billing_events`                        | none                                  | none (edge functions)          |
-| `verification_submissions`              | own                                   | none (edge function + Studio)  |
-| `legal_acceptances`                     | own                                   | insert own                     |
+| Table                                   | read                                                                 | client write                                                          |
+| --------------------------------------- | -------------------------------------------------------------------- | --------------------------------------------------------------------- |
+| `app_config`, `legal_documents`         | everyone (incl. `anon`)                                              | none (secret key only)                                                |
+| `profiles`                              | own                                                                  | insert / update own                                                   |
+| `public_profiles` (view)                | any signed-in, minus blocks                                          | —                                                                     |
+| `profile_locations`                     | **nobody**                                                           | insert / update own                                                   |
+| `places`                                | any signed-in                                                        | insert (author recorded)                                              |
+| `plan_series`                           | everyone (incl. `anon`)                                              | none (secret key only)                                                |
+| `plans`                                 | live plans, minus blocks                                             | insert / update own as host                                           |
+| `plan_members`                          | seats: any signed-in, minus blocks; requests: the person or the host | insert own (`status`, `message`), update `status`, delete own request |
+| `conversations`, `conversation_members` | members                                                              | update own `last_read_at`                                             |
+| `messages`                              | members, minus blocked direct threads                                | insert own                                                            |
+| `blocks`                                | own                                                                  | insert / delete own                                                   |
+| `reports`                               | own                                                                  | insert own                                                            |
+| `entitlements`                          | own                                                                  | **none** (webhook only)                                               |
+| `billing_events`                        | none                                                                 | none (edge functions)                                                 |
+| `verification_submissions`              | own                                                                  | none (edge function + Studio)                                         |
+| `legal_acceptances`                     | own                                                                  | insert own                                                            |
 
 **Every helper in the table above lives in a `private` schema, not in `public`.** PostgREST
 publishes each function in `public` as an RPC endpoint, so a `security definer` helper written for a
@@ -995,13 +1025,13 @@ membership value the client has to compute.
 | 16 Regeln                             | —                                      | `profiles.onboarding_completed_at`                     |
 | 17 Paywall · 30a aufgebraucht         | RevenueCat offerings + `entitlements`  | purchase via the SDK                                   |
 | 0 Prévia (Home)                       | `nearby_plans()`                       | —                                                      |
-| 1 Offen · 2 Beitritt anfragen         | `nearby_plans()` / plan detail         | `join_requests` (quota trigger applies)                |
-| 3 Anfrage gesendet · 5 Absagen        | plan detail                            | delete `join_requests` / set `left_at`                 |
-| 1–3 Host-Sheets                       | plan detail, `join_requests`           | resolve requests, `plan_participants`                  |
+| 1 Offen · 2 Beitritt anfragen         | `nearby_plans()` / plan detail         | `plan_members` (`admit_member()` applies the quota)    |
+| 3 Anfrage gesendet · 5 Absagen        | plan detail                            | delete own request / `status = 'left'`                 |
+| 1–3 Host-Sheets                       | plan detail                            | `status = 'seated' \| 'declined'` on `plan_members`    |
 | Create 1–6 · Veröffentlicht           | `places` (recent, nearby)              | `places`, `plans` (+ host seat trigger)                |
 | 12a Conversas                         | `conversation_list` view               | —                                                      |
 | 1:1 / Gruppe                          | `messages` + Realtime, presence        | `messages`, `conversation_members.last_read_at`        |
-| 17a Profil                            | `public_profiles`, `plan_participants` | `blocks`, `reports`                                    |
+| 17a Profil                            | `public_profiles`, `plan_members`      | `blocks`, `reports`                                    |
 | 15d Personensuche                     | `public_profiles` search, minus blocks | —                                                      |
 | Settings · Konto löschen              | —                                      | `delete-account`                                       |
 
@@ -1031,6 +1061,10 @@ supabase/migrations/
                                          seven tables become columns: the two profile lists, the
                                             preferences row, both language tables, attendance and
                                             the direct-conversation pair
+  20260920000700_views_are_read_only.sql the writable-view hole, closed
+  20260920000800_language_enum_members_places.sql
+                                         the language_code enum, plan_members in place of
+                                            join_requests + plan_participants, places.provider_place_id
 supabase/seed.sql                        app_config, eight people with home points, seven places,
                                             four plans matching the design fixtures, one standing
                                             meetup, two chat threads
@@ -1054,7 +1088,7 @@ eu-west-1). `nearby_plans()` returns the four design plans at the distances the 
 the privacy inversion holds under test: a signed-in user reads eight rows from `public_profiles`,
 one row from `profiles`, and **zero** from `profile_locations`.
 
-Seven tables lighter than it started. The collapse ran against the live database as three
+Nine tables lighter than it started — seventeen now. The collapse ran against the live database as three
 migrations rather than one, because `create or replace view` may only add columns at the end and
 the drops had to wait for everything that named those tables to be rewritten first — the ordering
 in `20260920000600` is load-bearing, not cosmetic.

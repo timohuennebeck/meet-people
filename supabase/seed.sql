@@ -131,14 +131,14 @@ on conflict (profile_id) do update set point = excluded.point;
 
 update public.profiles p set interests = v.interests, languages = v.languages
 from (values
-  ('11111111-1111-4111-8111-000000000001'::uuid, array['Corrida','Cinema','Café'], array['de','en']),
-  ('11111111-1111-4111-8111-000000000002'::uuid, array['Jogos','Café'],            array['de','en']),
-  ('11111111-1111-4111-8111-000000000003'::uuid, array['Corrida','Cinema','Café'], array['de','en']),
-  ('11111111-1111-4111-8111-000000000004'::uuid, array['Corrida'],                 array['de']),
-  ('11111111-1111-4111-8111-000000000005'::uuid, array['Jogos'],                   array['de']),
-  ('11111111-1111-4111-8111-000000000006'::uuid, array['Jogos','Café'],            array['de','en']),
-  ('11111111-1111-4111-8111-000000000007'::uuid, array['Jogos'],                   array['de']),
-  ('11111111-1111-4111-8111-000000000008'::uuid, array['Café'],                    array['pt','en'])
+  ('11111111-1111-4111-8111-000000000001'::uuid, array['Corrida','Cinema','Café'], array['de','en']::public.language_code[]),
+  ('11111111-1111-4111-8111-000000000002'::uuid, array['Jogos','Café'],            array['de','en']::public.language_code[]),
+  ('11111111-1111-4111-8111-000000000003'::uuid, array['Corrida','Cinema','Café'], array['de','en']::public.language_code[]),
+  ('11111111-1111-4111-8111-000000000004'::uuid, array['Corrida'],                 array['de']::public.language_code[]),
+  ('11111111-1111-4111-8111-000000000005'::uuid, array['Jogos'],                   array['de']::public.language_code[]),
+  ('11111111-1111-4111-8111-000000000006'::uuid, array['Jogos','Café'],            array['de','en']::public.language_code[]),
+  ('11111111-1111-4111-8111-000000000007'::uuid, array['Jogos'],                   array['de']::public.language_code[]),
+  ('11111111-1111-4111-8111-000000000008'::uuid, array['Café'],                    array['pt','en']::public.language_code[])
 ) as v(id, interests, languages)
 where p.id = v.id;
 
@@ -198,36 +198,44 @@ on conflict (id) do nothing;
 
 update public.plans p set languages = v.languages
 from (values
-  ('33333333-3333-4333-8333-000000000001'::uuid, array['pt','en']),
-  ('33333333-3333-4333-8333-000000000002'::uuid, array['pt','en','de']),
-  ('33333333-3333-4333-8333-000000000003'::uuid, array['pt']),
-  ('33333333-3333-4333-8333-000000000004'::uuid, array['en','es'])
+  ('33333333-3333-4333-8333-000000000001'::uuid, array['pt','en']::public.language_code[]),
+  ('33333333-3333-4333-8333-000000000002'::uuid, array['pt','en','de']::public.language_code[]),
+  ('33333333-3333-4333-8333-000000000003'::uuid, array['pt']::public.language_code[]),
+  ('33333333-3333-4333-8333-000000000004'::uuid, array['en','es']::public.language_code[])
 ) as v(id, languages)
 where p.id = v.id;
 
 -- The run: Lea hosts, and Sara, Noah and the viewer have seats — four of six,
--- which is why the viewer can open its group chat below.
-insert into public.plan_participants (plan_id, profile_id) values
-  ('33333333-3333-4333-8333-000000000001', '11111111-1111-4111-8111-000000000003'),
-  ('33333333-3333-4333-8333-000000000001', '11111111-1111-4111-8111-000000000005'),
-  ('33333333-3333-4333-8333-000000000001', '11111111-1111-4111-8111-000000000001'),
-  -- The games afternoon: Phil hosts and Sara has the second of four seats, so
-  -- two are open and three people are waiting for them.
-  ('33333333-3333-4333-8333-000000000002', '11111111-1111-4111-8111-000000000003')
+-- which is why the viewer can open its group chat below. The games afternoon:
+-- Phil hosts and Sara has the second of four seats, so two are open and three
+-- people are waiting for them.
+--
+-- Written with the state machine switched off: a seed is not a sequence of
+-- taps, and `admit_member()` would otherwise count Noah's request against a
+-- quota and refuse a seat on an approval plan that nobody accepted.
+alter table public.plan_members disable trigger user;
+
+insert into public.plan_members (plan_id, profile_id, status, seated_at) values
+  ('33333333-3333-4333-8333-000000000001', '11111111-1111-4111-8111-000000000003', 'seated', now() - interval '2 days'),
+  ('33333333-3333-4333-8333-000000000001', '11111111-1111-4111-8111-000000000005', 'seated', now() - interval '2 days'),
+  ('33333333-3333-4333-8333-000000000001', '11111111-1111-4111-8111-000000000001', 'seated', now() - interval '1 day'),
+  ('33333333-3333-4333-8333-000000000002', '11111111-1111-4111-8111-000000000003', 'seated', now() - interval '1 day')
 on conflict do nothing;
 
--- Three pending requests on the games afternoon. Tom appears once, not twice:
--- the fixture listed him under both "requests" and "waitlist", but the waitlist
--- is derived — it is simply the pending queue in `created_at` order once the
--- seats run out.
-insert into public.join_requests (id, plan_id, profile_id, message, created_at) values
-  ('44444444-4444-4444-8444-000000000001', '33333333-3333-4333-8333-000000000002',
-   '11111111-1111-4111-8111-000000000005', 'Jogo há 2 anos, sou nova em Berlim', now() - interval '3 hours'),
-  ('44444444-4444-4444-8444-000000000002', '33333333-3333-4333-8333-000000000002',
-   '11111111-1111-4111-8111-000000000006', null, now() - interval '2 hours'),
-  ('44444444-4444-4444-8444-000000000003', '33333333-3333-4333-8333-000000000002',
-   '11111111-1111-4111-8111-000000000007', null, now() - interval '1 hour')
-on conflict (id) do nothing;
+-- Three pending requests on the games afternoon, in the order they arrived.
+-- Tom appears once, not twice: the fixture listed him under both "requests" and
+-- "waitlist", but the waitlist is derived — it is simply the queue in
+-- `created_at` order once the seats run out.
+insert into public.plan_members (plan_id, profile_id, status, message, created_at) values
+  ('33333333-3333-4333-8333-000000000002', '11111111-1111-4111-8111-000000000005', 'requested',
+   'Jogo há 2 anos, sou nova em Berlim', now() - interval '3 hours'),
+  ('33333333-3333-4333-8333-000000000002', '11111111-1111-4111-8111-000000000006', 'requested',
+   null, now() - interval '2 hours'),
+  ('33333333-3333-4333-8333-000000000002', '11111111-1111-4111-8111-000000000007', 'requested',
+   null, now() - interval '1 hour')
+on conflict do nothing;
+
+alter table public.plan_members enable trigger user;
 
 -- ---------------------------------------------------------------------------
 -- A standing meetup
@@ -241,7 +249,7 @@ on conflict (id) do nothing;
 insert into public.plan_series
   (id, place_id, title, join_mode, seats, repeats_on, start_time, duration_minutes, languages) values
   ('55555555-5555-4555-8555-000000000001', '22222222-2222-4222-8222-000000000003',
-   'Caminhada de quarta no Görlitzer', 'open', null, 3, time '18:30', 90, array['pt','en'])
+   'Caminhada de quarta no Görlitzer', 'open', null, 3, time '18:30', 90, array['pt','en']::public.language_code[])
 on conflict (id) do nothing;
 
 -- ---------------------------------------------------------------------------
