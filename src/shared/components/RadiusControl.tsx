@@ -6,13 +6,26 @@ import { Card, Chip, SegmentedControl, Slider, SliderReadout, Text } from '@shar
 /** Presets under the slider, in miles. */
 const PRESETS = [1, 2, 3, 6] as const;
 
-/** Where each preset sits on the track, so the handle lands on it exactly. */
-const PRESET_FRACTION: Record<(typeof PRESETS)[number], number> = {
-  1: 0.13,
-  2: 0.26,
-  3: 0.42,
-  6: 0.92,
-};
+/**
+ * The track's usable span, taken from where the design draws the handle for the
+ * smallest and largest presets (`0.13` and `0.92`). Radius runs linearly across
+ * it, so the four presets land within a couple of pixels of the design's marks
+ * while the handle can still be dragged to anything in between.
+ */
+const TRACK = { from: 0.13, to: 0.92 } as const;
+const RANGE = { min: 1, max: 6 } as const;
+
+function radiusToFraction(radius: number): number {
+  const along = (radius - RANGE.min) / (RANGE.max - RANGE.min);
+  return TRACK.from + along * (TRACK.to - TRACK.from);
+}
+
+/** Half-mile steps: fine enough to feel continuous, coarse enough to read well. */
+function fractionToRadius(fraction: number): number {
+  const along = (fraction - TRACK.from) / (TRACK.to - TRACK.from);
+  const radius = RANGE.min + along * (RANGE.max - RANGE.min);
+  return Math.min(RANGE.max, Math.max(RANGE.min, Math.round(radius * 2) / 2));
+}
 
 export interface RadiusControlProps {
   radius: number;
@@ -55,18 +68,9 @@ export function RadiusControl({
         </View>
 
         <Slider
-          value={PRESET_FRACTION[radius as (typeof PRESETS)[number]] ?? 0.26}
+          value={radiusToFraction(radius)}
           valueText={`${radius} ${unit}`}
-          onChange={(fraction) => {
-            // Snap to the nearest preset, which is all the design exposes.
-            const nearest = PRESETS.reduce((best, preset) =>
-              Math.abs(PRESET_FRACTION[preset] - fraction) <
-              Math.abs(PRESET_FRACTION[best] - fraction)
-                ? preset
-                : best,
-            );
-            onChangeRadius?.(nearest);
-          }}
+          onChange={(fraction) => onChangeRadius?.(fractionToRadius(fraction))}
         />
 
         <View className="flex-row gap-[8px]">

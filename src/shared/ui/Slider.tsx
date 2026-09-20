@@ -1,6 +1,7 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
+  PanResponder,
   Pressable,
   View,
   type AccessibilityActionEvent,
@@ -17,6 +18,45 @@ const STEP = 0.05;
 
 const clamp = (value: number) => Math.min(1, Math.max(0, value));
 
+/**
+ * Turns a touch anywhere on the rail — a tap or a drag — into a fraction of the
+ * way along it.
+ *
+ * `grant` is told apart from `move` so a two-handle slider can pick which
+ * handle it is dragging when the finger lands and then keep hold of it, rather
+ * than swapping handles halfway across as the other one becomes the nearer.
+ *
+ * The responder is rebuilt whenever the callback changes, which during a drag
+ * is every frame. That is fine here: only `locationX` off the raw event is
+ * read, never the accumulated `gestureState` a rebuild would reset.
+ */
+function useTrackDrag(onAt: (fraction: number, grant: boolean) => void) {
+  const [width, setWidth] = useState(0);
+
+  const responder = useMemo(
+    () =>
+      PanResponder.create({
+        onStartShouldSetPanResponder: () => true,
+        onMoveShouldSetPanResponder: () => true,
+        // A slider often sits inside a scroll view. Without this the first
+        // slightly vertical wobble hands the drag to the scroller mid-stroke.
+        onPanResponderTerminationRequest: () => false,
+        onPanResponderGrant: (event) => {
+          if (width > 0) onAt(clamp(event.nativeEvent.locationX / width), true);
+        },
+        onPanResponderMove: (event) => {
+          if (width > 0) onAt(clamp(event.nativeEvent.locationX / width), false);
+        },
+      }),
+    [onAt, width],
+  );
+
+  return {
+    panHandlers: responder.panHandlers,
+    onLayout: (event: LayoutChangeEvent) => setWidth(event.nativeEvent.layout.width),
+  };
+}
+
 /** `28px · white fill · 2px brand ring · soft drop shadow` — the slider handle. */
 function Thumb({ left }: { left: number }) {
   return (
@@ -30,11 +70,11 @@ function Thumb({ left }: { left: number }) {
 /**
  * `6px · #E3E9F2` track with a brand fill.
  *
- * Deaf to touches on purpose: `locationX` is measured against the deepest view
- * that was hit, so a tap landing on a thumb or on the fill would otherwise be
- * read relative to *that* view and send the handle somewhere else entirely.
- * With the whole track transparent to touches the enclosing Pressable is always
- * the hit target, and `locationX` is a true offset along the rail.
+ * Deaf to touches on purpose: `locationX` is measured against the view that was
+ * hit, so a touch landing on a thumb or on the fill would otherwise be read
+ * relative to *that* view and send the handle somewhere else entirely. With the
+ * whole track transparent to touches the enclosing slider is always the target,
+ * and `locationX` is a true offset along the rail.
  */
 function Track({ children }: { children: React.ReactNode }) {
   return (
@@ -57,14 +97,10 @@ export interface SliderProps {
 
 /** Single-handle slider — the discovery radius control. */
 export function Slider({ value, onChange, valueText, accessibilityLabel, className }: SliderProps) {
-  const [width, setWidth] = useState(0);
-
-  const onLayout = useCallback((event: LayoutChangeEvent) => {
-    setWidth(event.nativeEvent.layout.width);
-  }, []);
+  const drag = useTrackDrag(useCallback((fraction) => onChange?.(fraction), [onChange]));
 
   return (
-    <Pressable
+    <View
       accessibilityRole="adjustable"
       accessibilityLabel={accessibilityLabel}
       accessibilityValue={{ min: 0, max: 100, now: Math.round(value * 100), text: valueText }}
@@ -75,11 +111,8 @@ export function Slider({ value, onChange, valueText, accessibilityLabel, classNa
         onChange(clamp(value + delta));
       }}
       className={cn(className)}
-      onLayout={onLayout}
-      onPress={(event) => {
-        if (!onChange || width === 0) return;
-        onChange(clamp(event.nativeEvent.locationX / width));
-      }}
+      onLayout={drag.onLayout}
+      {...drag.panHandlers}
     >
       <Track>
         <View
@@ -88,7 +121,7 @@ export function Slider({ value, onChange, valueText, accessibilityLabel, classNa
         />
         <Thumb left={value} />
       </Track>
-    </Pressable>
+    </View>
   );
 }
 
@@ -118,14 +151,31 @@ export function RangeSlider({
 }: RangeSliderProps) {
   const { t } = useTranslation();
   const [low, high] = range;
-  const [width, setWidth] = useState(0);
 
-  const onLayout = useCallback((event: LayoutChangeEvent) => {
-    setWidth(event.nativeEvent.layout.width);
-  }, []);
+  // Which handle the finger picked up, held for the length of the stroke so a
+  // drag past the other handle does not silently swap to it.
+  const [dragging, setDragging] = useState<'low' | 'high'>('low');
+
+  const drag = useTrackDrag(
+    useCallback(
+      (at: number, grant: boolean) => {
+        if (!onChange) return;
+        const handle = grant
+          ? Math.abs(at - low) <= Math.abs(at - high)
+            ? 'low'
+            : 'high'
+          : dragging;
+        if (grant) setDragging(handle);
+        // Handles stop at each other rather than passing through.
+        if (handle === 'low') onChange([Math.min(at, high), high]);
+        else onChange([low, Math.max(at, low)]);
+      },
+      [onChange, low, high, dragging],
+    ),
+  );
 
   return (
-    <Pressable
+    <View
       accessibilityRole="adjustable"
       accessibilityLabel={accessibilityLabel}
       accessibilityValue={{ text: valueText }}
@@ -149,14 +199,8 @@ export function RangeSlider({
         }
       }}
       className={cn(className)}
-      onLayout={onLayout}
-      onPress={(event) => {
-        if (!onChange || width === 0) return;
-        const at = clamp(event.nativeEvent.locationX / width);
-        // Move whichever handle is nearer to the tap.
-        if (Math.abs(at - low) <= Math.abs(at - high)) onChange([Math.min(at, high), high]);
-        else onChange([low, Math.max(at, low)]);
-      }}
+      onLayout={drag.onLayout}
+      {...drag.panHandlers}
     >
       <Track>
         <View
@@ -166,7 +210,7 @@ export function RangeSlider({
         <Thumb left={low} />
         <Thumb left={high} />
       </Track>
-    </Pressable>
+    </View>
   );
 }
 
