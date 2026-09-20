@@ -18,6 +18,39 @@ Nothing needs configuring to run the app. Supabase, PostHog and RevenueCat all
 stay inert until their keys are present, and screens read from the in-memory
 fixture data transcribed from the design.
 
+### On a device
+
+**Expo Go cannot run this app.** `react-native-purchases` ships its own iOS and
+Android native code, and Expo Go only carries the modules compiled into its
+binary. A development build is required, which is why `expo-dev-client` is a
+dependency — `npm start` therefore opens in dev-client mode, not Expo Go.
+
+With a Mac and Xcode, building locally is the shortest path:
+
+```bash
+npx expo run:ios --device      # generates ios/, installs pods, builds, installs
+```
+
+The first run also needs Developer Mode enabled on the phone (Settings →
+Privacy & Security → Developer Mode) and the certificate trusted afterwards
+(Settings → General → VPN & Device Management). A free Apple ID signs the build
+for seven days; a paid account for a year.
+
+Without a Mac, EAS builds in the cloud. This needs a paid Apple Developer
+account — a physical device cannot be provisioned without one:
+
+```bash
+npx eas login
+npx eas device:create                                  # register the iPhone
+npx eas build --profile development --platform ios
+npx expo start --dev-client                            # then scan to load the JS
+```
+
+`eas.json` defines four profiles: `development` (dev client, internal
+distribution), `simulator` (the same, for a Mac simulator), `preview` (internal
+distribution, release build) and `production` (store builds, auto-incrementing
+the build number).
+
 ### Local Supabase
 
 ```bash
