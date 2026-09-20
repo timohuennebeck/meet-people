@@ -20,10 +20,16 @@ fixture data transcribed from the design.
 
 ### On a device
 
-**Expo Go cannot run this app.** `react-native-purchases` ships its own iOS and
-Android native code, and Expo Go only carries the modules compiled into its
-binary. A development build is required, which is why `expo-dev-client` is a
-dependency — `npm start` therefore opens in dev-client mode, not Expo Go.
+**Expo Go cannot run this app.** `react-native-purchases`, `expo-camera`,
+`expo-image-picker`, `expo-haptics` and `@react-native-community/datetimepicker`
+all ship their own iOS and Android native code, and Expo Go only carries the
+modules compiled into its binary. A development build is required, which is why
+`expo-dev-client` is a dependency — `npm start` therefore opens in dev-client
+mode, not Expo Go.
+
+Adding or upgrading any of those means a **new build**, not a JS reload: the
+camera and photo-library usage strings in `app.json` are written into
+`Info.plist` at prebuild time.
 
 With a Mac and Xcode, building locally is the shortest path:
 
@@ -70,7 +76,8 @@ The schema, and the reasoning behind it, is in [`docs/database.md`](docs/databas
 app/                      expo-router routes — thin re-exports of feature screens
 src/
   features/               one folder per product area
-    onboarding/           welcome through rules, 18 steps
+    onboarding/           welcome through rules, 17 steps
+    legal/                terms of use and the privacy policy
     verification/         selfie capture, review, badge
     paywall/              Nearby Plus
     plans/                map, plan sheets, create flow
@@ -114,6 +121,14 @@ anything:
   Getting this backwards silently shrinks every ringed avatar, dot and flag, so
   check the shadow's `inset` keyword before converting one.
 
+  There is a third case the two rules above do not cover: an element that
+  **swaps one ring for the other** when it is selected. Compensating only the
+  inset state makes the box 2px smaller the moment it is picked, which shunts
+  everything below it down the screen. Those elements — `SelectableCard`,
+  `SelectableRow`, `TextField`, `Chip` — subtract the border width in _both_
+  states instead, which keeps the outer box at the design's layout size, since
+  a `box-shadow` ring consumes no space in either state anyway.
+
 - **Shadows are pre-decomposed.** Every `box-shadow` in the design has a named
   entry in `src/shared/theme/tokens.ts`, split into the iOS and Android fields.
 - **Relative units become absolute.** `line-height: 1.45` and
@@ -135,6 +150,13 @@ anything:
 - The design offers two layouts for the account step. Both are built: the
   default flow uses `AccountScreen` (6), and `AccountInlineScreen` (6b) sits at
   `/(onboarding)/account-inline` so the variant can be compared and swapped in.
+- The widget step is gone. It sold a home-screen widget the app does not ship,
+  so onboarding runs to 17 steps rather than the design's 18.
+- The design draws every field already filled in, with a drawn caret. Those are
+  real `TextInput`s here, so they start empty and show a placeholder — the
+  screens will not match the mockups character for character, by design.
+- Terms and privacy are their own screens. The design only draws the sentence
+  that links to them.
 
 ## Data
 
