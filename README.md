@@ -62,6 +62,8 @@ npm run db:types         # regenerates database.types.ts
 Copy the printed URL and anon key into `.env` as `EXPO_PUBLIC_SUPABASE_URL` and
 `EXPO_PUBLIC_SUPABASE_ANON_KEY`.
 
+The schema, and the reasoning behind it, is in [`docs/database.md`](docs/database.md).
+
 ## Layout
 
 ```
