@@ -192,6 +192,10 @@ export interface TagInputProps {
   placeholder?: string;
   /** Field height: 170 in onboarding, 190 on the settings page. */
   minHeight?: number;
+  /** Most tags the field accepts; at the limit the input closes and Return does nothing. */
+  max?: number;
+  /** Longest tag it accepts, in characters. */
+  maxLength?: number;
   className?: string;
 }
 
@@ -208,15 +212,22 @@ export function TagInput({
   onRemove,
   placeholder,
   minHeight = 170,
+  max,
+  maxLength,
   className,
 }: TagInputProps) {
   const [draft, setDraft] = useState('');
   const ring = useFocusRing();
+  const full = max !== undefined && tags.length >= max;
 
+  // Case-insensitive, like the database's unique index: "Café" and "café" are
+  // one interest, and admitting both would spend the cap on a duplicate.
   const commit = () => {
     const tag = draft.trim();
     setDraft('');
-    if (tag && !tags.includes(tag)) onAdd(tag);
+    if (!tag || full) return;
+    if (tags.some((entry) => entry.toLowerCase() === tag.toLowerCase())) return;
+    onAdd(tag);
   };
 
   return (
@@ -233,6 +244,8 @@ export function TagInput({
           value={draft}
           onChangeText={setDraft}
           onSubmitEditing={commit}
+          editable={!full}
+          maxLength={maxLength}
           onKeyPress={({ nativeEvent }) => {
             if (nativeEvent.key === 'Backspace' && draft === '' && tags.length > 0) {
               onRemove(tags[tags.length - 1]!);

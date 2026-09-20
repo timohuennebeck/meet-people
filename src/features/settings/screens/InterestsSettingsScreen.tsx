@@ -2,6 +2,7 @@ import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { View } from 'react-native';
 
+import { MAX_INTEREST_LENGTH, MAX_INTERESTS } from '@shared/lib/limits';
 import { Button, Chip, NavHeader, Screen, SectionLabel, Spacer, TagInput, Text } from '@shared/ui';
 
 import { usePreferences, useUpdatePreferences } from '../data/usePreferences';
@@ -30,6 +31,8 @@ export function InterestsSettingsScreen() {
         className="mt-[16px]"
         minHeight={190}
         tags={interests}
+        max={MAX_INTERESTS}
+        maxLength={MAX_INTEREST_LENGTH}
         onAdd={(tag) => update({ interests: [...interests, tag] })}
         onRemove={(tag) => update({ interests: interests.filter((entry) => entry !== tag) })}
       />
@@ -42,15 +45,17 @@ export function InterestsSettingsScreen() {
         {/* A tag already on the list is not offered again — adding it twice
             would put two chips under the same key, and removing either would
             take both. */}
-        {SUGGESTIONS.filter((suggestion) => !interests.includes(suggestion)).map((suggestion) => (
-          <Chip
-            key={suggestion}
-            label={`+ ${suggestion}`}
-            size="suggestion"
-            tone="outline"
-            onPress={() => update({ interests: [...interests, suggestion] })}
-          />
-        ))}
+        {(interests.length >= MAX_INTERESTS ? [] : SUGGESTIONS)
+          .filter((suggestion) => !interests.includes(suggestion))
+          .map((suggestion) => (
+            <Chip
+              key={suggestion}
+              label={`+ ${suggestion}`}
+              size="suggestion"
+              tone="outline"
+              onPress={() => update({ interests: [...interests, suggestion] })}
+            />
+          ))}
       </View>
 
       <Spacer min={10} />
