@@ -10,7 +10,7 @@ import { Button, Spacer, TextButton } from '@shared/ui';
 /** The shortlist the design offers on this step. */
 const OPTIONS = ['de', 'en', 'tr', 'es', 'pl'];
 
-/** Step 5 — the languages the user speaks, shown later on their profile. */
+/** The languages the user speaks, shown later on their profile. */
 export function LanguagesScreen() {
   const { t } = useTranslation();
   const router = useRouter();

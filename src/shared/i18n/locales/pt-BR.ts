@@ -37,6 +37,7 @@ export const ptBR = {
     rating: '4,8 de 5',
     ratingCount: '· 1.240 avaliações',
     start: 'Começar',
+    languagePicker: 'Idioma do app',
     haveAccount: 'Já tem conta?',
     signIn: 'Entrar',
     legalPrefix: 'Ao começar você aceita os',
@@ -51,10 +52,6 @@ export const ptBR = {
   },
 
   onboarding: {
-    appLanguage: {
-      title: 'Em que idioma\nquer o app?',
-      subtitle: 'Menus, avisos e o Pips.',
-    },
     location: {
       title: 'Onde procuramos\nos planos?',
       subtitle: 'Só o que dá para ir a pé.',

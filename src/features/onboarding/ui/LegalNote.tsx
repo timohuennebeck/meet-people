@@ -15,12 +15,14 @@ export function LegalNote() {
         doc="terms"
         label={t('onboarding.account.terms')}
         className="text-[13.5px] text-ink-body underline"
+        pressedClassName="text-ink-trace"
       />{' '}
       {t('onboarding.account.legalJoin')}{' '}
       <LegalLink
         doc="privacy"
         label={t('onboarding.account.privacy')}
         className="text-[13.5px] text-ink-body underline"
+        pressedClassName="text-ink-trace"
       />
       {t('onboarding.account.legalSuffix')}
     </Text>

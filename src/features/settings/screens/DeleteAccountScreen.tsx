@@ -1,5 +1,5 @@
 import { useRouter } from 'expo-router';
-import { CreditCard } from 'phosphor-react-native';
+import { Info } from 'phosphor-react-native';
 import { useTranslation } from 'react-i18next';
 
 import { MascotScreen } from '@shared/components/MascotScreen';
@@ -53,7 +53,7 @@ export function DeleteAccountScreen() {
         </>
       }
     >
-      <InfoNote icon={<CreditCard size={26} weight="fill" color={colors.brand} />}>
+      <InfoNote icon={<Info size={26} weight="fill" color={colors.brand} />}>
         {t('settings.deleteAccountPage.billing')}
       </InfoNote>
     </MascotScreen>

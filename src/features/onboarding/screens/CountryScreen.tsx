@@ -8,7 +8,7 @@ import { COUNTRIES } from '@shared/lib/languages';
 import { STEPS } from '@shared/lib/steps';
 import { Button, SelectableRow, Spacer, TextButton } from '@shared/ui';
 
-/** Step 6 — home country, whose flag ends up on the profile avatar. Skippable. */
+/** Home country, whose flag ends up on the profile avatar. Skippable. */
 export function CountryScreen() {
   const { t } = useTranslation();
   const router = useRouter();

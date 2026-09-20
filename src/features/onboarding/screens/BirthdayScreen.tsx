@@ -22,7 +22,7 @@ import { Button, Spacer, Text } from '@shared/ui';
 /** `height:236px;border-radius:24px` — the card the design draws the wheels in. */
 const CARD_HEIGHT = 236;
 
-/** Step 12 — birthday, from which the displayed age is derived. */
+/** Birthday, from which the displayed age is derived. */
 export function BirthdayScreen() {
   const { t, i18n } = useTranslation();
   const router = useRouter();

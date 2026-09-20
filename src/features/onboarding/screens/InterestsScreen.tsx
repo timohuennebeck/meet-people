@@ -11,7 +11,7 @@ import { Button, Chip, Spacer, TagInput } from '@shared/ui';
 /** Suggestions offered under the field, as shown in the design. */
 const SUGGESTIONS = ['Café', 'Café da manhã'];
 
-/** Step 4b — interests, entered as tags. */
+/** Interests, entered as tags. */
 export function InterestsScreen() {
   const { t } = useTranslation();
   const router = useRouter();

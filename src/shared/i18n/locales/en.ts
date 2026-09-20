@@ -38,6 +38,7 @@ export const en: Translation = {
     rating: '4.8 out of 5',
     ratingCount: '· 1,240 reviews',
     start: 'Get started',
+    languagePicker: 'App language',
     haveAccount: 'Already have an account?',
     signIn: 'Sign in',
     legalPrefix: 'By continuing you accept the',
@@ -52,10 +53,6 @@ export const en: Translation = {
   },
 
   onboarding: {
-    appLanguage: {
-      title: 'Which language\nfor the app?',
-      subtitle: 'Menus, alerts and Pips.',
-    },
     location: {
       title: 'Where should we\nlook for plans?',
       subtitle: 'Only what you can walk to.',

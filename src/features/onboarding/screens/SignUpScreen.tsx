@@ -54,7 +54,7 @@ function StrengthMeter({ filled }: { filled: number }) {
   );
 }
 
-/** Step 8 — e-mail and password, with the keyboard up. */
+/** E-mail and password, with the keyboard up. */
 export function SignUpScreen() {
   const { t } = useTranslation();
   const router = useRouter();

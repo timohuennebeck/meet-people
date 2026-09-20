@@ -10,7 +10,7 @@ import { Button, Glyph, Mascot, Spacer } from '@shared/ui';
 
 import { LegalNote } from '../ui/LegalNote';
 
-/** Step 7 — create or restore an account. Mascot card, e-mail first, Google below. */
+/** Create or restore an account. Mascot card, e-mail first, Google below. */
 export function AccountScreen() {
   const { t } = useTranslation();
   const router = useRouter();

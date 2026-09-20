@@ -28,7 +28,7 @@ function StepCard({ index, title, body }: { index: number; title: string; body: 
   );
 }
 
-/** Step 15 — what the two verification steps involve, before the camera opens. */
+/** What the two verification steps involve, before the camera opens. */
 export function VerificationIntroScreen() {
   const { t } = useTranslation();
   const router = useRouter();

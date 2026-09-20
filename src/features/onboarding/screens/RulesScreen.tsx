@@ -65,7 +65,7 @@ function ConfirmedRule({ title, index }: { title: string; index: number }) {
   );
 }
 
-/** Step 17 — the three community rules, confirmed one at a time. */
+/** The last step — the three community rules, confirmed one at a time. */
 export function RulesScreen() {
   const { t } = useTranslation();
   const router = useRouter();
@@ -107,10 +107,6 @@ export function RulesScreen() {
                   ? t('onboarding.rules.confirmAll')
                   : t('onboarding.rules.agree')
             }
-            // The design greys this button once all three are confirmed but
-            // keeps it clickable — it is what carries the user on to the
-            // paywall, so it takes the resting style, not the disabled state.
-            variant={allDone ? 'disabled' : 'primary'}
             onPress={advance}
           />
           <TextButton

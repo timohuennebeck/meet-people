@@ -7,7 +7,7 @@ import { Button, Glyph, Text } from '@shared/ui';
 
 import { CameraButton, CameraFrame } from '../ui/CameraFrame';
 
-/** Step 15b — keep the selfie or retake it. */
+/** Keep the selfie or retake it. */
 export function SelfieReviewScreen() {
   const { t } = useTranslation();
   const router = useRouter();

@@ -36,7 +36,7 @@ function PortraitPlaceholder() {
   );
 }
 
-/** Step 14 — a profile photo. Skippable, but flagged as worth doing. */
+/** A profile photo. Skippable, but flagged as worth doing. */
 export function PhotoScreen() {
   const { t } = useTranslation();
   const router = useRouter();

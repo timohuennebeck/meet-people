@@ -6,7 +6,7 @@ import { StepScaffold } from '@shared/components/StepScaffold';
 import { STEPS } from '@shared/lib/steps';
 import { Button, Spacer, Text, TimelineStep } from '@shared/ui';
 
-/** Step 15c — the review timeline, shown while a human checks the selfie. */
+/** The review timeline, shown while a human checks the selfie. */
 export function VerificationPendingScreen() {
   const { t } = useTranslation();
   const router = useRouter();

@@ -1,12 +1,14 @@
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
+import { Star } from 'phosphor-react-native';
 import { useTranslation } from 'react-i18next';
 import { Pressable, View } from 'react-native';
 
 import { AVATARS } from '@shared/data/fixtures';
-import { gradients, gradientStops, shadows } from '@shared/theme/tokens';
+import { colors, gradients, gradientStops, shadows } from '@shared/theme/tokens';
 import { Avatar, AvatarStack, Button, Highlight, Mascot, Screen, Text } from '@shared/ui';
 
+import { LanguagePicker } from '../ui/LanguagePicker';
 import { LegalLink } from '../ui/LegalLink';
 
 /**
@@ -53,6 +55,13 @@ export function WelcomeScreen() {
         className="absolute inset-0"
       />
 
+      {/* Before anything else, and out of the way of everyone who does not
+          need it: the app's language used to be a whole step asking the
+          question before the person had a reason to care. */}
+      <View className="shrink-0 flex-row justify-end">
+        <LanguagePicker />
+      </View>
+
       <View className="relative flex-1 items-center justify-center">
         <Mascot size={244} />
         <FloatingPlan
@@ -89,7 +98,14 @@ export function WelcomeScreen() {
         </View>
 
         <View className="mt-[14px] flex-row items-center gap-[9px]">
-          <Text className="text-[17px] leading-[17px] text-brand">★★★★★</Text>
+          {/* Drawn rather than typed: `★` is sharp-pointed and renders from a
+              different font on every platform. Phosphor's filled star has the
+              rounded points the design wants and one shape everywhere. */}
+          <View className="flex-row gap-[2px]">
+            {[0, 1, 2, 3, 4].map((index) => (
+              <Star key={index} size={16} weight="fill" color={colors.brand} />
+            ))}
+          </View>
           <Text weight={600} className="text-[15.5px]">
             {t('welcome.rating')}
           </Text>
@@ -99,7 +115,7 @@ export function WelcomeScreen() {
         <Button
           label={t('welcome.start')}
           className="mt-[20px]"
-          onPress={() => router.push('/(onboarding)/app-language')}
+          onPress={() => router.push('/(onboarding)/location')}
         />
 
         <Pressable

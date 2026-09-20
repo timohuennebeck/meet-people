@@ -7,7 +7,7 @@ import { StepScaffold } from '@shared/components/StepScaffold';
 import { STEPS } from '@shared/lib/steps';
 import { Button, Spacer } from '@shared/ui';
 
-/** Step 4 — which ages the user wants to see on the map. */
+/** Which ages the user wants to see on the map. */
 export function AgeRangeScreen() {
   const { t } = useTranslation();
   const router = useRouter();

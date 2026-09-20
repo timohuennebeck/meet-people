@@ -9,7 +9,7 @@ import type { Pronouns } from '@shared/data/schemas';
 import { STEPS } from '@shared/lib/steps';
 import { Button, Spacer, Text, TextButton } from '@shared/ui';
 
-/** Step 13 — pronouns, shown beside the user's name. Skippable. */
+/** Pronouns, shown beside the user's name. Skippable. */
 export function PronounsScreen() {
   const { t } = useTranslation();
   const router = useRouter();

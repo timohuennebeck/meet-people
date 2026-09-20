@@ -7,7 +7,7 @@ import { VIEWER } from '@shared/data/fixtures';
 import { STEPS } from '@shared/lib/steps';
 import { Button, Highlight, Mascot, StepTitle, Text, TextButton } from '@shared/ui';
 
-/** Step 9 — a short confirmation once the account exists. */
+/** A short confirmation once the account exists. */
 export function ConfirmationScreen() {
   const { t } = useTranslation();
   const router = useRouter();

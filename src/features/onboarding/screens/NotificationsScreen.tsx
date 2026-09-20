@@ -44,7 +44,7 @@ function SampleNotification() {
   );
 }
 
-/** Step 16 — the notification permission ask. */
+/** The notification permission ask. */
 export function NotificationsScreen() {
   const { t } = useTranslation();
   const router = useRouter();

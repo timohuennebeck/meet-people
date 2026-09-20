@@ -7,7 +7,7 @@ import { StepScaffold } from '@shared/components/StepScaffold';
 import { STEPS } from '@shared/lib/steps';
 import { Button, Mascot, Spacer, TextField } from '@shared/ui';
 
-/** Step 11 — first name only. */
+/** First name only. */
 export function NameScreen() {
   const { t } = useTranslation();
   const router = useRouter();

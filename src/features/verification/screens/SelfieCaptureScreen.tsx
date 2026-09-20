@@ -9,7 +9,7 @@ import { Text } from '@shared/ui';
 import { CameraFrame } from '../ui/CameraFrame';
 import { SelfieCameraNotice, SelfieCameraPreview, useSelfieCamera } from '../ui/SelfieCamera';
 
-/** Step 15a — the selfie camera. */
+/** The selfie camera. */
 export function SelfieCaptureScreen() {
   const { t } = useTranslation();
   const router = useRouter();

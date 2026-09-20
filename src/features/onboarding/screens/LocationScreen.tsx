@@ -21,7 +21,7 @@ function Benefit({ icon, children }: { icon: ReactNode; children: string }) {
   );
 }
 
-/** Step 2 — the location permission ask. */
+/** The location permission ask. */
 export function LocationScreen() {
   const { t } = useTranslation();
   const router = useRouter();

@@ -11,7 +11,7 @@ import { Glyph, Screen, SearchHeader, SelectableRow, Text, TextField } from '@sh
 /** Languages common in the user's neighbourhood, offered while nothing is typed. */
 const NEARBY = ['tr', 'ar'];
 
-/** Step 5a — live language search, reached from the languages step. */
+/** Live language search, reached from the languages step. */
 export function LanguageSearchScreen() {
   const { t } = useTranslation();
   const router = useRouter();

@@ -75,7 +75,7 @@ function RootNavigator() {
           route in the current state survives, `StackRouter` falls back to
           `routeNames[0]`, and this Stack sets no anchor. First in the list, the
           legal modal would become where the app lands on every sign-in. */}
-      <Stack.Screen name="legal" options={{ presentation: 'modal' }} />
+      <Stack.Screen name="legal" />
     </Stack>
   );
 }

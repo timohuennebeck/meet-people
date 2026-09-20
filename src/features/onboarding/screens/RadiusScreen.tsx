@@ -9,7 +9,7 @@ import type { DistanceUnit } from '@shared/data/schemas';
 import { STEPS } from '@shared/lib/steps';
 import { Button, Spacer } from '@shared/ui';
 
-/** Step 3 — how far the user is willing to travel. */
+/** How far the user is willing to travel. */
 export function RadiusScreen() {
   const { t } = useTranslation();
   const router = useRouter();
