@@ -9,6 +9,7 @@ import {
 } from 'react-native';
 
 import { cn } from '@shared/lib/cn';
+import { haptics } from '@shared/lib/haptics';
 import { shadows } from '@shared/theme/tokens';
 
 import { Text } from './Text';
@@ -42,7 +43,10 @@ function useTrackDrag(onAt: (fraction: number, grant: boolean) => void) {
         // slightly vertical wobble hands the drag to the scroller mid-stroke.
         onPanResponderTerminationRequest: () => false,
         onPanResponderGrant: (event) => {
-          if (width > 0) onAt(clamp(event.nativeEvent.locationX / width), true);
+          if (width === 0) return;
+          // Once as the handle is picked up, not on every frame of the drag.
+          haptics.select();
+          onAt(clamp(event.nativeEvent.locationX / width), true);
         },
         onPanResponderMove: (event) => {
           if (width > 0) onAt(clamp(event.nativeEvent.locationX / width), false);
@@ -265,7 +269,10 @@ export function SegmentedControl<T extends string>({
             key={option.value}
             accessibilityRole="radio"
             accessibilityState={{ selected }}
-            onPress={() => onChange?.(option.value)}
+            onPress={() => {
+              haptics.select();
+              onChange?.(option.value);
+            }}
             className={cn('rounded-pill px-[14px] py-[8px]', selected && 'bg-brand')}
           >
             <Text

@@ -2,6 +2,7 @@ import type { ReactNode } from 'react';
 import { Pressable, View, type ViewProps } from 'react-native';
 
 import { cn } from '@shared/lib/cn';
+import { haptics } from '@shared/lib/haptics';
 
 import { Check } from './icons';
 import { Text, type TextProps } from './Text';
@@ -92,7 +93,13 @@ export function SelectableCard({
     <Pressable
       accessibilityRole="radio"
       accessibilityState={{ selected }}
-      onPress={onPress}
+      onPress={
+        onPress &&
+        (() => {
+          haptics.select();
+          onPress();
+        })
+      }
       className={cn('rounded-panel bg-surface active:opacity-[0.85]', recipe.className, className)}
       style={
         padding

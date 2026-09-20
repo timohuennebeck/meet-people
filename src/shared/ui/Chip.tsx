@@ -2,6 +2,7 @@ import { useTranslation } from 'react-i18next';
 import { Pressable, View } from 'react-native';
 
 import { cn } from '@shared/lib/cn';
+import { haptics } from '@shared/lib/haptics';
 import { shadows } from '@shared/theme/tokens';
 
 import { CloseSmall } from './icons';
@@ -119,7 +120,10 @@ export function Chip({
           accessibilityLabel={t('common.remove', { label })}
           // The glyph is 11px, so the target is grown outwards rather than in.
           hitSlop={10}
-          onPress={onRemove}
+          onPress={() => {
+            haptics.select();
+            onRemove();
+          }}
         >
           <CloseSmall size={11} />
         </Pressable>
@@ -146,7 +150,10 @@ export function Chip({
   return (
     <Pressable
       accessibilityRole="button"
-      onPress={onPress}
+      onPress={() => {
+        haptics.select();
+        onPress();
+      }}
       className={classes}
       style={tone === 'raised' ? shadows.chipSoft : undefined}
     >
