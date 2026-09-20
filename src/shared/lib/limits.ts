@@ -1,12 +1,16 @@
 /**
  * Product limits the client enforces politely before the database enforces them
- * for real. Each mirrors a key in `app_config` (see `docs/database.md` §3.2) and
- * becomes a live read once the app talks to Supabase; until then the number
- * lives here so the two cannot silently disagree by more than one edit.
+ * for real, so nobody meets one as a database error.
  */
 
-/** `app_config.max_interests` — past this the profile's chip row stops saying anything. */
+/**
+ * The `interest_cap` check constraint on `profiles.interests`. Past ten the
+ * profile's chip row stops saying anything about the person.
+ */
 export const MAX_INTERESTS = 10;
 
-/** `profile_interests.interest` length check; a longer chip wraps on the profile. */
+/**
+ * Client-only since the interests became an array: the per-item length check
+ * went with the table that held them. A longer chip wraps on the profile.
+ */
 export const MAX_INTEREST_LENGTH = 30;

@@ -153,7 +153,7 @@ function asProfileRow(row: unknown): PublicProfileRow {
 // Preferences, which most reads need before they can format anything
 // ---------------------------------------------------------------------------
 
-/** The subset of `preferences` columns the settings screen writes. */
+/** The subset of `profiles` columns the settings screen writes. */
 type PreferencesUpdate = Partial<{
   radius: number;
   distance_unit: DistanceUnit;
@@ -162,6 +162,8 @@ type PreferencesUpdate = Partial<{
   audience_gender: 'everyone' | 'women' | 'men' | 'non_binary';
   app_language: string;
   notifications_enabled: boolean;
+  interests: string[];
+  languages: string[];
 }>;
 
 const AUDIENCE_TO_DB: Record<AudienceGender, 'everyone' | 'women' | 'men' | 'non_binary'> = {
@@ -186,15 +188,11 @@ async function planContext(): Promise<PlanContext> {
   const db = client();
   const uid = await viewerId();
   const row = unwrap(
-    await db
-      .from('preferences')
-      .select('radius, distance_unit')
-      .eq('profile_id', uid)
-      .maybeSingle(),
+    await db.from('profiles').select('radius, distance_unit').eq('id', uid).maybeSingle(),
   );
   const unit: DistanceUnit = row?.distance_unit ?? 'mi';
-  // The default matches `preferences.radius`'s own default, so a profile whose
-  // row has not been created yet still places its pins somewhere sensible.
+  // The default matches `profiles.radius`'s own default, so a profile whose row
+  // has not been created yet still places its pins somewhere sensible.
   const radius = row?.radius ?? 2;
   return { viewerId: uid, radiusM: radiusMetres(radius, unit), unit };
 }
@@ -239,20 +237,6 @@ async function planDetail(planId: string): Promise<Plan> {
 // ---------------------------------------------------------------------------
 // People
 // ---------------------------------------------------------------------------
-
-async function interestsOf(profileId: string): Promise<string[]> {
-  const rows = unwrap(
-    await client().from('profile_interests').select('interest').eq('profile_id', profileId),
-  );
-  return (rows ?? []).map((row) => row.interest);
-}
-
-async function languagesOf(profileId: string): Promise<string[]> {
-  const rows = unwrap(
-    await client().from('profile_languages').select('language_code').eq('profile_id', profileId),
-  );
-  return (rows ?? []).map((row) => row.language_code);
-}
 
 /** How many of the given people share a plan with the viewer, keyed by profile id. */
 async function sharedPlanCounts(profileIds: string[]): Promise<Map<string, number>> {
@@ -518,9 +502,10 @@ export const supabaseSource: DataSource = {
      *
      * The base table rather than `public_profiles`, because this is the one
      * person entitled to everything it holds — the age below is computed from
-     * the `birthdate` no other screen ever sees. `verified` is the exception:
-     * it is derived from the verification submissions, which only the view can
-     * reach, so it comes from there.
+     * the `birthdate` no other screen ever sees, and the interests and the
+     * languages are columns beside it, so the whole person is one read.
+     * `verified` is the exception: it is derived from the verification
+     * submissions, which only the view can reach, so it comes from there.
      */
     me: async (): Promise<User> => {
       const db = client();
@@ -529,7 +514,7 @@ export const supabaseSource: DataSource = {
       const [profile, publicRow] = await Promise.all([
         db
           .from('profiles')
-          .select('*, profile_interests(interest), profile_languages(language_code)')
+          .select('*')
           .eq('id', uid)
           .single()
           .then((result) => unwrapSingle(result, `Profile ${uid}`)),
@@ -551,8 +536,8 @@ export const supabaseSource: DataSource = {
         countryCode: profile.country_code ?? undefined,
         pronouns: profile.pronouns ?? undefined,
         bio: profile.bio ?? undefined,
-        interests: profile.profile_interests.map((row) => row.interest),
-        languages: spokenLanguagesFor(profile.profile_languages.map((row) => row.language_code)),
+        interests: profile.interests,
+        languages: spokenLanguagesFor(profile.languages),
         joinedAt: profile.created_at,
       });
     },
@@ -561,36 +546,31 @@ export const supabaseSource: DataSource = {
     detail: async (userId: string): Promise<User> => {
       const db = client();
 
-      const [row, interests, languages, attendanceRate, plansCount, sharedCounts] =
-        await Promise.all([
-          db
-            .from('public_profiles')
-            .select('*')
-            .eq('id', userId)
-            .maybeSingle()
-            .then((result) => unwrap(result)),
-          interestsOf(userId),
-          languagesOf(userId),
-          db.rpc('attendance_rate_of', { uid: userId }).then((result) => unwrap(result)),
-          db
-            .from('plan_participants')
-            .select('plan_id', { count: 'exact', head: true })
-            .eq('profile_id', userId)
-            .is('left_at', null)
-            .then((result) => {
-              if (result.error) throwAsDataError(result.error);
-              return result.count ?? 0;
-            }),
-          sharedPlanCounts([userId]),
-        ]);
+      const [row, attendanceRate, plansCount, sharedCounts] = await Promise.all([
+        db
+          .from('public_profiles')
+          .select('*')
+          .eq('id', userId)
+          .maybeSingle()
+          .then((result) => unwrap(result)),
+        db.rpc('attendance_rate_of', { uid: userId }).then((result) => unwrap(result)),
+        db
+          .from('plan_participants')
+          .select('plan_id', { count: 'exact', head: true })
+          .eq('profile_id', userId)
+          .is('left_at', null)
+          .then((result) => {
+            if (result.error) throwAsDataError(result.error);
+            return result.count ?? 0;
+          }),
+        sharedPlanCounts([userId]),
+      ]);
 
       if (!row) throw new Error(`User ${userId} not found`);
 
       return validate(
         userSchema,
         toUser(asProfileRow(row), {
-          interests,
-          languages,
           attendanceRate,
           plansCount,
           sharedPlansCount: sharedCounts.get(userId) ?? 0,
@@ -689,10 +669,9 @@ export const supabaseSource: DataSource = {
 
   preferences: {
     /**
-     * The viewer's preferences row, plus the two lists the settings screen
-     * edits alongside it. Interests and languages are their own tables — they
-     * belong to the profile rather than to discovery — but the settings screen
-     * shows them on the same page, so the domain type carries all three.
+     * The viewer's preferences, which are columns on their `profiles` row —
+     * discovery settings, the app's own settings, and the two lists the
+     * settings screen edits on the same page. One read covers all of them.
      */
     get: async (): Promise<Preferences> => {
       const db = client();
@@ -705,24 +684,22 @@ export const supabaseSource: DataSource = {
         return validate(preferencesSchema, { ...DEFAULT_PREFERENCES, ...deferredPreferences });
       }
 
-      const [row, interests, languages] = await Promise.all([
-        db
-          .from('preferences')
-          .select('*')
-          .eq('profile_id', uid)
-          .single()
-          .then((result) => unwrapSingle(result, 'Preferences')),
-        interestsOf(uid),
-        languagesOf(uid),
-      ]);
+      const row = await db
+        .from('profiles')
+        .select(
+          'radius, distance_unit, age_min, age_max, audience_gender, interests, languages, app_language, notifications_enabled',
+        )
+        .eq('id', uid)
+        .single()
+        .then((result) => unwrapSingle(result, 'Preferences'));
 
       return validate(preferencesSchema, {
         radius: row.radius,
         distanceUnit: row.distance_unit,
         ageRange: [row.age_min, row.age_max],
         audienceGender: AUDIENCE_FROM_DB[row.audience_gender],
-        interests,
-        spokenLanguages: spokenLanguagesFor(languages),
+        interests: row.interests,
+        spokenLanguages: spokenLanguagesFor(row.languages),
         appLanguage: row.app_language,
         notificationsEnabled: row.notifications_enabled,
       });
@@ -731,11 +708,12 @@ export const supabaseSource: DataSource = {
     /**
      * Applies a patch.
      *
-     * Interests and languages are replaced wholesale rather than diffed: both
-     * lists are short, the screen sends the whole set every time, and a delete
-     * followed by an insert is one shape to reason about. The insert may be
-     * refused with TOO_MANY_INTERESTS when the cap in `app_config` is lower
-     * than the one the client enforces.
+     * Every field is a column on the same row, so the whole patch is one
+     * update — interests and languages included, since assigning an array is
+     * how a list is replaced now. The update may be refused with
+     * TOO_MANY_INTERESTS: the cap and the case-insensitive uniqueness of the
+     * interest list are check constraints on `profiles`, and `toDataError`
+     * folds either onto that code.
      */
     update: async (patch: Partial<Preferences>): Promise<Preferences> => {
       const db = client();
@@ -760,34 +738,13 @@ export const supabaseSource: DataSource = {
       if (patch.notificationsEnabled !== undefined) {
         columns.notifications_enabled = patch.notificationsEnabled;
       }
+      if (patch.interests !== undefined) columns.interests = [...patch.interests];
+      if (patch.spokenLanguages !== undefined) {
+        columns.languages = patch.spokenLanguages.map((language) => language.code);
+      }
 
       if (Object.keys(columns).length > 0) {
-        unwrap(await db.from('preferences').update(columns).eq('profile_id', uid));
-      }
-
-      if (patch.interests !== undefined) {
-        unwrap(await db.from('profile_interests').delete().eq('profile_id', uid));
-        if (patch.interests.length > 0) {
-          unwrap(
-            await db
-              .from('profile_interests')
-              .insert(patch.interests.map((interest) => ({ profile_id: uid, interest }))),
-          );
-        }
-      }
-
-      if (patch.spokenLanguages !== undefined) {
-        unwrap(await db.from('profile_languages').delete().eq('profile_id', uid));
-        if (patch.spokenLanguages.length > 0) {
-          unwrap(
-            await db.from('profile_languages').insert(
-              patch.spokenLanguages.map((language) => ({
-                profile_id: uid,
-                language_code: language.code,
-              })),
-            ),
-          );
-        }
+        unwrap(await db.from('profiles').update(columns).eq('id', uid));
       }
 
       return supabaseSource.preferences.get();

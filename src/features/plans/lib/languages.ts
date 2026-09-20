@@ -10,7 +10,7 @@ import { PEOPLE, VIEWER } from '@shared/data/fixtures';
  *
  * Nearby is modelled as the people directory minus the viewer — "por perto" is
  * other people, and counting yourself would inflate every row by one. When this
- * reads from Supabase it becomes a query over `profile_languages` within the
+ * reads from Supabase it becomes a query over `profiles.languages` within the
  * viewer's radius; the two numbers this module exposes stay the same shape.
  */
 const NEARBY = Object.values(PEOPLE).filter((person) => person.id !== VIEWER.id);

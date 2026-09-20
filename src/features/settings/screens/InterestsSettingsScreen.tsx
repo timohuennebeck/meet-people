@@ -46,7 +46,10 @@ export function InterestsSettingsScreen() {
             would put two chips under the same key, and removing either would
             take both. */}
         {(interests.length >= MAX_INTERESTS ? [] : SUGGESTIONS)
-          .filter((suggestion) => !interests.includes(suggestion))
+          .filter(
+            (suggestion) =>
+              !interests.some((tag) => tag.toLowerCase() === suggestion.toLowerCase()),
+          )
           .map((suggestion) => (
             <Chip
               key={suggestion}

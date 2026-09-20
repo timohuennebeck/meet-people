@@ -52,7 +52,9 @@ export function InterestsScreen() {
         {/* Nothing to offer once the cap is reached — a chip that fails silently
             is worse than no chip. */}
         {(tags.length >= MAX_INTERESTS ? [] : SUGGESTIONS)
-          .filter((suggestion) => !tags.includes(suggestion))
+          .filter(
+            (suggestion) => !tags.some((tag) => tag.toLowerCase() === suggestion.toLowerCase()),
+          )
           .map((suggestion) => (
             <Chip
               key={suggestion}

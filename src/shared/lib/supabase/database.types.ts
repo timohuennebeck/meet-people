@@ -191,86 +191,59 @@ export type Database = {
       conversations: {
         Row: {
           created_at: string
+          direct_higher_id: string | null
+          direct_lower_id: string | null
           id: string
           plan_id: string | null
         }
         Insert: {
           created_at?: string
+          direct_higher_id?: string | null
+          direct_lower_id?: string | null
           id?: string
           plan_id?: string | null
         }
         Update: {
           created_at?: string
+          direct_higher_id?: string | null
+          direct_lower_id?: string | null
           id?: string
           plan_id?: string | null
         }
         Relationships: [
           {
+            foreignKeyName: "conversations_direct_higher_id_fkey"
+            columns: ["direct_higher_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "conversations_direct_higher_id_fkey"
+            columns: ["direct_higher_id"]
+            isOneToOne: false
+            referencedRelation: "public_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "conversations_direct_lower_id_fkey"
+            columns: ["direct_lower_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "conversations_direct_lower_id_fkey"
+            columns: ["direct_lower_id"]
+            isOneToOne: false
+            referencedRelation: "public_profiles"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "conversations_plan_id_fkey"
             columns: ["plan_id"]
             isOneToOne: false
             referencedRelation: "plans"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      direct_conversations: {
-        Row: {
-          conversation_id: string
-          higher_id: string
-          lower_id: string
-        }
-        Insert: {
-          conversation_id: string
-          higher_id: string
-          lower_id: string
-        }
-        Update: {
-          conversation_id?: string
-          higher_id?: string
-          lower_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "direct_conversations_conversation_id_fkey"
-            columns: ["conversation_id"]
-            isOneToOne: true
-            referencedRelation: "conversation_list"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "direct_conversations_conversation_id_fkey"
-            columns: ["conversation_id"]
-            isOneToOne: true
-            referencedRelation: "conversations"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "direct_conversations_higher_id_fkey"
-            columns: ["higher_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "direct_conversations_higher_id_fkey"
-            columns: ["higher_id"]
-            isOneToOne: false
-            referencedRelation: "public_profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "direct_conversations_lower_id_fkey"
-            columns: ["lower_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "direct_conversations_lower_id_fkey"
-            columns: ["lower_id"]
-            isOneToOne: false
-            referencedRelation: "public_profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -558,93 +531,33 @@ export type Database = {
           },
         ]
       }
-      plan_attendance: {
-        Row: {
-          outcome: Database["public"]["Enums"]["attendance_outcome"]
-          plan_id: string
-          profile_id: string
-          recorded_at: string
-        }
-        Insert: {
-          outcome: Database["public"]["Enums"]["attendance_outcome"]
-          plan_id: string
-          profile_id: string
-          recorded_at?: string
-        }
-        Update: {
-          outcome?: Database["public"]["Enums"]["attendance_outcome"]
-          plan_id?: string
-          profile_id?: string
-          recorded_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "plan_attendance_plan_id_fkey"
-            columns: ["plan_id"]
-            isOneToOne: false
-            referencedRelation: "plans"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "plan_attendance_profile_id_fkey"
-            columns: ["profile_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "plan_attendance_profile_id_fkey"
-            columns: ["profile_id"]
-            isOneToOne: false
-            referencedRelation: "public_profiles"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      plan_languages: {
-        Row: {
-          language_code: string
-          plan_id: string
-        }
-        Insert: {
-          language_code: string
-          plan_id: string
-        }
-        Update: {
-          language_code?: string
-          plan_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "plan_languages_plan_id_fkey"
-            columns: ["plan_id"]
-            isOneToOne: false
-            referencedRelation: "plans"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       plan_participants: {
         Row: {
           is_host: boolean
           joined_at: string
           left_at: string | null
+          outcome: Database["public"]["Enums"]["attendance_outcome"] | null
           plan_id: string
           profile_id: string
+          recorded_at: string | null
         }
         Insert: {
           is_host?: boolean
           joined_at?: string
           left_at?: string | null
+          outcome?: Database["public"]["Enums"]["attendance_outcome"] | null
           plan_id: string
           profile_id: string
+          recorded_at?: string | null
         }
         Update: {
           is_host?: boolean
           joined_at?: string
           left_at?: string | null
+          outcome?: Database["public"]["Enums"]["attendance_outcome"] | null
           plan_id?: string
           profile_id?: string
+          recorded_at?: string | null
         }
         Relationships: [
           {
@@ -677,6 +590,7 @@ export type Database = {
           duration_minutes: number | null
           id: string
           join_mode: Database["public"]["Enums"]["join_mode"]
+          languages: string[]
           place_id: string
           repeats_on: number
           seats: number | null
@@ -689,6 +603,7 @@ export type Database = {
           duration_minutes?: number | null
           id?: string
           join_mode?: Database["public"]["Enums"]["join_mode"]
+          languages?: string[]
           place_id: string
           repeats_on: number
           seats?: number | null
@@ -701,6 +616,7 @@ export type Database = {
           duration_minutes?: number | null
           id?: string
           join_mode?: Database["public"]["Enums"]["join_mode"]
+          languages?: string[]
           place_id?: string
           repeats_on?: number
           seats?: number | null
@@ -717,29 +633,6 @@ export type Database = {
           },
         ]
       }
-      plan_series_languages: {
-        Row: {
-          language_code: string
-          series_id: string
-        }
-        Insert: {
-          language_code: string
-          series_id: string
-        }
-        Update: {
-          language_code?: string
-          series_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "plan_series_languages_series_id_fkey"
-            columns: ["series_id"]
-            isOneToOne: false
-            referencedRelation: "plan_series"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       plans: {
         Row: {
           age_max: number | null
@@ -750,6 +643,7 @@ export type Database = {
           host_id: string | null
           id: string
           join_mode: Database["public"]["Enums"]["join_mode"]
+          languages: string[]
           place_id: string
           seats: number | null
           series_id: string | null
@@ -766,6 +660,7 @@ export type Database = {
           host_id?: string | null
           id?: string
           join_mode?: Database["public"]["Enums"]["join_mode"]
+          languages?: string[]
           place_id: string
           seats?: number | null
           series_id?: string | null
@@ -782,6 +677,7 @@ export type Database = {
           host_id?: string | null
           id?: string
           join_mode?: Database["public"]["Enums"]["join_mode"]
+          languages?: string[]
           place_id?: string
           seats?: number | null
           series_id?: string | null
@@ -816,117 +712,6 @@ export type Database = {
             columns: ["series_id"]
             isOneToOne: false
             referencedRelation: "plan_series"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      preferences: {
-        Row: {
-          age_max: number
-          age_min: number
-          app_language: string
-          audience_gender: Database["public"]["Enums"]["audience_gender"]
-          distance_unit: Database["public"]["Enums"]["distance_unit"]
-          notifications_enabled: boolean
-          profile_id: string
-          radius: number
-          updated_at: string
-        }
-        Insert: {
-          age_max?: number
-          age_min?: number
-          app_language?: string
-          audience_gender?: Database["public"]["Enums"]["audience_gender"]
-          distance_unit?: Database["public"]["Enums"]["distance_unit"]
-          notifications_enabled?: boolean
-          profile_id: string
-          radius?: number
-          updated_at?: string
-        }
-        Update: {
-          age_max?: number
-          age_min?: number
-          app_language?: string
-          audience_gender?: Database["public"]["Enums"]["audience_gender"]
-          distance_unit?: Database["public"]["Enums"]["distance_unit"]
-          notifications_enabled?: boolean
-          profile_id?: string
-          radius?: number
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "preferences_profile_id_fkey"
-            columns: ["profile_id"]
-            isOneToOne: true
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "preferences_profile_id_fkey"
-            columns: ["profile_id"]
-            isOneToOne: true
-            referencedRelation: "public_profiles"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      profile_interests: {
-        Row: {
-          interest: string
-          profile_id: string
-        }
-        Insert: {
-          interest: string
-          profile_id: string
-        }
-        Update: {
-          interest?: string
-          profile_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "profile_interests_profile_id_fkey"
-            columns: ["profile_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "profile_interests_profile_id_fkey"
-            columns: ["profile_id"]
-            isOneToOne: false
-            referencedRelation: "public_profiles"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      profile_languages: {
-        Row: {
-          language_code: string
-          profile_id: string
-        }
-        Insert: {
-          language_code: string
-          profile_id: string
-        }
-        Update: {
-          language_code?: string
-          profile_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "profile_languages_profile_id_fkey"
-            columns: ["profile_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "profile_languages_profile_id_fkey"
-            columns: ["profile_id"]
-            isOneToOne: false
-            referencedRelation: "public_profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -966,48 +751,75 @@ export type Database = {
       }
       profiles: {
         Row: {
+          age_max: number
+          age_min: number
+          app_language: string
+          audience_gender: Database["public"]["Enums"]["audience_gender"]
           avatar_storage_path: string | null
           bio: string | null
           birthdate: string | null
           country_code: string | null
           created_at: string
           deleted_at: string | null
+          distance_unit: Database["public"]["Enums"]["distance_unit"]
           gender: Database["public"]["Enums"]["gender"] | null
           id: string
+          interests: string[]
+          languages: string[]
           name: string
           neighbourhood: string | null
+          notifications_enabled: boolean
           onboarding_completed_at: string | null
           pronouns: Database["public"]["Enums"]["pronouns"]
+          radius: number
           updated_at: string
         }
         Insert: {
+          age_max?: number
+          age_min?: number
+          app_language?: string
+          audience_gender?: Database["public"]["Enums"]["audience_gender"]
           avatar_storage_path?: string | null
           bio?: string | null
           birthdate?: string | null
           country_code?: string | null
           created_at?: string
           deleted_at?: string | null
+          distance_unit?: Database["public"]["Enums"]["distance_unit"]
           gender?: Database["public"]["Enums"]["gender"] | null
           id: string
+          interests?: string[]
+          languages?: string[]
           name?: string
           neighbourhood?: string | null
+          notifications_enabled?: boolean
           onboarding_completed_at?: string | null
           pronouns?: Database["public"]["Enums"]["pronouns"]
+          radius?: number
           updated_at?: string
         }
         Update: {
+          age_max?: number
+          age_min?: number
+          app_language?: string
+          audience_gender?: Database["public"]["Enums"]["audience_gender"]
           avatar_storage_path?: string | null
           bio?: string | null
           birthdate?: string | null
           country_code?: string | null
           created_at?: string
           deleted_at?: string | null
+          distance_unit?: Database["public"]["Enums"]["distance_unit"]
           gender?: Database["public"]["Enums"]["gender"] | null
           id?: string
+          interests?: string[]
+          languages?: string[]
           name?: string
           neighbourhood?: string | null
+          notifications_enabled?: boolean
           onboarding_completed_at?: string | null
           pronouns?: Database["public"]["Enums"]["pronouns"]
+          radius?: number
           updated_at?: string
         }
         Relationships: []
@@ -1155,7 +967,9 @@ export type Database = {
           country_code: string | null
           gender: Database["public"]["Enums"]["gender"] | null
           id: string | null
+          interests: string[] | null
           joined_at: string | null
+          languages: string[] | null
           name: string | null
           neighbourhood: string | null
           pronouns: Database["public"]["Enums"]["pronouns"] | null
@@ -1168,7 +982,9 @@ export type Database = {
           country_code?: string | null
           gender?: Database["public"]["Enums"]["gender"] | null
           id?: string | null
+          interests?: string[] | null
           joined_at?: string | null
+          languages?: string[] | null
           name?: string | null
           neighbourhood?: string | null
           pronouns?: Database["public"]["Enums"]["pronouns"] | null
@@ -1181,7 +997,9 @@ export type Database = {
           country_code?: string | null
           gender?: Database["public"]["Enums"]["gender"] | null
           id?: string | null
+          interests?: string[] | null
           joined_at?: string | null
+          languages?: string[] | null
           name?: string | null
           neighbourhood?: string | null
           pronouns?: Database["public"]["Enums"]["pronouns"] | null

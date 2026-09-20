@@ -23,9 +23,10 @@ import { AttendeeRow } from '../ui/AttendeeRow';
  *
  * Everyone starts ticked, so answering honestly costs a tap only when someone
  * did not turn up — which is why the subtitle's instruction is "desmarque quem
- * faltou" rather than "marque quem veio". Nothing is written: `plan_attendance`
- * exists in the schema plan and not in the fixture layer, so the answer travels
- * to the thank-you screen as counts and goes no further.
+ * faltou" rather than "marque quem veio". Nothing is written: `plan_participants.outcome`
+ * is derived server-side from cancellations, and host-confirmed attendance is
+ * deferred, so the answer travels to the thank-you screen as counts and goes no
+ * further.
  */
 export function AttendanceCheckScreen() {
   const { t, i18n } = useTranslation();

@@ -42,6 +42,8 @@ export interface PublicProfileRow {
   country_code: string | null;
   joined_at: string;
   verified: boolean | null;
+  interests: string[] | null;
+  languages: string[] | null;
 }
 
 /** The `place` object on a `nearby_plans` row. */
@@ -129,10 +131,11 @@ export function spokenLanguagesFor(codes: readonly string[]): SpokenLanguage[] {
   });
 }
 
-/** Extra facts about a person that live outside `public_profiles`. */
+/**
+ * Extra facts about a person that live outside `public_profiles` — counts and
+ * rates computed per call site rather than stored on the profile.
+ */
 export interface UserExtras {
-  interests?: readonly string[];
-  languages?: readonly string[];
   attendanceRate?: number | null;
   plansCount?: number | null;
   sharedPlansCount?: number | null;
@@ -140,6 +143,10 @@ export interface UserExtras {
 
 /**
  * A profile row as the UI's `User`.
+ *
+ * Every `PublicProfileRow` is a whole person: the view carries the interests
+ * and the languages alongside the name, so a participant or a host embedded in
+ * a `nearby_plans()` row renders exactly what `users.detail()` would.
  *
  * `age` is the one lossy step: `public_profiles` computes it from `birthdate`,
  * which is null until the birthday step six screens into sign-up, while
@@ -149,8 +156,6 @@ export interface UserExtras {
  * the plan it appears on.
  */
 export function toUser(row: PublicProfileRow, extras: UserExtras = {}): User {
-  const interests = extras.interests ?? [];
-  const languages = extras.languages ?? [];
   return {
     id: row.id,
     name: row.name ?? '',
@@ -161,8 +166,8 @@ export function toUser(row: PublicProfileRow, extras: UserExtras = {}): User {
     countryCode: row.country_code ?? undefined,
     pronouns: row.pronouns ?? undefined,
     bio: row.bio ?? undefined,
-    interests: [...interests],
-    languages: spokenLanguagesFor(languages),
+    interests: [...(row.interests ?? [])],
+    languages: spokenLanguagesFor(row.languages ?? []),
     joinedAt: row.joined_at,
     attendanceRate: extras.attendanceRate ?? undefined,
     plansCount: extras.plansCount ?? undefined,
