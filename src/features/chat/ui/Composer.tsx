@@ -36,8 +36,16 @@ export function Composer({
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}
-        className="shrink-0"
-        contentContainerStyle={{ paddingHorizontal: 16, paddingTop: 8, gap: 8 }}
+        className="shrink-0 grow-0"
+        // `alignItems` matters: a horizontal ScrollView stretches its children
+        // to the full height of the row by default, which pulls the pills into
+        // tall capsules instead of letting them hug their label.
+        contentContainerStyle={{
+          alignItems: 'center',
+          paddingHorizontal: 16,
+          paddingTop: 8,
+          gap: 8,
+        }}
       >
         {quickReplies.map((reply) => (
           <Pressable

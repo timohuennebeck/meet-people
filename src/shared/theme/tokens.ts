@@ -158,12 +158,12 @@ export const shadows = {
     shadowRadius: 22,
     elevation: 6,
   },
-  /** `0 12px 30px rgba(21,24,31,.08)` — the rules card. */
+  /** `0 14px 34px rgba(21,24,31,.10)` — the rules card. */
   ruleCard: {
     shadowColor: '#15181F',
-    shadowOffset: { width: 0, height: 12 },
-    shadowOpacity: 0.08,
-    shadowRadius: 30,
+    shadowOffset: { width: 0, height: 14 },
+    shadowOpacity: 0.1,
+    shadowRadius: 34,
     elevation: 10,
   },
   /** `0 2px 8px rgba(21,24,31,.22)` — slider thumbs. */

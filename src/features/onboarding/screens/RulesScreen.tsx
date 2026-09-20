@@ -90,7 +90,7 @@ export function RulesScreen() {
         // Re-keying on the index replays the card's entrance for each rule.
         key={index}
         entering={FadeInDown.duration(620)}
-        className="mt-[20px] h-[296px] shrink-0 rounded-[28px] bg-surface p-[22px]"
+        className="mt-[20px] h-[296px] shrink-0 rounded-[30px] bg-surface p-[20px]"
         style={shadows.ruleCard}
       >
         <View className="shrink-0 flex-row items-center gap-[12px]">
