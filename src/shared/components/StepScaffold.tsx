@@ -14,7 +14,13 @@ export interface StepScaffoldProps {
    * The question, with `\n` where the design breaks the line. Omitted on the
    * photo step, whose heading sits centred with the content instead.
    */
-  title?: ReactNode;
+  title?: string;
+  /**
+   * Replaces the title outright, for the one step whose heading is a row rather
+   * than a paragraph — the confirmation step's name sits in a rounded band, and
+   * a band cannot be drawn by a nested `Text`. Takes the same top margin.
+   */
+  titleBlock?: ReactNode;
   /** Extra classes on the title, e.g. `text-center` on the confirmation step. */
   titleClassName?: string;
   /** Small-caps label above the title, used by the verification intro. */
@@ -44,6 +50,7 @@ export interface StepScaffoldProps {
 export function StepScaffold({
   position,
   title,
+  titleBlock,
   titleClassName,
   eyebrow,
   subtitle,
@@ -72,10 +79,14 @@ export function StepScaffold({
           {eyebrow}
         </Text>
       ) : null}
-      {title ? (
+      {titleBlock ? (
+        // The eyebrow already supplies the gap, so the title tightens to 8px.
+        <View className="shrink-0" style={{ marginTop: eyebrow ? 8 : spacing.title }}>
+          {titleBlock}
+        </View>
+      ) : title ? (
         <StepTitle
           className={cn('shrink-0', titleClassName)}
-          // The eyebrow already supplies the gap, so the title tightens to 8px.
           style={{ marginTop: eyebrow ? 8 : spacing.title }}
         >
           {title}

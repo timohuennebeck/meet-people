@@ -5,7 +5,7 @@ import { Pressable, View } from 'react-native';
 
 import { AVATARS } from '@shared/data/fixtures';
 import { gradients, gradientStops, shadows } from '@shared/theme/tokens';
-import { Avatar, AvatarStack, Button, Mascot, Screen, Text } from '@shared/ui';
+import { Avatar, AvatarStack, Button, Highlight, Mascot, Screen, Text } from '@shared/ui';
 
 /**
  * Two floating plan cards that overlap the mascot, pinned to the design's
@@ -68,14 +68,14 @@ export function WelcomeScreen() {
       </View>
 
       <View className="relative shrink-0">
+        {/* `padding:0 8px · radius:8px`, and the design breaks the line after it. */}
+        <Highlight
+          className="rounded-[8px] bg-brand-haze px-[8px]"
+          textClassName="text-[34px] leading-[40.12px] tracking-[-1.19px] text-brand-ink"
+        >
+          {t('welcome.titleHighlight')}
+        </Highlight>
         <Text weight={600} className="text-[34px] leading-[40.12px] tracking-[-1.19px]">
-          <Text
-            weight={600}
-            className="rounded-[8px] bg-brand-haze px-[8px] text-[34px] leading-[40.12px] tracking-[-1.19px] text-brand-ink"
-          >
-            {t('welcome.titleHighlight')}
-          </Text>
-          {'\n'}
           {t('welcome.titleRest')}
         </Text>
 

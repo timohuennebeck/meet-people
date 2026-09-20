@@ -5,7 +5,7 @@ import { View } from 'react-native';
 import { StepScaffold } from '@shared/components/StepScaffold';
 import { VIEWER } from '@shared/data/fixtures';
 import { STEPS } from '@shared/lib/steps';
-import { Button, Mascot, Text, TextButton } from '@shared/ui';
+import { Button, Highlight, Mascot, StepTitle, Text, TextButton } from '@shared/ui';
 
 /** Step 9 — a short confirmation once the account exists. */
 export function ConfirmationScreen() {
@@ -15,18 +15,21 @@ export function ConfirmationScreen() {
   return (
     <StepScaffold
       position={STEPS.confirmation}
-      titleClassName="text-center"
-      title={
-        <>
-          {t('onboarding.confirmation.titleLead')}{' '}
-          <Text
-            weight={600}
-            className="rounded-[10px] bg-brand-tint px-[10px] text-[32px] leading-[34.56px] tracking-[-1.024px] text-brand"
-          >
-            {VIEWER.name}
-          </Text>
-          {t('onboarding.confirmation.titleTrail')}
-        </>
+      titleBlock={
+        // `padding:2px 10px 4px · radius:10px` around the name, centred with
+        // the words either side of it.
+        <View className="flex-row flex-wrap items-center justify-center gap-x-[9px]">
+          <StepTitle>{t('onboarding.confirmation.titleLead')}</StepTitle>
+          <View className="flex-row items-center">
+            <Highlight
+              className="rounded-[10px] bg-brand-tint px-[10px] pb-[4px] pt-[2px]"
+              textClassName="text-[32px] leading-[34.56px] tracking-[-1.024px] text-brand"
+            >
+              {VIEWER.name}
+            </Highlight>
+            <StepTitle>{t('onboarding.confirmation.titleTrail')}</StepTitle>
+          </View>
+        </View>
       }
       footer={
         <>

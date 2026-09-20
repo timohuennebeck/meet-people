@@ -9,7 +9,7 @@ export interface CreateStepLayoutProps {
   step: number;
   /** Fill fraction; the design uses 20/40/60/80/100%. */
   progress: number;
-  title: ReactNode;
+  title: string;
   subtitle?: string;
   children: ReactNode;
   footer?: ReactNode;

@@ -18,6 +18,7 @@ export { Caret } from './Caret';
 export { Badge, Chip, CountBadge, type ChipSize, type ChipTone } from './Chip';
 export { Flag, FlagStack, flagUri } from './Flag';
 export { CircleButton, NavHeader, ProgressHeader, SearchHeader } from './Header';
+export { Highlight, type HighlightProps } from './Highlight';
 export { ListGroup, ListRow, SelectableRow } from './ListRow';
 export { GlowingMascot, Mascot } from './Mascot';
 export { CheckLine, InfoNote, SealNote, WarningNote } from './Note';

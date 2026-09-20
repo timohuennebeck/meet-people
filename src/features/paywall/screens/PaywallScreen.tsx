@@ -9,6 +9,7 @@ import {
   CheckLine,
   CircleButton,
   Glyph,
+  Highlight,
   Mascot,
   Screen,
   SelectableCard,
@@ -118,20 +119,24 @@ export function PaywallScreen() {
         </View>
       </View>
 
-      <Text
-        weight={600}
-        className="mt-[10px] shrink-0 text-[29px] leading-[32.48px] tracking-[-0.928px]"
-      >
-        {t('paywall.titleLead')}
-        {'\n'}
-        <Text
-          weight={600}
-          className="rounded-[10px] bg-brand-band px-[10px] text-[29px] leading-[32.48px] tracking-[-0.928px]"
-        >
-          {t('paywall.titleHighlight')}
-        </Text>{' '}
-        {t('paywall.titleTrail')}
-      </Text>
+      <View className="mt-[10px] shrink-0">
+        <Text weight={600} className="text-[29px] leading-[32.48px] tracking-[-0.928px]">
+          {t('paywall.titleLead')}
+        </Text>
+        {/* `padding:2px 10px · radius:10px`, pulled back 4px by the design's
+            negative margin so the band lines up with the text above it. */}
+        <View className="-ml-[4px] flex-row items-center gap-[6px]">
+          <Highlight
+            className="rounded-[10px] bg-brand-band px-[10px] py-[2px]"
+            textClassName="text-[29px] leading-[32.48px] tracking-[-0.928px]"
+          >
+            {t('paywall.titleHighlight')}
+          </Highlight>
+          <Text weight={600} className="text-[29px] leading-[32.48px] tracking-[-0.928px]">
+            {t('paywall.titleTrail')}
+          </Text>
+        </View>
+      </View>
 
       <Text className="mt-[9px] shrink-0 text-[15px] leading-[21.3px] text-ink-dim">
         {t('paywall.subtitle')}
