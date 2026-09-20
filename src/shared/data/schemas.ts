@@ -160,6 +160,18 @@ export const preferencesSchema = z.object({
 });
 export type Preferences = z.infer<typeof preferencesSchema>;
 
+/**
+ * A people-search hit: the person, plus the pre-formatted line under their
+ * name ("Kreuzberg · 2 planos em comum").
+ */
+export const searchResultSchema = z.object({
+  user: userSchema,
+  detail: z.string(),
+});
+export type SearchResult = z.infer<typeof searchResultSchema>;
+
+export const searchResultsSchema = z.array(searchResultSchema);
+
 /** The draft a user builds while stepping through the create-plan flow. */
 export const planDraftSchema = z.object({
   title: z.string().max(60),
