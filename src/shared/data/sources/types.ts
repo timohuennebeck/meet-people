@@ -5,6 +5,7 @@ import type {
   Place,
   Plan,
   Preferences,
+  ProfileView,
   SearchResults,
   User,
 } from '../schemas';
@@ -43,6 +44,25 @@ export interface DataSource {
     search(term: string): Promise<SearchResults>;
     /** Recently viewed profiles, listed under the search results. */
     recent(): Promise<SearchResults>;
+    /**
+     * How many people looked at the viewer's own profile this week. Free to
+     * everyone — it is the number the paywall is selling the names behind.
+     */
+    viewCount(): Promise<number>;
+    /**
+     * Who they were, newest first. Plus only: a free account is refused with
+     * `PLUS_REQUIRED`, which is an answer the viewers screen renders as the
+     * paywall rather than as an error.
+     */
+    viewers(): Promise<ProfileView[]>;
+    /**
+     * Records that the viewer opened somebody's profile.
+     *
+     * The server decides whether the look counts — its own profile, a blocked
+     * person or a half-finished one are dropped silently — so a caller never
+     * has to ask first, and never has anything to show when it resolves.
+     */
+    recordView(userId: string): Promise<void>;
   };
 
   chats: {

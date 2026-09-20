@@ -190,3 +190,18 @@ export type SearchResult = z.infer<typeof searchResultSchema>;
 
 export const searchResultsSchema = z.array(searchResultSchema);
 export type SearchResults = z.infer<typeof searchResultsSchema>;
+
+/**
+ * Somebody who looked at the viewer's profile, and when they last looked.
+ *
+ * One entry per person rather than per visit: `profile_views` keeps a single
+ * row per pair and bumps `viewed_at` on every visit, so "Tom looked three
+ * times" is a question the table deliberately cannot answer and this type
+ * deliberately cannot carry.
+ */
+export const profileViewSchema = z.object({
+  user: userSchema,
+  /** ISO timestamp of the most recent look. */
+  viewedAt: z.string(),
+});
+export type ProfileView = z.infer<typeof profileViewSchema>;

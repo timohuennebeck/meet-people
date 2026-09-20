@@ -1,5 +1,6 @@
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import type { ParseKeys } from 'i18next';
+import { useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ScrollView, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -10,7 +11,7 @@ import { cn } from '@shared/lib/cn';
 import { colors } from '@shared/theme/tokens';
 import { Button, CircleButton, Glyph, SealNote, Text } from '@shared/ui';
 
-import { useUser } from '../data/useUsers';
+import { useMe, useRecordProfileView, useUser } from '../data/useUsers';
 import { ProfileHeader, ProfileInterests } from '../ui/ProfileHeader';
 
 /** `radius:18px · #F7F9FC` tile — one of the three stats under the header. */
@@ -32,7 +33,23 @@ export function PersonProfileScreen() {
   const insets = useSafeAreaInsets();
   const { id } = useLocalSearchParams<{ id: string }>();
   const { data: user } = useUser(id ?? '');
+  const { data: me } = useMe();
   const openDirect = useOpenDirect();
+  const { mutate: recordView } = useRecordProfileView();
+  const recorded = useRef(false);
+
+  // A visit, not a render: the ref is what makes it once per mount, since the
+  // effect re-runs as the two profiles arrive. Own profile is skipped here as
+  // well as inside the function — there is no point in the round trip, and
+  // waiting for `me` costs nothing because it is already cached by the profile
+  // tab. Nothing is read back: the RPC returns void whether it recorded the
+  // look or decided it was not one, and a call that never arrives leaves the
+  // screen exactly as it is.
+  useEffect(() => {
+    if (recorded.current || !user || !me || user.id === me.id) return;
+    recorded.current = true;
+    recordView(user.id);
+  }, [user, me, recordView]);
 
   if (!user) return <View className="flex-1 bg-surface" />;
 

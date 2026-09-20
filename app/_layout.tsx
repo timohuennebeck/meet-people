@@ -100,6 +100,7 @@ function RootNavigator() {
         {/* The other `MascotScreen` confirmation — same reason. */}
         <Stack.Screen name="report/[id]/sent" />
 
+        <Stack.Screen name="profile-views" />
         <Stack.Screen name="search" />
         <Stack.Screen name="settings" />
         <Stack.Screen name="verification-badge" />

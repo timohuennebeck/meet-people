@@ -512,6 +512,17 @@ export const en: Translation = {
     distanceLine: '{{neighbourhood}} · {{distance}} from you',
     tenureLine: 'On the app since March · replies in ~2 h',
     verifiedNote: 'Selfie verified in March. Profile confirmed by 3 hosts.',
+
+    views: {
+      row_one: '{{count}} person viewed your profile this week',
+      row_other: '{{count}} people viewed your profile this week',
+      none: 'No one viewed your profile this week',
+      navTitle: 'Who viewed your profile',
+      lockedCount_one: '{{count}} person viewed your profile',
+      lockedCount_other: '{{count}} people viewed your profile',
+      lockedBody: 'Plus shows you who they are.',
+      lockedAction: 'See Plus',
+    },
   },
 
   safety: {

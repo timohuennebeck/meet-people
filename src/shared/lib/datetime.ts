@@ -10,6 +10,8 @@
  * already on screen.
  */
 
+import { i18n } from '@shared/i18n';
+
 /**
  * The youngest the app accepts. The database enforces the same floor — the
  * `profiles` adult constraint checks `birthdate <= current_date - interval '18
@@ -141,4 +143,26 @@ export function formatDayMonth(date: Date, locale: string): string {
 /** `19:00` where the locale is 24-hour, `7:00 PM` where it is not. */
 export function formatTime(date: Date, locale: string): string {
   return date.toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit' });
+}
+
+/**
+ * `Hoje 14:32` / `Ontem 19:04` / `17 de set. 19:19` — when something already
+ * happened, to the day and the minute.
+ *
+ * The viewers list is what needs it: a face beside a name wants a "when" that
+ * is worth reading and is not a log. Anything within the last two days is
+ * named the way the design names a plan's day, and older than that by its
+ * date, so the line stays the same width as the names above it.
+ *
+ * The day words come from `datetime.*`, exactly as `whenLabel` builds them —
+ * the locale decides the date and the clock, i18n decides "Hoje".
+ */
+export function formatPastMoment(date: Date, locale: string, now = new Date()): string {
+  const time = formatTime(date, locale);
+  const day = {
+    today: () => i18n.t('datetime.today'),
+    yesterday: () => i18n.t('datetime.yesterday'),
+    other: () => formatDayMonth(date, locale),
+  }[relativeDay(date, now)]();
+  return i18n.t('datetime.dayAtTime', { day, time });
 }

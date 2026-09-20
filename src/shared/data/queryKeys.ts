@@ -40,6 +40,14 @@ export const userKeys = {
   search: (term: string) => key([...userKeys.all, 'search', term] as const),
   /** Recently viewed profiles, shown under the search results. */
   recent: () => key([...userKeys.all, 'recent'] as const),
+  /**
+   * How many people looked at the viewer's profile. Separate from `viewers()`
+   * rather than derived from it: the count is free and the list is not, so the
+   * free account holds the first and never the second.
+   */
+  views: () => key([...userKeys.all, 'views'] as const),
+  /** Who looked at the viewer's profile, newest first. Plus only. */
+  viewers: () => key([...userKeys.all, 'viewers'] as const),
 } as const;
 
 export const chatKeys = {

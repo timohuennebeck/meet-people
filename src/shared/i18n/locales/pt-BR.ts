@@ -520,6 +520,21 @@ export const ptBR = {
     distanceLine: '{{neighbourhood}} · {{distance}} de você',
     tenureLine: 'No app desde março · responde em ~2 h',
     verifiedNote: 'Selfie verificada em março. Perfil confirmado por 3 anfitriões.',
+
+    /**
+     * Quem olhou seu perfil. `row` é grátis e conta; `locked*` é o que uma
+     * conta grátis vê no lugar da lista, que é do Plus.
+     */
+    views: {
+      row_one: '{{count}} pessoa viu seu perfil esta semana',
+      row_other: '{{count}} pessoas viram seu perfil esta semana',
+      none: 'Ninguém viu seu perfil esta semana',
+      navTitle: 'Quem viu seu perfil',
+      lockedCount_one: '{{count}} pessoa viu seu perfil',
+      lockedCount_other: '{{count}} pessoas viram seu perfil',
+      lockedBody: 'O Plus mostra quem são.',
+      lockedAction: 'Conhecer o Plus',
+    },
   },
 
   safety: {

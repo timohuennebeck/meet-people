@@ -18,3 +18,6 @@ android/
 # Supabase
 supabase/.temp/
 supabase/.branches/
+
+# Scratch from `npm run db:types`
+.db.types.tmp

@@ -25,6 +25,7 @@ import {
   placeSchema,
   planSchema,
   preferencesSchema,
+  profileViewSchema,
   searchResultsSchema,
   userSchema,
   type AudienceGender,
@@ -35,6 +36,7 @@ import {
   type Place,
   type Plan,
   type Preferences,
+  type ProfileView,
   type SearchResults,
   type User,
 } from '../schemas';
@@ -640,6 +642,47 @@ export const supabaseSource: DataSource = {
      * "BUSCAS RECENTES" the viewer never looked at.
      */
     recent: (): Promise<SearchResults> => Promise.resolve([]),
+
+    /**
+     * How many people looked this week. Free, and the only half of this the
+     * paywall shows a free account — which is why it is its own round trip
+     * rather than the length of the list below.
+     */
+    viewCount: async (): Promise<number> => unwrap(await client().rpc('profile_view_count')) ?? 0,
+
+    /**
+     * Who looked, newest first.
+     *
+     * `viewer` is a whole `public_profiles` row as JSON, so it goes through
+     * the same `toUser` as a participant embedded on a plan and a viewer
+     * renders exactly what their profile would. A free account is refused by
+     * the function, and `unwrap` turns that into the `PLUS_REQUIRED`
+     * `DataError` the screen answers with the paywall.
+     */
+    viewers: async (): Promise<ProfileView[]> => {
+      const rows = unwrap(await client().rpc('profile_viewers'));
+      return validate(
+        profileViewSchema.array(),
+        (rows ?? []).map((row) => ({
+          user: toUser(asProfileRow(row.viewer)),
+          viewedAt: new Date(row.viewed_at).toISOString(),
+        })),
+      );
+    },
+
+    /**
+     * Records that the viewer opened somebody's profile.
+     *
+     * Nothing is checked here first. The function drops a look at your own
+     * profile, at somebody who blocked you and at a half-finished one, and
+     * returns void either way — the server is what decides a view is not worth
+     * recording, and it never says so. What is *not* swallowed is the call
+     * failing: a request that never arrived is a different thing from one the
+     * server chose to ignore, and the caller decides what to do about it.
+     */
+    recordView: async (userId: string): Promise<void> => {
+      unwrap(await client().rpc('record_profile_view', { profile: userId }));
+    },
   },
 
   chats: {

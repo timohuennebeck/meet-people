@@ -492,6 +492,7 @@ export type Database = {
           plan_id: string
           profile_id: string
           recorded_at: string | null
+          requested_at: string | null
           seated_at: string | null
           status: Database["public"]["Enums"]["member_status"]
           updated_at: string
@@ -505,6 +506,7 @@ export type Database = {
           plan_id: string
           profile_id: string
           recorded_at?: string | null
+          requested_at?: string | null
           seated_at?: string | null
           status: Database["public"]["Enums"]["member_status"]
           updated_at?: string
@@ -518,6 +520,7 @@ export type Database = {
           plan_id?: string
           profile_id?: string
           recorded_at?: string | null
+          requested_at?: string | null
           seated_at?: string | null
           status?: Database["public"]["Enums"]["member_status"]
           updated_at?: string
@@ -707,6 +710,53 @@ export type Database = {
             foreignKeyName: "profile_locations_profile_id_fkey"
             columns: ["profile_id"]
             isOneToOne: true
+            referencedRelation: "public_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profile_views: {
+        Row: {
+          profile_id: string
+          viewed_at: string
+          viewer_id: string
+        }
+        Insert: {
+          profile_id: string
+          viewed_at?: string
+          viewer_id: string
+        }
+        Update: {
+          profile_id?: string
+          viewed_at?: string
+          viewer_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "profile_views_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "profile_views_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "public_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "profile_views_viewer_id_fkey"
+            columns: ["viewer_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "profile_views_viewer_id_fkey"
+            columns: ["viewer_id"]
+            isOneToOne: false
             referencedRelation: "public_profiles"
             referencedColumns: ["id"]
           },
@@ -1023,6 +1073,15 @@ export type Database = {
         }[]
       }
       open_direct_conversation: { Args: { other: string }; Returns: string }
+      profile_view_count: { Args: { days?: number }; Returns: number }
+      profile_viewers: {
+        Args: { days?: number }
+        Returns: {
+          viewed_at: string
+          viewer: Json
+        }[]
+      }
+      record_profile_view: { Args: { profile: string }; Returns: undefined }
     }
     Enums: {
       attendance_outcome: "attended" | "cancelled" | "no_show"
@@ -1059,6 +1118,7 @@ export type Database = {
         | "tr"
         | "uk"
         | "zh"
+        | "pt-BR"
       legal_doc_kind: "terms" | "privacy"
       member_status: "requested" | "declined" | "seated" | "left"
       platform: "ios" | "android"
@@ -1232,6 +1292,7 @@ export const Constants = {
         "tr",
         "uk",
         "zh",
+        "pt-BR",
       ],
       legal_doc_kind: ["terms", "privacy"],
       member_status: ["requested", "declined", "seated", "left"],

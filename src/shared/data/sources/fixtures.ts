@@ -1,4 +1,4 @@
-import type { z } from 'zod';
+import { z } from 'zod';
 
 import { i18n } from '@shared/i18n';
 
@@ -9,6 +9,7 @@ import {
   placeSchema,
   planSchema,
   preferencesSchema,
+  profileViewSchema,
   searchResultsSchema,
   userSchema,
   type Conversation,
@@ -17,6 +18,7 @@ import {
   type Place,
   type Plan,
   type Preferences,
+  type ProfileView,
   type User,
 } from '../schemas';
 import type { DataSource } from './types';
@@ -41,6 +43,23 @@ const threads = new Map<string, Message[]>([
 
 /** Stands in for network latency so loading states are exercised in development. */
 const LATENCY_MS = 120;
+
+/**
+ * Who looked at the viewer's profile, and how long ago.
+ *
+ * Built on every read rather than written down once, so the three of them stay
+ * inside the seven-day window the count is about however long the app has been
+ * open — a fixed timestamp would quietly drop out of "esta semana" and leave
+ * the row saying three and the list showing none.
+ */
+function profileViews(): ProfileView[] {
+  const hoursAgo = (hours: number) => new Date(Date.now() - hours * 3_600_000).toISOString();
+  return [
+    { user: fixtures.SARA, viewedAt: hoursAgo(4) },
+    { user: fixtures.LEA, viewedAt: hoursAgo(27) },
+    { user: fixtures.NOAH, viewedAt: hoursAgo(74) },
+  ];
+}
 
 /**
  * Resolves a value after the simulated latency, validating it on the way out.
@@ -131,6 +150,22 @@ export const fixtureSource: DataSource = {
             ),
       ),
     recent: () => settle(searchResultsSchema, fixtures.RECENT_SEARCHES),
+
+    /** Three, which is what `viewers` lists — the offline path renders the same screen. */
+    viewCount: (): Promise<number> => settle(z.number().int().min(0), profileViews().length),
+
+    viewers: (): Promise<ProfileView[]> => settle(profileViewSchema.array(), profileViews()),
+
+    /**
+     * Accepted and dropped.
+     *
+     * A look is recorded against the person who was looked at, and the only
+     * profile this source can answer for is the viewer's own — there is
+     * nowhere for somebody else's `profile_views` row to land and nothing that
+     * would read it back. It resolves rather than refuses because the screen
+     * doing the recording has no state to change either way.
+     */
+    recordView: (_userId: string): Promise<void> => Promise.resolve(),
   },
 
   chats: {
