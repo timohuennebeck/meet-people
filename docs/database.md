@@ -131,9 +131,10 @@ would create the row invisibly, and when it fails the user sees a generic "Datab
 new user" from Auth with nothing the app can act on.
 
 `SessionProvider` keeps its shape (`isAuthenticated`, `hasOnboarded`, `isVerified`,
-`isSubscribed`) but becomes a thin layer over the Supabase session plus a `profiles` query; the
-AsyncStorage copy stays as an offline cache. The router guards change from local flags to
-`profile.onboarding_completed_at != null` and the RevenueCat entitlement.
+`isSubscribed`) but becomes a thin layer over the Supabase session plus a `profiles` query and
+`verification_status_of(auth.uid())`; the AsyncStorage copy stays as an offline cache. The router
+guards change from local flags to `profile.onboarding_completed_at != null` and the RevenueCat
+entitlement.
 
 **Where logic lives.** Plain table reads and writes from the app wherever RLS is enough (profiles,
 preferences, interests, consent, blocks). Edge functions wherever a secret or a third party is
@@ -233,7 +234,6 @@ create table public.profiles (
   bio                     text check (char_length(bio) <= 400),
   neighbourhood           text,                                  -- never a street address
   country_code            char(2),
-  verification_status     public.verification_status not null default 'none',
   onboarding_completed_at timestamptz,
   deleted_at              timestamptz,                           -- anonymised, see §3.9
   created_at              timestamptz not null default now(),
@@ -249,13 +249,13 @@ create table public.profile_locations (
 );
 create index on public.profile_locations using gist (point);
 
--- What other users read.
+-- What other users read. Verification is derived here, not stored on the profile (§3.8).
 create view public.public_profiles as
-  select id, name, extract(year from age(birthdate))::int as age, avatar_storage_path,
-         pronouns, gender, bio, neighbourhood, country_code,
-         verification_status = 'verified' as verified
-  from public.profiles
-  where deleted_at is null;
+  select p.id, p.name, extract(year from age(p.birthdate))::int as age, p.avatar_storage_path,
+         p.pronouns, p.gender, p.bio, p.neighbourhood, p.country_code,
+         public.verification_status_of(p.id) = 'verified' as verified
+  from public.profiles p
+  where p.deleted_at is null;
 ```
 
 `profile_locations` is the load-bearing piece: **no policy grants SELECT on it to anyone**. Every
@@ -582,19 +582,36 @@ create index on public.verification_submissions (profile_id, submitted_at desc);
 ```
 
 **Review is manual, in Studio, and the schema is shaped around that.** No `reviewed_by` and no
-reviewer console: a person opens the row, looks at the selfie, sets `outcome`. The one thing the
-schema must guarantee is that this is a _single_ edit. A trigger on `verification_submissions`
-keeps `profiles.verification_status` in step — `pending` when a row is inserted, and whatever
-`outcome` becomes when it is set, stamping `reviewed_at` in the same statement. Two tables are never
-edited by hand for one decision, so they can never disagree, and the profile column stays the only
-thing a client reads: `verification_submissions` has no client read policy at all.
+reviewer console: a person opens the row, looks at the selfie, sets `outcome`. A trigger stamps
+`reviewed_at` whenever `outcome` changes, and that is the only automation — there is no second
+table to keep in step, because **a profile's verification status is not stored anywhere. It is the
+latest submission**, read through one function:
 
-That is also why `profiles.verified_at` is gone. The date of the accepting review is `reviewed_at`
-on the submission whose `outcome` is `verified`; nothing in the design shows it — the pill says
-"Verificado", not since when — and if a screen ever needs it, it is one query away.
-`verification_status` stays on `profiles`, though, and the distinction matters: status is read on
-every profile card, every `nearby_plans` row and the "verificados" filter, so it has to be where
-those reads already are, and moderation may one day revoke it with no submission involved.
+```sql
+create function public.verification_status_of(uid uuid) returns public.verification_status
+  language sql stable security definer set search_path = ''
+  as $$ select coalesce(
+    (select coalesce(s.outcome, 'pending') from public.verification_submissions s
+     where s.profile_id = uid order by s.submitted_at desc limit 1),
+    'none') $$;
+```
+
+The four enum values map one-to-one onto it — no row is `none`, a latest row with no `outcome`
+yet is `pending`, otherwise the outcome itself. `public_profiles` and `nearby_plans()` call it;
+both run with the owner's privileges, so they can read a table clients cannot. An earlier draft
+kept a `verification_status` column on `profiles` and a trigger to mirror it, on the argument that
+clients cannot read the submissions. That argument was wrong for exactly this reason, and a
+mirrored column is one more thing that can disagree with the truth.
+
+Two things follow. **Revoking** a badge is updating the latest row's `outcome` to `rejected` — the
+row outlives the selfie, since the retention job purges the object and stamps `purged_at` but keeps
+the row, so there is always a row to flip. And the person's **own** status (the pending screen 14c,
+the settings pill) is read the same way, which needs an own-rows `select` policy on
+`verification_submissions`; that exposes a storage path into a private bucket, not a picture.
+
+`profiles.verified_at` is gone for the same reason. The date of the accepting review is
+`reviewed_at` on the verified row; nothing in the design shows it — the pill says "Verificado", not
+since when — and if a screen ever needs it, it is one query away.
 
 The capture screen promises "Apagamos a selfie depois da conferência". That is a retention
 obligation, not a nicety: a `pg_cron` job deletes the storage object `selfie_retention_days` after
@@ -749,26 +766,27 @@ create policy "own preferences: write" on public.preferences for all
   using (auth.uid() = profile_id) with check (auth.uid() = profile_id);
 ```
 
-| Table                                        | read                                  | client write                   |
-| -------------------------------------------- | ------------------------------------- | ------------------------------ |
-| `app_config`, `legal_documents`              | everyone (incl. `anon`)               | none (secret key only)         |
-| `profiles`                                   | own                                   | insert / update own            |
-| `public_profiles` (view)                     | any signed-in, minus blocks           | —                              |
-| `profile_locations`                          | **nobody**                            | insert / update own            |
-| `profile_interests`, `profile_languages`     | any signed-in                         | own                            |
-| `preferences`                                | own                                   | own                            |
-| `places`                                     | any signed-in                         | insert (author recorded)       |
-| `plans`                                      | live plans, minus blocks              | insert / update own as host    |
-| `plan_participants`                          | any signed-in, minus blocks           | update own `left_at` (leaving) |
-| `join_requests`                              | author or host                        | insert own, host resolves      |
-| `plan_attendance`                            | own                                   | none (derived server-side)     |
-| `conversations`, `conversation_members`      | members                               | update own `last_read_at`      |
-| `messages`                                   | members, minus blocked direct threads | insert own                     |
-| `blocks`                                     | own                                   | insert / delete own            |
-| `reports`                                    | own                                   | insert own                     |
-| `entitlements`                               | own                                   | **none** (webhook only)        |
-| `billing_events`, `verification_submissions` | none                                  | none (edge functions)          |
-| `legal_acceptances`                          | own                                   | insert own                     |
+| Table                                    | read                                  | client write                   |
+| ---------------------------------------- | ------------------------------------- | ------------------------------ |
+| `app_config`, `legal_documents`          | everyone (incl. `anon`)               | none (secret key only)         |
+| `profiles`                               | own                                   | insert / update own            |
+| `public_profiles` (view)                 | any signed-in, minus blocks           | —                              |
+| `profile_locations`                      | **nobody**                            | insert / update own            |
+| `profile_interests`, `profile_languages` | any signed-in                         | own                            |
+| `preferences`                            | own                                   | own                            |
+| `places`                                 | any signed-in                         | insert (author recorded)       |
+| `plans`                                  | live plans, minus blocks              | insert / update own as host    |
+| `plan_participants`                      | any signed-in, minus blocks           | update own `left_at` (leaving) |
+| `join_requests`                          | author or host                        | insert own, host resolves      |
+| `plan_attendance`                        | own                                   | none (derived server-side)     |
+| `conversations`, `conversation_members`  | members                               | update own `last_read_at`      |
+| `messages`                               | members, minus blocked direct threads | insert own                     |
+| `blocks`                                 | own                                   | insert / delete own            |
+| `reports`                                | own                                   | insert own                     |
+| `entitlements`                           | own                                   | **none** (webhook only)        |
+| `billing_events`                         | none                                  | none (edge functions)          |
+| `verification_submissions`               | own                                   | none (edge function + Studio)  |
+| `legal_acceptances`                      | own                                   | insert own                     |
 
 Anonymous users (`(auth.jwt() ->> 'is_anonymous')::boolean`) get the same policies. They can
 complete steps 1–6 and nothing else: creating a plan, sending a request and opening a chat all
@@ -835,15 +853,17 @@ membership value the client has to compute.
 supabase/migrations/
   20260920000000_initial_schema.sql      ✅ applied: enums, profiles, preferences, places,
                                             plans, participants, requests, chat, RLS, triggers
-  002_privacy_split.sql                  public_profiles view, profile_locations, tightened
-                                            profile policies, gender, deleted_at,
-                                            handle_new_user, missing indexes
+  002_privacy_split.sql                  profile_locations, gender, deleted_at, tightened
+                                            profile policies, missing indexes; DROPS
+                                            profiles.verification_status + verified_at and adds
+                                            verification_submissions + verification_status_of()
+                                            first, because public_profiles calls it
   003_safety_and_capacity.sql            blocks + is_blocked(), reports, capacity trigger,
                                             participants.left_at, plan_attendance,
                                             messages FK restrict, messages.body → content
-  004_trust_legal_billing.sql            verification_submissions + status trigger,
-                                            legal_documents + acceptances, entitlements,
-                                            billing_events, app_config, storage policies
+  004_trust_legal_billing.sql            legal_documents + acceptances, entitlements,
+                                            billing_events, app_config, storage policies,
+                                            the reviewed_at trigger, retention job
   005_derived_reads.sql                  conversation_list, nearby_plans(), has_plus(),
                                             export_my_data(), quota trigger, realtime publication
 supabase/seed.sql                        app_config (eight keys), terms + privacy in pt-BR and
