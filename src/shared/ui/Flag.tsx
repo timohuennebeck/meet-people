@@ -2,6 +2,8 @@ import { Image } from 'expo-image';
 
 import { cn } from '@shared/lib/cn';
 
+import { Ring } from './Avatar';
+
 /**
  * The design pulls circular country flags from the `flag-icons` CDN at a pinned
  * version. Keeping the same source means the artwork matches the export exactly.
@@ -16,41 +18,34 @@ export interface FlagProps {
   /** ISO 3166-1 alpha-2 code, e.g. `pt`, `gb`, `de`. */
   code: string;
   size?: number;
-  /** Adds the `0 0 0 2px #fff` gutter used when flags overlap in a stack. */
-  ringed?: boolean;
   className?: string;
 }
 
 /** Circular country flag. */
-export function Flag({ code, size = 42, ringed = false, className }: FlagProps) {
+export function Flag({ code, size = 42, className }: FlagProps) {
   return (
     <Image
       source={{ uri: flagUri(code) }}
       accessibilityLabel={code.toUpperCase()}
       className={cn('shrink-0 rounded-full', className)}
-      style={{
-        width: size,
-        height: size,
-        borderRadius: size / 2,
-        ...(ringed ? { borderWidth: 2, borderColor: '#fff' } : null),
-      }}
+      style={{ width: size, height: size, borderRadius: size / 2 }}
       contentFit="cover"
     />
   );
 }
 
-/** Overlapping pair of flags — the "languages I speak" value in settings. */
+/**
+ * Overlapping pair of flags — the "languages I speak" value in settings.
+ * The `0 0 0 2px #fff` gutter is drawn outside each flag, so `Ring` keeps the
+ * artwork at its stated size.
+ */
 export function FlagStack({ codes, size = 22 }: { codes: string[]; size?: number }) {
   return (
     <>
       {codes.map((code, index) => (
-        <Flag
-          key={code}
-          code={code}
-          size={size}
-          ringed
-          className={index === 0 ? undefined : '-ml-[7px]'}
-        />
+        <Ring key={code} size={size} width={2} style={index === 0 ? undefined : { marginLeft: -7 }}>
+          <Flag code={code} size={size} />
+        </Ring>
       ))}
     </>
   );

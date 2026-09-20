@@ -57,6 +57,9 @@ export function RulesScreen() {
   return (
     <StepLayout
       step={STEPS.rules}
+      // The rules card is taller than a usual step's content, so the design
+      // pulls the heading block in.
+      spacing={{ title: 20, subtitle: 8 }}
       title={t('onboarding.rules.title')}
       subtitle={t('onboarding.rules.subtitle')}
       footer={

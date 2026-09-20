@@ -21,7 +21,7 @@ function SampleNotification() {
       className="flex-row gap-[12px] rounded-well p-[14px]"
       style={[{ backgroundColor: 'rgba(255,255,255,0.95)' }, shadows.notification]}
     >
-      <View className="h-[40px] w-[40px] shrink-0 items-center justify-center overflow-hidden rounded-[11px] border border-hair bg-surface">
+      <View className="h-[42px] w-[42px] shrink-0 items-center justify-center overflow-hidden rounded-[11px] border border-hair bg-surface">
         <Image source={APP_MARK} style={{ width: 34, height: 34 }} contentFit="contain" />
       </View>
       <View className="min-w-0 flex-1">

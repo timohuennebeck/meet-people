@@ -27,8 +27,8 @@ export function VerificationSuccessScreen() {
 
       <View className="relative shrink-0">
         {/* The newly badged profile, overlapping the mascot slightly. */}
-        <View className="-mt-[18px] flex-row items-center gap-[12px] rounded-tile border border-hair bg-surface py-[12px] pl-[12px] pr-[16px]">
-          <Avatar uri={AVATARS.mara} size={48} />
+        <View className="-mt-[18px] flex-row items-center gap-[12px] rounded-tile border border-hair bg-surface py-[11px] pl-[11px] pr-[15px]">
+          <Avatar uri={AVATARS.maraProfile} size={48} />
           <View className="min-w-0 flex-1 gap-[2px]">
             <View className="flex-row items-center gap-[7px]">
               <Text weight={600} className="text-[17px] tracking-[-0.17px]">

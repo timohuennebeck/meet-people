@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { ScrollView, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { gradients, gradientStops } from '@shared/theme/tokens';
+import { colors, gradients, gradientStops } from '@shared/theme/tokens';
 import {
   flagUri,
   Button,
@@ -62,7 +62,7 @@ export function PersonProfileScreen() {
               <Glyph.ChevronLeft size={13} />
             </CircleButton>
             <CircleButton size={40} className="bg-white/75">
-              <Glyph.DotsVertical size={17} />
+              <Glyph.DotsVertical size={17} color={colors.inkStrong} />
             </CircleButton>
           </View>
 
@@ -122,7 +122,7 @@ export function PersonProfileScreen() {
         className="shrink-0 px-[20px] pt-[12px]"
         style={{ paddingBottom: Math.max(30, insets.bottom) }}
       >
-        <Button label={t('profile.invite')} variant="primarySheet" />
+        <Button label={t('profile.invite')} variant="primaryCompact" />
       </View>
     </View>
   );

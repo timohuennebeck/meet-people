@@ -113,7 +113,11 @@ export function SettingsScreen() {
           <ListRow divided destructive label={t('settings.deleteAccount')} />
         </Group>
 
-        <Pressable accessibilityRole="button" onPress={signOut} className="items-center py-[4px]">
+        <Pressable
+          accessibilityRole="button"
+          onPress={signOut}
+          className="items-center pb-[2px] pt-[4px]"
+        >
           <Text weight={600} className="text-[15.5px] text-ink-body">
             {t('settings.signOut')}
           </Text>

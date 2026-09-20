@@ -28,6 +28,8 @@ export interface SeatListProps {
   gap?: number;
   /** Caption size: 11px in the guest sheet, 12px in the host sheet. */
   captionSize?: 11 | 12;
+  /** Gap between avatar and caption. The design uses 5 or 6 independently of size. */
+  captionGap?: number;
   /** Fills empty seats with `#FAFAFC`, as the host sheet does. */
   tintedEmpty?: boolean;
 }
@@ -42,6 +44,7 @@ export function SeatList({
   even = false,
   gap = 14,
   captionSize = 11,
+  captionGap,
   tintedEmpty = false,
 }: SeatListProps) {
   return (
@@ -50,7 +53,7 @@ export function SeatList({
         <View
           key={`${seat.label}-${index}`}
           className={cn('items-center', even && 'flex-1')}
-          style={{ gap: captionSize === 12 ? 6 : 5 }}
+          style={{ gap: captionGap ?? (captionSize === 12 ? 6 : 5) }}
         >
           {seat.avatarUri ? (
             <Avatar uri={seat.avatarUri} size={size} highlighted={seat.isViewer} />

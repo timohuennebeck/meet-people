@@ -54,7 +54,7 @@ export function PlanPublishedScreen() {
 
         <View className="mt-[16px] flex-row items-start gap-[12px]">
           <View className="min-w-0 flex-1 items-center gap-[7px]">
-            <View className="h-[56px] w-full flex-row items-center gap-[9px] self-stretch rounded-pill border border-hair bg-surface px-[19px]">
+            <View className="h-[56px] w-full flex-row items-center gap-[9px] self-stretch rounded-pill border border-hair bg-surface px-[20px]">
               <Glyph.LinkGlyph size={16} />
               <Text numberOfLines={1} className="min-w-0 flex-1 text-[16px]">
                 treff.app/p/kotti

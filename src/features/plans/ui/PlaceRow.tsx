@@ -17,7 +17,8 @@ export interface PlaceRowProps {
  * create flow's recent and nearby lists.
  */
 export function PlaceRow({ place, selected = false, onPress }: PlaceRowProps) {
-  const inset = selected ? 2 : 1;
+  // The selected ring is inset and overlaps the padding; the resting one is not.
+  const padCompensation = selected ? 2 : 0;
 
   return (
     <Pressable
@@ -29,7 +30,7 @@ export function PlaceRow({ place, selected = false, onPress }: PlaceRowProps) {
         selected ? 'border-2 border-brand' : 'border border-hair',
       )}
       style={({ pressed }) => [
-        { paddingVertical: 14 - inset, paddingHorizontal: 16 - inset },
+        { paddingVertical: 14 - padCompensation, paddingHorizontal: 16 - padCompensation },
         pressed ? { opacity: 0.85 } : null,
       ]}
     >

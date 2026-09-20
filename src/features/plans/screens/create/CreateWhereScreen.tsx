@@ -31,7 +31,7 @@ export function CreateWhereScreen() {
         </View>
       }
     >
-      <View className="mt-[18px] h-[56px] shrink-0 flex-row items-center gap-[10px] rounded-well border border-hair bg-surface px-[15px]">
+      <View className="mt-[18px] h-[56px] shrink-0 flex-row items-center gap-[10px] rounded-well border border-hair bg-surface px-[16px]">
         <MagnifyingGlass size={21} color={colors.inkGhost} />
         <Text className="flex-1 text-[16px] text-ink-ghost">
           {t('create.where.searchPlaceholder')}
@@ -40,7 +40,7 @@ export function CreateWhereScreen() {
 
       <View className="mt-[12px] shrink-0 flex-row flex-wrap gap-[8px]">
         <Chip label={t('create.where.filterNear')} size="place" tone="brand" />
-        <Chip label={t('create.where.filterParks')} size="place" tone="outline" />
+        <Chip label={t('create.where.filterParks')} size="place" tone="outlineStrong" />
       </View>
 
       <SectionLabel className="mt-[18px] shrink-0">{t('create.where.recent')}</SectionLabel>

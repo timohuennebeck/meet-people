@@ -54,7 +54,7 @@ export function InterestsSettingsScreen() {
 
       <Button
         label={t('common.save')}
-        variant="primarySheet"
+        variant="primaryCompact"
         className="mb-[12px]"
         onPress={() => router.back()}
       />

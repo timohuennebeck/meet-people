@@ -15,7 +15,7 @@ import { Text } from './Text';
  */
 export function ListGroup({ children, className }: { children: ReactNode; className?: string }) {
   return (
-    <View className={cn('rounded-panel border border-hair bg-surface px-[15px]', className)}>
+    <View className={cn('rounded-panel border border-hair bg-surface px-[16px]', className)}>
       {children}
     </View>
   );
@@ -101,7 +101,9 @@ export function SelectableRow({
   highlightPrefix,
   onPress,
 }: SelectableRowProps) {
-  const inset = selected ? 2 : 1;
+  // Selected rows carry an inset ring, which overlaps the padding; resting rows
+  // carry an outset one, which does not.
+  const padCompensation = selected ? 2 : 0;
   const rest = highlightPrefix ? title.slice(highlightPrefix.length) : null;
 
   return (
@@ -114,7 +116,7 @@ export function SelectableRow({
         selected ? 'border-2 border-brand' : 'border border-hair',
       )}
       style={({ pressed }) => [
-        { paddingVertical: 12 - inset, paddingHorizontal: 14 - inset },
+        { paddingVertical: 12 - padCompensation, paddingHorizontal: 14 - padCompensation },
         pressed ? { opacity: 0.85 } : null,
       ]}
     >

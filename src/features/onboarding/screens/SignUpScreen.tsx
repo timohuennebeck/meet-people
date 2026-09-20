@@ -46,18 +46,18 @@ export function SignUpScreen() {
   return (
     <StepLayout
       step={STEPS.signUp}
-      padding="keyboard"
+      padding="form"
       title={t('onboarding.signUp.title')}
       subtitle={t('onboarding.signUp.subtitle')}
     >
       <FieldLabel className="mt-[24px]">{t('onboarding.account.emailLabel')}</FieldLabel>
       <View className="mt-[9px] h-[62px] shrink-0 flex-row items-center rounded-field border-2 border-brand bg-surface px-[16px]">
         <Text className="text-[17px]">mara.k@mail.com</Text>
-        <Caret height={22} />
+        <Caret height={22} gap={2} />
       </View>
 
       <FieldLabel className="mt-[18px]">{t('onboarding.account.passwordLabel')}</FieldLabel>
-      <View className="mt-[9px] h-[62px] shrink-0 flex-row items-center gap-[12px] rounded-field border border-hair bg-surface px-[17px]">
+      <View className="mt-[9px] h-[62px] shrink-0 flex-row items-center gap-[12px] rounded-field border border-hair bg-surface px-[18px]">
         <Text className="flex-1 text-[20px] tracking-[6.4px] text-ink-body">••••••••</Text>
         <Glyph.EyeGlyph size={21} color={colors.inkDim} />
       </View>

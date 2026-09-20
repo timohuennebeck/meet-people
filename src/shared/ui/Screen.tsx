@@ -18,6 +18,8 @@ const PADDING = {
   hero: { top: 62, horizontal: 24, bottom: 34 },
   /** `56px 20px 0` — screens whose keyboard is open, so no bottom inset. */
   keyboard: { top: 56, horizontal: 20, bottom: 0 },
+  /** `56px 20px 20px` — the sign-up screen, which keeps a small bottom inset. */
+  form: { top: 56, horizontal: 20, bottom: 20 },
   /** `56px 20px 30px` — the paywall. */
   paywall: { top: 56, horizontal: 20, bottom: 30 },
   /** No padding — full-bleed screens (map, chat, camera, profile header). */

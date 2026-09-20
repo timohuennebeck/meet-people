@@ -106,6 +106,8 @@ export const planSchema = z.object({
   ageRange: z.tuple([z.number().int(), z.number().int()]).nullable(),
   /** Position on the map canvas, in the design's 402×874 coordinate space. */
   pin: z.object({ x: z.number(), y: z.number() }),
+  /** Short title for the pin's label bubble, where the full one will not fit. */
+  pinLabel: z.string().optional(),
 });
 export type Plan = z.infer<typeof planSchema>;
 

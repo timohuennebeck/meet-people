@@ -78,6 +78,7 @@ export function PlanCard({ plan, variant, onPress }: PlanCardProps) {
         height={140}
         mascotSize={100}
         radius={18}
+        leadingInset={10}
         leading={<Badge label={categoryLabel} className={CATEGORY_STYLE[plan.category]} />}
         trailing={
           variant === 'full' && openSeats > 0 ? (

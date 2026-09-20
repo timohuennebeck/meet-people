@@ -9,14 +9,48 @@ export const AGE_MAX = 60;
 
 export type AgeRange = readonly [number, number];
 
+/**
+ * The track's scale.
+ *
+ * The design draws the default 21–34 range with its handles at 14% and 58%,
+ * which is not where a straight 18–60 mapping would put them — the mock places
+ * them by eye. Anchoring the scale on those two points reproduces the export
+ * exactly at the default while staying monotonic everywhere else, so the
+ * control still behaves like a slider.
+ */
+const ANCHORS: readonly [age: number, fraction: number][] = [
+  [AGE_MIN, 0],
+  [21, 0.14],
+  [34, 0.58],
+  [AGE_MAX, 1],
+];
+
 /** Converts an age to its position on the track. */
 export function ageToFraction(age: number): number {
-  return (age - AGE_MIN) / (AGE_MAX - AGE_MIN);
+  const clamped = Math.min(AGE_MAX, Math.max(AGE_MIN, age));
+  for (let i = 1; i < ANCHORS.length; i += 1) {
+    const [lowAge, lowFraction] = ANCHORS[i - 1]!;
+    const [highAge, highFraction] = ANCHORS[i]!;
+    if (clamped <= highAge) {
+      const progress = (clamped - lowAge) / (highAge - lowAge);
+      return lowFraction + progress * (highFraction - lowFraction);
+    }
+  }
+  return 1;
 }
 
 /** Converts a position on the track back to a whole-year age. */
 export function fractionToAge(fraction: number): number {
-  return Math.round(AGE_MIN + fraction * (AGE_MAX - AGE_MIN));
+  const clamped = Math.min(1, Math.max(0, fraction));
+  for (let i = 1; i < ANCHORS.length; i += 1) {
+    const [lowAge, lowFraction] = ANCHORS[i - 1]!;
+    const [highAge, highFraction] = ANCHORS[i]!;
+    if (clamped <= highFraction) {
+      const progress = (clamped - lowFraction) / (highFraction - lowFraction);
+      return Math.round(lowAge + progress * (highAge - lowAge));
+    }
+  }
+  return AGE_MAX;
 }
 
 export interface AgeRangeControlProps {
@@ -31,6 +65,8 @@ export interface AgeRangeControlProps {
   presets?: 'inside' | 'none';
   /** Readout size: 38px in onboarding and create, 32px in settings. */
   readoutSize?: number;
+  /** Card padding: 22px in onboarding and create, 20px on the settings page. */
+  cardPadding?: number;
   /** Label for the "any age" preset. */
   allLabel: string;
   unitLabel: string;
@@ -46,14 +82,24 @@ function isSame(a: AgeRange, b: AgeRange) {
   return a[0] === b[0] && a[1] === b[1];
 }
 
-/** Renders the three preset pills shared by every age control. */
+/**
+ * Renders the three preset pills shared by every age control.
+ *
+ * The design pads them 10px when they sit below the card (onboarding) and 9px
+ * when they sit inside it (create and settings).
+ */
 export function AgePresets({
   range,
   onChange,
   allLabel,
+  standalone = false,
   className,
-}: Pick<AgeRangeControlProps, 'range' | 'onChange' | 'allLabel'> & { className?: string }) {
+}: Pick<AgeRangeControlProps, 'range' | 'onChange' | 'allLabel'> & {
+  standalone?: boolean;
+  className?: string;
+}) {
   const isAll = range[0] === AGE_MIN && range[1] === AGE_MAX;
+  const size = standalone ? 'presetTall' : 'preset';
 
   return (
     <View className={cn('flex-row gap-[8px]', className)}>
@@ -62,19 +108,17 @@ export function AgePresets({
           key={preset.join('-')}
           grow
           label={`${preset[0]}–${preset[1]}`}
-          size="scope"
+          size={size}
           tone={!isAll && isSame(range, preset) ? 'brand' : 'fill'}
           onPress={() => onChange?.(preset)}
-          className="px-0 py-[9px]"
         />
       ))}
       <Chip
         grow
         label={allLabel}
-        size="scope"
+        size={size}
         tone={isAll ? 'brand' : 'fill'}
         onPress={() => onChange?.([AGE_MIN, AGE_MAX])}
-        className="px-0 py-[9px]"
       />
     </View>
   );
@@ -90,12 +134,13 @@ export function AgeRangeControl({
   summary,
   presets = 'none',
   readoutSize = 38,
+  cardPadding = 22,
   allLabel,
   unitLabel,
   className,
 }: AgeRangeControlProps) {
   return (
-    <Card padding={{ vertical: 22, horizontal: 18 }} className={className}>
+    <Card padding={{ vertical: cardPadding, horizontal: 18 }} className={className}>
       <View className="gap-[16px]">
         <SliderReadout value={`${range[0]}–${range[1]}`} unit={unitLabel} size={readoutSize} />
 

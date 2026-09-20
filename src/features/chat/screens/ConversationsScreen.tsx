@@ -15,9 +15,11 @@ export function ConversationsScreen() {
   const router = useRouter();
   const { data: conversations } = useConversations();
 
-  const unreadThreads = (conversations ?? []).filter(
-    (conversation) => conversation.unreadCount > 0,
-  ).length;
+  // "3 novas" counts unread messages, not the threads holding them.
+  const unreadMessages = (conversations ?? []).reduce(
+    (total, conversation) => total + conversation.unreadCount,
+    0,
+  );
 
   return (
     <Screen className="bg-surface">
@@ -37,9 +39,9 @@ export function ConversationsScreen() {
 
       <View className="mt-[22px] shrink-0 flex-row items-center justify-between">
         <SectionLabel className="tracking-[1.125px]">{t('chat.yourPlans')}</SectionLabel>
-        {unreadThreads > 0 ? (
+        {unreadMessages > 0 ? (
           <Text weight={600} className="text-[13.5px] text-brand">
-            {t('chat.unreadCount', { count: unreadThreads })}
+            {t('chat.unreadCount', { count: unreadMessages })}
           </Text>
         ) : null}
       </View>

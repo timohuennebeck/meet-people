@@ -54,6 +54,7 @@ export function CreateWhenScreen() {
         fontSize={22}
         selectedFontSize={25}
         fade={70}
+        radius={28}
       />
 
       <SectionLabel className="mt-[20px] shrink-0">{t('create.when.durationLabel')}</SectionLabel>

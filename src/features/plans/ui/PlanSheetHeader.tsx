@@ -14,8 +14,16 @@ export interface PlanSheetHeaderProps {
   joined?: boolean;
   /** Adds the white "VOCÊ É HOST" badge next to the category. */
   hosting?: boolean;
-  /** Trims the trailing distance from the meta line, as the host sheet does. */
-  hideDistance?: boolean;
+  /**
+   * Whether to show the category badge alongside the host badge. The freshly
+   * published host sheet carries only "VOCÊ É HOST".
+   */
+  showCategory?: boolean;
+  /**
+   * Appends the distance to the meta line. Guests see how far the plan is;
+   * the host, who set the place, does not.
+   */
+  showDistance?: boolean;
   /** Gap under the photo: 6px on the open sheet, 4px elsewhere. */
   titleGap?: number;
 }
@@ -30,14 +38,15 @@ export function PlanSheetHeader({
   mascotSize,
   joined = false,
   hosting = false,
-  hideDistance = false,
+  showCategory = true,
+  showDistance = true,
   titleGap = 4,
 }: PlanSheetHeaderProps) {
   const { t } = useTranslation();
 
   const categoryLabel =
     plan.category === 'sport' ? t('plan.categorySport') : t('plan.categoryGames');
-  const meta = hideDistance ? plan.whenLabel.split(' · ').slice(0, 2).join(' · ') : plan.whenLabel;
+  const meta = showDistance ? `${plan.whenLabel} · ${plan.place.distanceLabel}` : plan.whenLabel;
 
   return (
     <>
@@ -50,7 +59,9 @@ export function PlanSheetHeader({
             <Badge label={t('plan.joinedBadge')} className="bg-category-sport" />
           ) : (
             <>
-              <Badge label={categoryLabel} className={cn(CATEGORY_STYLE[plan.category])} />
+              {showCategory ? (
+                <Badge label={categoryLabel} className={cn(CATEGORY_STYLE[plan.category])} />
+              ) : null}
               {hosting ? (
                 <Badge
                   label={t('plan.hostBadge')}

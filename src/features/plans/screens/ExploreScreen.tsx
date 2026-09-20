@@ -66,10 +66,11 @@ export function ExploreScreen() {
           category={plan.category}
           x={plan.pin.x}
           y={plan.pin.y}
+          // Only the focused plan names itself on the map.
           label={
-            plan.id === cards[0]?.id
+            plan.id === cards[0]?.id && plan.pinLabel
               ? {
-                  title: plan.title.split(' no ')[0] ?? plan.title,
+                  title: plan.pinLabel,
                   meta: `18:30 · ${plan.participants.length}/${plan.capacity}`,
                 }
               : undefined
@@ -100,10 +101,11 @@ export function ExploreScreen() {
             accessibilityRole="button"
             accessibilityLabel={VIEWER.name}
             onPress={() => router.push('/(tabs)/profile')}
-            className="h-[44px] w-[44px] overflow-hidden rounded-full border-[3px] border-white bg-surface"
+            // 44px avatar with a 3px white ring drawn outside it.
+            className="h-[50px] w-[50px] overflow-hidden rounded-full border-[3px] border-white bg-surface"
             style={shadows.chip}
           >
-            <Avatar uri={AVATARS.viewer} size={38} />
+            <Avatar uri={AVATARS.viewer} size={44} />
           </Pressable>
         </View>
       </View>
@@ -129,7 +131,9 @@ export function ExploreScreen() {
         horizontal
         showsHorizontalScrollIndicator={false}
         className="absolute bottom-0 left-0 right-0"
-        contentContainerStyle={{ paddingHorizontal: 18, gap: 12, paddingBottom: 30 }}
+        // The design insets the carousel on the left only, so the last card can
+        // scroll flush to the right edge.
+        contentContainerStyle={{ paddingLeft: 18, gap: 12, paddingBottom: 30 }}
         style={{ marginBottom: insets.bottom }}
       >
         {cards.map((plan, index) => (

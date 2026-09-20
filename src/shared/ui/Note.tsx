@@ -40,7 +40,7 @@ export function SealNote({ children }: { children: string }) {
   return (
     <Note
       className="rounded-well bg-surface-app px-[16px] py-[14px]"
-      icon={<VerifiedSeal size={34} />}
+      icon={<VerifiedSeal size={34} tickSize={17} tickStrokeWidth={2.6} />}
     >
       {children}
     </Note>

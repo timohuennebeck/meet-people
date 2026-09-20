@@ -47,16 +47,18 @@ function PriceTile({
         padding={{ vertical: 16, horizontal: 16 }}
         className="rounded-tile"
       >
-        <View className="flex-row items-start justify-between">
-          <Text weight={600} className="text-[15.5px]">
-            {label}
+        <View className="gap-[4px]">
+          <View className="flex-row items-start justify-between">
+            <Text weight={600} className="text-[15.5px]">
+              {label}
+            </Text>
+            <SelectionDot selected={selected} size={23} restingClassName="border-hair-steel" />
+          </View>
+          <Text weight={600} className="mt-[8px] text-[21px] tracking-[-0.42px]">
+            {price}
           </Text>
-          <SelectionDot selected={selected} size={23} />
+          <Text className="text-[14px] text-ink-ghost">{period}</Text>
         </View>
-        <Text weight={600} className="mt-[8px] text-[21px] tracking-[-0.42px]">
-          {price}
-        </Text>
-        <Text className="text-[14px] text-ink-ghost">{period}</Text>
       </Card>
       {badge ? (
         <View className="absolute -top-[13px] left-1/2 -translate-x-1/2 rounded-pill bg-brand px-[12px] py-[5px]">

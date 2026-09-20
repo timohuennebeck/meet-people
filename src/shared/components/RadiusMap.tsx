@@ -36,7 +36,8 @@ export function RadiusMap({ height, className }: { height: number; className?: s
             borderColor: 'rgba(47,124,246,0.35)',
           }}
         />
-        <View className="absolute h-[18px] w-[18px] rounded-full border-[4px] border-white bg-brand" />
+        {/* 18px brand dot with a 4px white ring drawn outside it. */}
+        <View className="absolute h-[26px] w-[26px] rounded-full border-[4px] border-white bg-brand" />
       </View>
 
       <NearbyFace uri={AVATARS.phil} className="left-[30px] top-[26px]" />

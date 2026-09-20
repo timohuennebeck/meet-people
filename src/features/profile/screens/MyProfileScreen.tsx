@@ -5,7 +5,7 @@ import { ScrollView, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { usePreferences } from '@features/settings/data/usePreferences';
-import { gradients, gradientStops } from '@shared/theme/tokens';
+import { colors, gradients, gradientStops } from '@shared/theme/tokens';
 import {
   Button,
   Chip,
@@ -47,7 +47,7 @@ export function MyProfileScreen() {
               accessibilityLabel={t('settings.title')}
               onPress={() => router.push('/settings')}
             >
-              <Glyph.DotsVertical size={17} />
+              <Glyph.DotsVertical size={17} color={colors.inkStrong} />
             </CircleButton>
           </View>
 

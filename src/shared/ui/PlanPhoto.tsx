@@ -29,6 +29,8 @@ export interface PlanPhotoProps {
   radius?: number;
   /** Badges pinned to the top-left corner. */
   leading?: ReactNode;
+  /** Inset for the leading badges: 10 on a map card, 12 inside a sheet. */
+  leadingInset?: number;
   /** Badge pinned to the top-right corner. */
   trailing?: ReactNode;
   /** Renders the round × that dismisses a sheet. */
@@ -45,6 +47,7 @@ export function PlanPhoto({
   mascotSize,
   radius = 22,
   leading,
+  leadingInset = 12,
   trailing,
   dismissible = false,
   className,
@@ -65,7 +68,11 @@ export function PlanPhoto({
         <Mascot size={mascotSize} />
       </LinearGradient>
       {leading ? (
-        <View className="absolute left-[12px] top-[12px] flex-row gap-[6px]" pointerEvents="none">
+        <View
+          className="absolute flex-row gap-[6px]"
+          style={{ left: leadingInset, top: leadingInset }}
+          pointerEvents="none"
+        >
           {leading}
         </View>
       ) : null}

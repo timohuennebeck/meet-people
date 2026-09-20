@@ -39,9 +39,12 @@ export function LeavePlanScreen() {
     router.dismissAll();
   };
 
-  const attendees = plan
-    ? plan.participants.map((participant) => participant.user.name).join(', ')
-    : '';
+  // "com Phil, Sara e você" — the viewer is named by the template's tail, so
+  // they must not appear in the list as well.
+  const attendees = (plan?.participants ?? [])
+    .filter((participant) => !participant.isViewer)
+    .map((participant) => participant.user.name)
+    .join(', ');
 
   return (
     <View className="flex-1">
@@ -73,9 +76,7 @@ export function LeavePlanScreen() {
         </View>
 
         <View className="gap-[8px]">
-          <SectionLabel className="tracking-[0.4px] text-ink-faint">
-            {t('plan.leave.messageLabel')}
-          </SectionLabel>
+          <SectionLabel sheet>{t('plan.leave.messageLabel')}</SectionLabel>
           <View className="min-h-[118px] rounded-tile border-2 border-brand bg-surface px-[16px] py-[14px]">
             <Text className="text-[17px] leading-[24.65px] text-ink-trace">
               {SAMPLE_NOTE}

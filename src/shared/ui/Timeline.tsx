@@ -39,6 +39,12 @@ export interface TimelineStepProps {
   connector?: number;
   /** Pulls the step up by 14px, as the design does for every step after the first. */
   tight?: boolean;
+  /**
+   * Greys the title. The design does not tie this to the dot: the verification
+   * timeline leaves its in-progress step at full contrast while the plan's
+   * request timeline greys the equivalent one, so each caller decides.
+   */
+  mutedTitle?: boolean;
 }
 
 /** One row of a vertical progress timeline. */
@@ -49,8 +55,9 @@ export function TimelineStep({
   estimate,
   connector = 0,
   tight = false,
+  mutedTitle,
 }: TimelineStepProps) {
-  const muted = state !== 'done';
+  const muted = mutedTitle ?? state === 'pending';
 
   return (
     <View className={cn('flex-row items-start gap-[14px]', tight && '-mt-[14px]')}>

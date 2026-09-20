@@ -42,7 +42,10 @@ export function ThreadScreen() {
     : [t('chat.quickAgreed'), t('chat.quickOnMyWay'), t('chat.quickLate')];
 
   const typingAuthor = thread.typingAuthorId ? PEOPLE[thread.typingAuthorId] : undefined;
-  const lastOwnIndex = (messages ?? []).findLastIndex((message) => message.authorId === VIEWER.id);
+  // The design glows the last bubble in the thread, and only when it is the
+  // user's own — so in the group thread, where someone else spoke last, nothing
+  // glows.
+  const lastIndex = (messages ?? []).length - 1;
 
   return (
     <View className="flex-1 overflow-hidden bg-surface">
@@ -58,6 +61,7 @@ export function ThreadScreen() {
         {isGroup && conversation.avatarUrls.length > 1 ? (
           <PairAvatar
             size={44}
+            height={40}
             primary={conversation.avatarUrls[0]!}
             secondary={conversation.avatarUrls[1]!}
           />
@@ -65,7 +69,8 @@ export function ThreadScreen() {
           <View className="h-[42px] w-[42px] shrink-0">
             <Avatar uri={conversation?.avatarUrls[0] ?? ''} size={42} />
             {conversation?.online ? (
-              <View className="absolute -bottom-[1px] -right-[1px] h-[12px] w-[12px] rounded-full border-[2.5px] border-white bg-online" />
+              // 12px green dot with a 2.5px white ring outside it.
+              <View className="absolute -bottom-[3.5px] -right-[3.5px] h-[17px] w-[17px] rounded-full border-[2.5px] border-white bg-online" />
             ) : null}
           </View>
         )}
@@ -112,7 +117,7 @@ export function ThreadScreen() {
               // Names label other people's bubbles in groups only.
               authorName={isGroup && !mine ? author?.name : undefined}
               receipt={message.receipt}
-              highlighted={mine && index === lastOwnIndex}
+              highlighted={mine && index === lastIndex}
             />
           );
         })}

@@ -61,6 +61,8 @@ export interface WheelPickerProps {
   selectedFontSize: number;
   /** Height of the top and bottom fade masks. */
   fade: number;
+  /** Corner radius: 24 on the birthday picker, 28 on the time picker. */
+  radius?: number;
   className?: string;
 }
 
@@ -79,15 +81,13 @@ export function WheelPicker({
   fontSize,
   selectedFontSize,
   fade,
+  radius = 24,
   className,
 }: WheelPickerProps) {
   return (
     <View
-      className={cn(
-        'relative shrink-0 overflow-hidden rounded-panel border border-hair bg-surface',
-        className,
-      )}
-      style={{ height }}
+      className={cn('relative shrink-0 overflow-hidden border border-hair bg-surface', className)}
+      style={{ height, borderRadius: radius }}
     >
       <View
         className="absolute left-[16px] right-[16px] top-1/2 bg-surface-chip"

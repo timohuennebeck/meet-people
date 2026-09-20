@@ -75,7 +75,7 @@ export function JoinRequestScreen() {
         <SealNote>{t('plan.request.privacyNote', { name: host?.name ?? '' })}</SealNote>
 
         <Button label={t('plan.request.send')} onPress={send} />
-        <TextButton label={t('common.cancel')} tone="mutedTall" onPress={() => router.back()} />
+        <TextButton label={t('common.cancel')} tone="body" onPress={() => router.back()} />
       </SheetSurface>
     </View>
   );

@@ -76,6 +76,7 @@ export function AudienceSettingsScreen() {
           onChange={(next) => update({ ageRange: [next[0], next[1]] })}
           presets="inside"
           readoutSize={32}
+          cardPadding={20}
           allLabel={t('onboarding.ageRange.presetAll')}
           unitLabel={t('common.years')}
         />

@@ -20,6 +20,22 @@ const VARIANTS = {
     weight: 600 as const,
     shadow: undefined,
   },
+  /** `h:60 · #2F7CF6 · 17px/600` — the sign-in options on the account step. */
+  primaryTall: {
+    container: 'bg-brand',
+    text: 'text-white text-[17px]',
+    height: 60,
+    weight: 600 as const,
+    shadow: undefined,
+  },
+  /** `h:56 · #2F7CF6 · 17px/600` — "save" and the profile's invite action. */
+  primaryCompact: {
+    container: 'bg-brand',
+    text: 'text-white text-[17px]',
+    height: 56,
+    weight: 600 as const,
+    shadow: undefined,
+  },
   /** `h:56 · #2F7CF6 · 16px/600 + shadow` — the primary action inside a sheet. */
   primarySheet: {
     container: 'bg-brand',

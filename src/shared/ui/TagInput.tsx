@@ -35,7 +35,7 @@ export function TagInput({ tags, draft, onRemove, minHeight = 170, className }: 
         {draft !== undefined ? (
           <View className="flex-row items-center px-[2px] py-[9px]">
             <Text className="text-[16px]">{draft}</Text>
-            <Caret height={20} />
+            <Caret height={20} gap={1} />
           </View>
         ) : null}
       </View>
@@ -69,7 +69,8 @@ export function TextField({
   radius = 18,
   className,
 }: TextFieldProps) {
-  const inset = focused ? 2 : 1;
+  // The focus ring is inset and overlaps the padding; the resting one is not.
+  const padCompensation = focused ? 2 : 0;
 
   return (
     <View
@@ -78,7 +79,7 @@ export function TextField({
         focused ? 'border-2 border-brand' : 'border border-hair',
         className,
       )}
-      style={{ height, borderRadius: radius, paddingHorizontal: 16 - inset }}
+      style={{ height, borderRadius: radius, paddingHorizontal: 16 - padCompensation }}
     >
       <Text className={cn(value === undefined && 'text-ink-ghost')} style={{ fontSize }}>
         {value ?? placeholder}

@@ -61,18 +61,22 @@ export function MapPin({ avatarUri, category, x, y, label, onPress }: MapPinProp
 }
 
 /**
- * The user's own position. The design's `0 0 0 10px rgba(47,124,246,.18)` is a
- * solid ring rather than a blur, so it is drawn as a 36px disc centred behind
- * the 16px dot instead of as a shadow.
+ * The user's own position.
+ *
+ * The design is `16px` of blue, a `3px` white border and a
+ * `0 0 0 10px rgba(47,124,246,.18)` ring. Neither the border nor the ring eats
+ * into the dot — the element is content-box and the ring is a shadow spread —
+ * so the dot is 22px overall inside a 42px halo. The halo is drawn as a disc
+ * behind, since a zero-blur shadow spread is a solid ring, not a glow.
  */
 export function UserDot({ x, y }: { x: number; y: number }) {
   return (
     <View
-      className="absolute h-[36px] w-[36px] items-center justify-center rounded-full"
-      style={{ left: x - 10, top: y - 10, backgroundColor: 'rgba(47,124,246,0.18)' }}
+      className="absolute h-[42px] w-[42px] items-center justify-center rounded-full"
+      style={{ left: x - 13, top: y - 13, backgroundColor: 'rgba(47,124,246,0.18)' }}
       pointerEvents="none"
     >
-      <View className="h-[16px] w-[16px] rounded-full border-[3px] border-white bg-brand" />
+      <View className="h-[22px] w-[22px] rounded-full border-[3px] border-white bg-brand" />
     </View>
   );
 }

@@ -74,10 +74,9 @@ export function RadiusControl({
               key={preset}
               grow
               label={`${preset} ${unit}`}
-              size="scope"
+              size="preset"
               tone={preset === radius ? 'brand' : 'fill'}
               onPress={() => onChangeRadius?.(preset)}
-              className="px-0 py-[9px]"
             />
           ))}
         </View>

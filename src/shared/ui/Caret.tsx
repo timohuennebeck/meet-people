@@ -13,7 +13,7 @@ import Animated, {
  * beside sample input text. The prototype animates it on a 1.06s step cycle;
  * that timing is preserved here.
  */
-export function Caret({ height = 20 }: { height?: number }) {
+export function Caret({ height = 20, gap = 3 }: { height?: number; gap?: number }) {
   const opacity = useSharedValue(1);
 
   useEffect(() => {
@@ -31,8 +31,8 @@ export function Caret({ height = 20 }: { height?: number }) {
 
   return (
     <Animated.View
-      className="ml-[3px] w-[2px] rounded-[1px] bg-brand"
-      style={[{ height }, style]}
+      className="w-[2px] rounded-[1px] bg-brand"
+      style={[{ height, marginLeft: gap }, style]}
     />
   );
 }

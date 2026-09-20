@@ -28,7 +28,7 @@ export function PhoneScreen() {
       }
     >
       <View className="mt-[20px] shrink-0 flex-row gap-[10px]">
-        <View className="flex-row items-center gap-[8px] rounded-well border border-hair bg-surface px-[13px] py-[16px]">
+        <View className="flex-row items-center gap-[8px] rounded-well border border-hair bg-surface px-[14px] py-[17px]">
           <Flag code="de" size={26} />
           <Text weight={500} className="text-[17px]">
             +49

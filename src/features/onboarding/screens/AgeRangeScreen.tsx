@@ -38,6 +38,7 @@ export function AgeRangeScreen() {
         unitLabel={t('common.years')}
       />
       <AgePresets
+        standalone
         className="mt-[16px]"
         range={range}
         onChange={(next) => update({ ageRange: [next[0], next[1]] })}

@@ -46,10 +46,10 @@ export function SelfieCaptureScreen() {
         {t('verification.capture.prompt')}
       </Text>
 
-      {/* The oval the face should sit inside. */}
+      {/* The oval the face should sit inside — 250×316 with a 2px ring outside. */}
       <View className="absolute inset-0 items-center justify-center" pointerEvents="none">
         <View
-          className="h-[316px] w-[250px] rounded-[130px] border-2"
+          className="h-[320px] w-[254px] rounded-[130px] border-2"
           style={{ borderColor: 'rgba(255,255,255,0.85)' }}
         />
       </View>
@@ -59,7 +59,8 @@ export function SelfieCaptureScreen() {
           accessibilityRole="button"
           accessibilityLabel={t('verification.capture.prompt')}
           onPress={() => router.push('/(onboarding)/selfie-review')}
-          className="h-[78px] w-[78px] rounded-full border-[5px] bg-white"
+          // 78px white disc with a 5px translucent ring drawn outside it.
+          className="h-[88px] w-[88px] rounded-full border-[5px] bg-white"
           style={{ borderColor: 'rgba(255,255,255,0.3)' }}
         />
         <Text className="text-[14.5px]" style={{ color: 'rgba(255,255,255,0.85)' }}>

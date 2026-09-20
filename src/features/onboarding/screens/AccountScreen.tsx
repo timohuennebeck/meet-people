@@ -52,6 +52,7 @@ export function AccountScreen() {
       <View className="mt-[20px] shrink-0 gap-[12px]">
         <Button
           label={t('onboarding.account.withEmail')}
+          variant="primaryTall"
           icon={<Glyph.EnvelopeGlyph size={19} />}
           onPress={() => router.push('/(onboarding)/sign-up')}
         />

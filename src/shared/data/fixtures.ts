@@ -23,6 +23,7 @@ export const AVATARS = {
   phil: portrait('host-jonas'),
   sara: portrait('p-sara'),
   mara: portrait('chat-mara'),
+  maraProfile: portrait('p-mara'),
   lea: portrait('chat-lea'),
   jonas: portrait('chat-jonas'),
   ana: portrait('chat-lea-2'),
@@ -178,7 +179,7 @@ export const GAME_PLAN: Plan = {
   membership: 'guest',
   host: PHIL,
   place: CAFE_KOTTI,
-  whenLabel: 'Hoje 19:00–21:00 · Blutenburgstr. 96 · 0,7 mi',
+  whenLabel: 'Hoje 19:00–21:00 · Blutenburgstr. 96',
   startsAt: '2026-09-20T19:00:00.000Z',
   durationMinutes: 120,
   capacity: 4,
@@ -252,6 +253,7 @@ export const RUN_PLAN: Plan = {
   waitlist: [],
   ageRange: null,
   pin: { x: 88, y: 250 },
+  pinLabel: 'Corrida 3 mi',
 };
 
 /** The host's own walk, used for the freshly-published host sheet. */

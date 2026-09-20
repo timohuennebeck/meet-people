@@ -25,6 +25,10 @@ const CHIPS = {
   place: { padding: 'px-[14px] py-[9px]', text: 'text-[14.5px]', weight: 400 as const },
   /** `8px 14px · 13.5px` — the people / plans / places search scopes. */
   scope: { padding: 'px-[14px] py-[8px]', text: 'text-[13.5px]', weight: 500 as const },
+  /** `9px 0 · 14.5px` — the radius presets, which share the row's width evenly. */
+  preset: { padding: 'px-0 py-[9px]', text: 'text-[14.5px]', weight: 500 as const },
+  /** `10px 0 · 14.5px` — the age presets, one pixel taller than the radius ones. */
+  presetTall: { padding: 'px-0 py-[10px]', text: 'text-[14.5px]', weight: 500 as const },
   /** `9px 12px 9px 14px · 15px/600` — a committed interest tag with its ×. */
   tag: { padding: 'py-[9px] pl-[14px] pr-[12px]', text: 'text-[15px]', weight: 600 as const },
 } as const;
@@ -43,6 +47,12 @@ const TONES = {
   outline: {
     container: 'bg-surface border border-hair',
     text: 'text-ink-body',
+    selectedWeight: false,
+  },
+  /** As `outline`, but with the darker label the place filters use. */
+  outlineStrong: {
+    container: 'bg-surface border border-hair',
+    text: 'text-ink-strong',
     selectedWeight: false,
   },
   /** White with a soft drop shadow — the resting map filter chips. */

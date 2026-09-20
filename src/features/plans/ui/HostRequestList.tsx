@@ -12,7 +12,7 @@ function NoRequestsYet() {
 
   return (
     <View className="gap-[12px]">
-      <SectionLabel className="tracking-[0.4px]">{t('plan.requestsLabel')}</SectionLabel>
+      <SectionLabel sheet>{t('plan.requestsLabel')}</SectionLabel>
       <View className="items-center gap-[8px] rounded-well border-[1.5px] border-dashed border-hair-mid p-[18px]">
         <GlowingMascot />
         <Text weight={600} className="text-[15px]">
@@ -48,7 +48,7 @@ export function HostRequestList({ plan, full }: HostRequestListProps) {
     return (
       <>
         <View className="gap-[12px]">
-          <SectionLabel className="tracking-[0.4px]">
+          <SectionLabel sheet>
             {t('plan.waitlistCount', { count: plan.waitlist.length })}
           </SectionLabel>
           {plan.waitlist.map((request) => (
@@ -70,9 +70,7 @@ export function HostRequestList({ plan, full }: HostRequestListProps) {
 
   return (
     <View className="gap-[12px]">
-      <SectionLabel className="tracking-[0.4px]">
-        {t('plan.requestsCount', { count: plan.requests.length })}
-      </SectionLabel>
+      <SectionLabel sheet>{t('plan.requestsCount', { count: plan.requests.length })}</SectionLabel>
 
       {plan.requests.map((request) => (
         <PersonRow

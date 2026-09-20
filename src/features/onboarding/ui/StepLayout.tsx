@@ -27,6 +27,11 @@ export interface StepLayoutProps {
   padding?: ScreenPadding;
   /** Overrides the screen background, e.g. white on the photo step. */
   className?: string;
+  /**
+   * Gap above the title and above the subtitle. Every step uses 22/10 except
+   * the rules step, whose taller card pulls both in to 20/8.
+   */
+  spacing?: { title: number; subtitle: number };
 }
 
 /**
@@ -43,6 +48,7 @@ export function StepLayout({
   footer,
   padding = 'step',
   className,
+  spacing = { title: 22, subtitle: 10 },
 }: StepLayoutProps) {
   const router = useRouter();
 
@@ -64,12 +70,19 @@ export function StepLayout({
         </Text>
       ) : null}
       {title ? (
-        // The eyebrow already supplies the gap, so the title tightens to 8px.
-        <StepTitle className={cn(eyebrow ? 'mt-[8px]' : 'mt-[22px]', 'shrink-0', titleClassName)}>
+        <StepTitle
+          className={cn('shrink-0', titleClassName)}
+          // The eyebrow already supplies the gap, so the title tightens to 8px.
+          style={{ marginTop: eyebrow ? 8 : spacing.title }}
+        >
           {title}
         </StepTitle>
       ) : null}
-      {subtitle ? <StepSubtitle className="mt-[10px] shrink-0">{subtitle}</StepSubtitle> : null}
+      {subtitle ? (
+        <StepSubtitle className="shrink-0" style={{ marginTop: spacing.subtitle }}>
+          {subtitle}
+        </StepSubtitle>
+      ) : null}
       {children}
       {footer ? <View className="shrink-0">{footer}</View> : null}
     </Screen>

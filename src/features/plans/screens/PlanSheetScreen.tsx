@@ -85,6 +85,7 @@ function RequestedState({ plan, onWithdraw }: { plan: Plan; onWithdraw: () => vo
         <TimelineStep
           state="active"
           tight
+          mutedTitle
           estimate={t('plan.sent.confirmEstimate')}
           title={t('plan.sent.confirmTitle', { name: plan.host.name })}
           description={t('plan.sent.confirmBody')}
@@ -149,34 +150,63 @@ function JoinedState({ plan, onLeave }: { plan: Plan; onLeave: () => void }) {
   );
 }
 
-/** The viewer hosts this plan: seats, then the requests still to answer. */
+/**
+ * The viewer hosts this plan: seats, then whoever still wants in.
+ *
+ * The design gives each host state its own proportions — a tall photo and a
+ * seats header while requests are outstanding, a short photo and a bare seat
+ * row once the plan is fresh or full — so the geometry follows the state.
+ */
 function HostState({ plan }: { plan: Plan }) {
   const { t } = useTranslation();
   const open = openSeatCount(plan);
   const full = open === 0;
+  const hasRequests = plan.requests.length > 0;
+
+  // A plan with five seats lays them out smaller to fit the row.
+  const wide = plan.capacity > 4;
+  // Freshly published: nobody has asked yet and nothing is taken.
+  const fresh = !hasRequests && !full;
+
+  const seatRow = (
+    <SeatList
+      seats={seatsFor(plan, t('common.freeSeat'), `${t('common.you')} · ${t('plan.hostRole')}`)}
+      size={full ? 68 : wide ? 58 : 72}
+      gap={wide ? 8 : 10}
+      even
+      captionSize={wide ? 11 : 12}
+      captionGap={6}
+      tintedEmpty
+    />
+  );
 
   return (
     <SheetSurface gap={18} padding={{ top: 12, horizontal: 18, bottom: 36 }}>
-      <PlanSheetHeader plan={plan} photoHeight={160} mascotSize={118} hosting hideDistance />
+      <PlanSheetHeader
+        plan={plan}
+        photoHeight={hasRequests ? 220 : 160}
+        mascotSize={hasRequests ? 148 : 118}
+        hosting
+        // A freshly published plan carries only the host badge.
+        showCategory={!fresh}
+        showDistance={false}
+      />
 
-      <View className="gap-[12px]">
-        <View className="flex-row items-baseline justify-between">
-          <Text weight={600} className="text-[12px] tracking-[0.4px] text-ink-faint">
-            {t('plan.seatsLabel')}
-          </Text>
-          <Text weight={600} className="text-[13px] text-category-games">
-            {open === 1 ? t('plan.seatsFreeOne') : t('plan.seatsFree', { count: open })}
-          </Text>
+      {full ? (
+        seatRow
+      ) : (
+        <View className="gap-[12px]">
+          <View className="flex-row items-baseline justify-between">
+            <Text weight={600} className="text-[12px] tracking-[0.4px] text-ink-faint">
+              {t('plan.seatsLabel')}
+            </Text>
+            <Text weight={600} className="text-[13px] text-category-games">
+              {open === 1 ? t('plan.seatsFreeOne') : t('plan.seatsFree', { count: open })}
+            </Text>
+          </View>
+          {seatRow}
         </View>
-        <SeatList
-          seats={seatsFor(plan, t('common.freeSeat'), `${t('common.you')} · ${t('plan.hostRole')}`)}
-          size={plan.capacity > 4 ? 58 : 72}
-          gap={plan.capacity > 4 ? 8 : 10}
-          even
-          captionSize={12}
-          tintedEmpty
-        />
-      </View>
+      )}
 
       <HostRequestList plan={plan} full={full} />
     </SheetSurface>
