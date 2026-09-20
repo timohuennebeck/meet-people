@@ -1,0 +1,90 @@
+import { LinearGradient } from 'expo-linear-gradient';
+import type { ReactNode } from 'react';
+import { View } from 'react-native';
+
+import { cn } from '@shared/lib/cn';
+import { gradients } from '@shared/theme/tokens';
+
+import { Mascot } from './Mascot';
+import { Text } from './Text';
+
+/**
+ * Category colours. Every plan photo carries one of these as its top-left
+ * badge — sport green, games slate, walk orange, coffee pink.
+ */
+export const CATEGORY_STYLE = {
+  sport: 'bg-category-sport',
+  games: 'bg-category-games',
+  walk: 'bg-category-walk',
+  coffee: 'bg-category-coffee',
+} as const;
+
+export type PlanCategory = keyof typeof CATEGORY_STYLE;
+
+export interface PlanPhotoProps {
+  /** Frame height: 140 on a map card, 160–220 inside a sheet. */
+  height: number;
+  /** Mascot size, which the design scales with the frame. */
+  mascotSize: number;
+  radius?: number;
+  /** Badges pinned to the top-left corner. */
+  leading?: ReactNode;
+  /** Badge pinned to the top-right corner. */
+  trailing?: ReactNode;
+  /** Renders the round × that dismisses a sheet. */
+  dismissible?: boolean;
+  className?: string;
+}
+
+/**
+ * The plan image placeholder: a `158deg` blue gradient with Pips centred on it.
+ * Real photos will replace the gradient once plans carry uploads.
+ */
+export function PlanPhoto({
+  height,
+  mascotSize,
+  radius = 22,
+  leading,
+  trailing,
+  dismissible = false,
+  className,
+}: PlanPhotoProps) {
+  return (
+    <View
+      className={cn('relative shrink-0 overflow-hidden', className)}
+      style={{ height, borderRadius: radius }}
+    >
+      <LinearGradient
+        colors={gradients.photo}
+        // 158deg measured from the CSS vertical, expressed as start/end points.
+        start={{ x: 0, y: 0 }}
+        end={{ x: 0.92, y: 1 }}
+        className="h-full w-full items-center justify-center"
+        style={{ borderRadius: radius }}
+      >
+        <Mascot size={mascotSize} />
+      </LinearGradient>
+      {leading ? (
+        <View className="absolute left-[12px] top-[12px] flex-row gap-[6px]" pointerEvents="none">
+          {leading}
+        </View>
+      ) : null}
+      {trailing ? (
+        <View className="absolute right-[10px] top-[10px]" pointerEvents="none">
+          {trailing}
+        </View>
+      ) : null}
+      {dismissible ? (
+        <View
+          className="absolute right-[10px] top-[10px] h-[32px] w-[32px] items-center justify-center rounded-full"
+          style={{ backgroundColor: 'rgba(255,255,255,0.9)' }}
+          pointerEvents="none"
+        >
+          <Text weight={600} className="text-[16px]">
+            ×
+          </Text>
+        </View>
+      ) : null}
+    </View>
+  );
+}

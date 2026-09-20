@@ -1,0 +1,104 @@
+import { LinearGradient } from 'expo-linear-gradient';
+import { useLocalSearchParams, useRouter } from 'expo-router';
+import { useTranslation } from 'react-i18next';
+import { View } from 'react-native';
+
+import { gradients } from '@shared/theme/tokens';
+import {
+  Avatar,
+  Button,
+  Caret,
+  Chip,
+  SectionLabel,
+  SheetScrim,
+  SheetSurface,
+  Text,
+  TextButton,
+  WarningNote,
+} from '@shared/ui';
+
+import { usePlan, useSetMembership } from '../data/usePlans';
+
+/** The note the design shows already drafted, in placeholder grey. */
+const SAMPLE_NOTE = 'Desculpa, meu turno mudou. Fica para a próxima.';
+
+/**
+ * Leaving a plan. The confirmation is honest about the consequences — the seat
+ * returns to the map, the host is told, the group chat closes — and keeps the
+ * way back open.
+ */
+export function LeavePlanScreen() {
+  const { t } = useTranslation();
+  const router = useRouter();
+  const { id } = useLocalSearchParams<{ id: string }>();
+  const { data: plan } = usePlan(id ?? '');
+  const { mutate: setMembership } = useSetMembership();
+
+  const leave = () => {
+    if (plan) setMembership({ planId: plan.id, membership: 'guest' });
+    router.dismissAll();
+  };
+
+  const attendees = plan
+    ? plan.participants.map((participant) => participant.user.name).join(', ')
+    : '';
+
+  return (
+    <View className="flex-1">
+      <LinearGradient colors={gradients.map} className="absolute inset-0" />
+      <SheetScrim strong />
+
+      <SheetSurface gap={18} padding={{ top: 12, horizontal: 18, bottom: 36 }}>
+        <View className="gap-[6px] pt-[6px]">
+          <Text weight={600} className="text-[24px] leading-[27.6px] tracking-[-0.5px]">
+            {t('plan.leave.title')}
+          </Text>
+          <Text weight={500} className="text-[14.5px] leading-[21px] text-ink-muted">
+            {t('plan.leave.subtitle', { name: plan?.host.name ?? '' })}
+          </Text>
+        </View>
+
+        <View className="flex-row items-center gap-[12px] rounded-field bg-surface-sunken p-[12px]">
+          {plan ? <Avatar uri={plan.host.avatarUrl} size={44} /> : null}
+          <View className="flex-1 gap-[2px]">
+            <Text weight={600} className="text-[15px] leading-[18px]">
+              {plan?.title}
+            </Text>
+            <Text weight={600} className="text-[12px] text-ink-faint">
+              {`${plan?.whenLabel.split(' · ')[0] ?? ''} · ${t('plan.leave.attendees', {
+                names: attendees,
+              })}`}
+            </Text>
+          </View>
+        </View>
+
+        <View className="gap-[8px]">
+          <SectionLabel className="tracking-[0.4px] text-ink-faint">
+            {t('plan.leave.messageLabel')}
+          </SectionLabel>
+          <View className="min-h-[118px] rounded-tile border-2 border-brand bg-surface px-[16px] py-[14px]">
+            <Text className="text-[17px] leading-[24.65px] text-ink-trace">
+              {SAMPLE_NOTE}
+              <Caret height={20} />
+            </Text>
+          </View>
+          <View className="flex-row flex-wrap gap-[8px]">
+            <Chip label={t('plan.leave.reasonWork')} size="reason" tone="fill" />
+            <Chip label={t('plan.leave.reasonSick')} size="reason" tone="fill" />
+          </View>
+        </View>
+
+        <WarningNote>{t('plan.leave.warning')}</WarningNote>
+
+        <View className="gap-[10px]">
+          <Button label={t('plan.leave.confirm')} variant="danger" onPress={leave} />
+          <TextButton
+            label={t('plan.leave.keep')}
+            tone="bodyStrong"
+            onPress={() => router.back()}
+          />
+        </View>
+      </SheetSurface>
+    </View>
+  );
+}

@@ -1,0 +1,27 @@
+{
+  "expo": {
+    "name": "treff",
+    "slug": "treff",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "scheme": "treff",
+    "userInterfaceStyle": "light",
+    "newArchEnabled": true,
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "app.treff.mobile"
+    },
+    "android": {
+      "package": "app.treff.mobile",
+      "edgeToEdgeEnabled": true
+    },
+    "web": {
+      "bundler": "metro",
+      "output": "single"
+    },
+    "plugins": ["expo-router", "expo-localization", "expo-font"],
+    "experiments": {
+      "typedRoutes": true
+    }
+  }
+}
