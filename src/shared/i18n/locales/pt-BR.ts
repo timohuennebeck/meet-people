@@ -8,6 +8,7 @@ export const ptBR = {
     continue: 'Continuar',
     save: 'Salvar',
     cancel: 'Cancelar',
+    tagCount: '{{used}}/{{max}}',
     skip: 'Pular',
     publish: 'Publicar',
     back: 'Voltar',

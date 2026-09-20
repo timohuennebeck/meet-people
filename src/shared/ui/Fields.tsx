@@ -1,4 +1,5 @@
 import { type ReactNode, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Platform, TextInput, View, type TextInputProps } from 'react-native';
 
 import { cn } from '@shared/lib/cn';
@@ -216,6 +217,7 @@ export function TagInput({
   maxLength,
   className,
 }: TagInputProps) {
+  const { t } = useTranslation();
   const [draft, setDraft] = useState('');
   const ring = useFocusRing();
   const full = max !== undefined && tags.length >= max;
@@ -269,6 +271,12 @@ export function TagInput({
           ]}
         />
       </View>
+      {/* Pinned to the corner so it never takes part in the tag wrap. */}
+      {max !== undefined ? (
+        <Text className="absolute bottom-[12px] right-[14px] text-[13px] text-ink-ghost">
+          {t('common.tagCount', { used: String(tags.length), max: String(max) })}
+        </Text>
+      ) : null}
     </View>
   );
 }

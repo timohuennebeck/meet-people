@@ -9,6 +9,7 @@ export const en: Translation = {
     continue: 'Continue',
     save: 'Save',
     cancel: 'Cancel',
+    tagCount: '{{used}}/{{max}}',
     skip: 'Skip',
     publish: 'Publish',
     back: 'Back',
