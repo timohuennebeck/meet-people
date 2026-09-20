@@ -68,7 +68,7 @@ anything:
   design has no global `box-sizing` reset, which is what makes the two cases
   differ:
   - An **outset** ring — `box-shadow: 0 0 0 Npx` with no `inset`, or a `border`
-    on a content-box element — is painted *outside* and consumes nothing. The
+    on a content-box element — is painted _outside_ and consumes nothing. The
     React Native element must grow by `2N` and keep the design's full padding.
     `Ring` in `src/shared/ui/Avatar.tsx` is that case: a 12px dot inside a 2.5px
     ring is a 17px element, not a 12px one.
@@ -78,6 +78,7 @@ anything:
 
   Getting this backwards silently shrinks every ringed avatar, dot and flag, so
   check the shadow's `inset` keyword before converting one.
+
 - **Shadows are pre-decomposed.** Every `box-shadow` in the design has a named
   entry in `src/shared/theme/tokens.ts`, split into the iOS and Android fields.
 - **Relative units become absolute.** `line-height: 1.45` and

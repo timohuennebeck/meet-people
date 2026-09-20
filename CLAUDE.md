@@ -37,6 +37,7 @@ check that file first.
 
   The design export has no global `box-sizing` reset, so a plain `border` on an
   element that did not opt into `border-box` is the outset case too.
+
 - Unitless line heights and `em` letter-spacing resolve to px against the font
   size.
 - Keep the design's half-pixel sizes: `text-[16.5px]`, not `text-[17px]`.
