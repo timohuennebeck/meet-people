@@ -26,15 +26,17 @@ export function CreateWhatScreen() {
       subtitle={t('create.what.subtitle')}
       footer={<Button label={t('common.continue')} onPress={() => router.push('/create/where')} />}
     >
-      {/* `radius:22px · padding:16px · 20px/500`, wrapping onto a second line
-          rather than scrolling sideways. */}
+      {/* `radius:22px · padding:18px · 20px/500 · inset 0 0 0 2px`, one line
+          tall — 18 + 27 + 18 — and wrapping onto a second rather than
+          scrolling sideways. */}
       <NoteField
         className="mt-[20px] shrink-0"
         value={title}
         onChangeText={setTitle}
         placeholder={t('create.what.placeholder')}
-        padding={{ vertical: 16, horizontal: 16 }}
-        minHeight={0}
+        padding={{ vertical: 18, horizontal: 18 }}
+        lines={1}
+        minHeight={63}
         fontSize={20}
         lineHeight={27}
         weight={500}

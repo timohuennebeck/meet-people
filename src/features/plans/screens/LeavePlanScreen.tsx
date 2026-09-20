@@ -79,7 +79,8 @@ export function LeavePlanScreen() {
             onChangeText={setNote}
             placeholder={t('plan.leave.notePlaceholder')}
             muted
-            padding={{ vertical: 14, horizontal: 16 }}
+            padding={{ vertical: 16, horizontal: 18 }}
+            autoFocus
           />
           <View className="flex-row flex-wrap gap-[8px]">
             {(['reasonWork', 'reasonSick'] as const).map((key) => (

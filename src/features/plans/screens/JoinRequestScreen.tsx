@@ -66,6 +66,7 @@ export function JoinRequestScreen() {
           value={message}
           onChangeText={setMessage}
           placeholder={t('plan.request.notePlaceholder')}
+          autoFocus
         />
 
         <View className="flex-row flex-wrap gap-[8px]">

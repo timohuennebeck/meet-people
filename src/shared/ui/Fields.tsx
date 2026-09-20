@@ -1,5 +1,5 @@
 import { type ReactNode, useState } from 'react';
-import { TextInput, View, type TextInputProps } from 'react-native';
+import { Platform, TextInput, View, type TextInputProps } from 'react-native';
 
 import { cn } from '@shared/lib/cn';
 import { colors } from '@shared/theme/tokens';
@@ -105,10 +105,22 @@ export function TextField({
 export interface NoteFieldProps extends Omit<TextInputProps, 'style' | 'className' | 'multiline'> {
   value: string;
   onChangeText: (next: string) => void;
-  /** The design pads the request note 14px all round and the leave note 16/14. */
+  /**
+   * The design's own padding, as stated — `padding:16px` on the request note,
+   * `16px 18px` on the leave one. The inset ring's width is taken off it here,
+   * so callers pass the design figure rather than pre-compensating it.
+   */
   padding?: { vertical: number; horizontal: number };
   /** Greys the text, as the optional leave note is drawn. */
   muted?: boolean;
+  /**
+   * How many lines the field is drawn for before any text wraps. Only the web
+   * build needs telling: there a multi-line input is a `<textarea>`, which
+   * takes its height from its `rows` attribute — two lines unless it is told
+   * otherwise — rather than from the text inside it. iOS measures the text, so
+   * it starts at one line and grows as the note wraps either way.
+   */
+  lines?: number;
   minHeight?: number;
   fontSize?: number;
   lineHeight?: number;
@@ -124,8 +136,9 @@ export interface NoteFieldProps extends Omit<TextInputProps, 'style' | 'classNam
 export function NoteField({
   value,
   onChangeText,
-  padding = { vertical: 14, horizontal: 14 },
+  padding = { vertical: 16, horizontal: 16 },
   muted = false,
+  lines,
   minHeight = 118,
   fontSize = 17,
   lineHeight = 24.65,
@@ -150,6 +163,7 @@ export function NoteField({
         {...rest}
         {...ring.handlers}
         multiline
+        numberOfLines={Platform.OS === 'web' ? lines : undefined}
         value={value}
         onChangeText={onChangeText}
         placeholderTextColor={colors.inkGhost}

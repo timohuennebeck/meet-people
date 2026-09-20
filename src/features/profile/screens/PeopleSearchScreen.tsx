@@ -68,6 +68,10 @@ export function PeopleSearchScreen() {
   const { data: results } = useUserSearch(term);
   const { data: recent } = useRecentSearches();
 
+  // The design only draws the `PESSOAS · n` group over a term that was typed;
+  // with the field empty there is nothing to count, just the recent searches.
+  const searching = term.trim().length > 0;
+
   const open = (userId: string) => router.push(`/people/${userId}`);
 
   return (
@@ -119,11 +123,13 @@ export function PeopleSearchScreen() {
         contentContainerStyle={{ gap: 18 }}
         showsVerticalScrollIndicator={false}
       >
-        <ResultGroup
-          label={t('search.peopleCount', { count: (results ?? []).length })}
-          people={results ?? []}
-          onOpen={open}
-        />
+        {searching ? (
+          <ResultGroup
+            label={t('search.peopleCount', { count: (results ?? []).length })}
+            people={results ?? []}
+            onOpen={open}
+          />
+        ) : null}
         <ResultGroup label={t('search.recent')} people={recent ?? []} onOpen={open} />
       </ScrollView>
     </Screen>
