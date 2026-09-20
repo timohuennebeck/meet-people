@@ -97,8 +97,6 @@ export function ProgressHeader({
 export interface NavHeaderProps {
   title: string;
   onBack?: () => void;
-  /** Rendered at the trailing edge, e.g. the overflow dots on a profile. */
-  trailing?: ReactNode;
   className?: string;
 }
 
@@ -107,7 +105,7 @@ export interface NavHeaderProps {
  * pages and other pushed detail screens. The title is centred against the
  * screen rather than the remaining space, exactly as in the design.
  */
-export function NavHeader({ title, onBack, trailing, className }: NavHeaderProps) {
+export function NavHeader({ title, onBack, className }: NavHeaderProps) {
   const { t } = useTranslation();
 
   return (
@@ -122,7 +120,6 @@ export function NavHeader({ title, onBack, trailing, className }: NavHeaderProps
       >
         {title}
       </Text>
-      {trailing ? <View className="ml-auto">{trailing}</View> : null}
     </View>
   );
 }

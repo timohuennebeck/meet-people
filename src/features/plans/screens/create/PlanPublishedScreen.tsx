@@ -5,7 +5,16 @@ import { useTranslation } from 'react-i18next';
 import { View } from 'react-native';
 
 import { gradients, gradientStops } from '@shared/theme/tokens';
-import { Button, Glyph, Mascot, Screen, Text, TextButton } from '@shared/ui';
+import {
+  Button,
+  Glyph,
+  LabelledDivider,
+  Mascot,
+  Screen,
+  StepTitle,
+  Text,
+  TextButton,
+} from '@shared/ui';
 
 /** `56px circle · 13.5px caption` — the QR and "more" actions in the share row. */
 function ShareAction({ icon, label }: { icon: ReactNode; label: string }) {
@@ -37,20 +46,16 @@ export function PlanPublishedScreen() {
       </View>
 
       <View className="relative shrink-0">
-        <Text weight={600} className="text-[32px] leading-[34.56px] tracking-[-1.024px]">
-          {t('create.published.title')}
-        </Text>
+        <StepTitle>{t('create.published.title')}</StepTitle>
+        {/* Not `StepSubtitle`: the design leaves this one's line-height at the
+            font default rather than the 1.45 every other subtitle carries. */}
         <Text className="mt-[10px] text-[15.5px] text-ink-dim">
           {t('create.published.subtitle')}
         </Text>
 
         <Button label={t('create.published.invite')} className="mt-[20px]" />
 
-        <View className="mt-[20px] flex-row items-center gap-[12px]">
-          <View className="h-[1px] flex-1 bg-hair-mid" />
-          <Text className="text-[14px] text-ink-ghost">{t('create.published.orShare')}</Text>
-          <View className="h-[1px] flex-1 bg-hair-mid" />
-        </View>
+        <LabelledDivider label={t('create.published.orShare')} className="mt-[20px]" />
 
         <View className="mt-[16px] flex-row items-start gap-[12px]">
           <View className="min-w-0 flex-1 items-center gap-[7px]">

@@ -7,7 +7,17 @@ import { View } from 'react-native';
 import { AVATARS } from '@shared/data/fixtures';
 import { useSession } from '@shared/providers/SessionProvider';
 import { gradients, gradientStops } from '@shared/theme/tokens';
-import { Avatar, Button, CheckLine, Mascot, Screen, Text, VerifiedSeal } from '@shared/ui';
+import {
+  Avatar,
+  Button,
+  CheckLine,
+  Mascot,
+  Screen,
+  StepSubtitle,
+  StepTitle,
+  Text,
+  VerifiedSeal,
+} from '@shared/ui';
 
 /** The full-page confirmation shown once the selfie review clears. */
 export function VerificationSuccessScreen() {
@@ -48,13 +58,9 @@ export function VerificationSuccessScreen() {
           </View>
         </View>
 
-        <Text weight={600} className="mt-[18px] text-[32px] leading-[34.56px] tracking-[-1.024px]">
-          {t('verification.success.title', { name })}
-        </Text>
+        <StepTitle className="mt-[18px]">{t('verification.success.title', { name })}</StepTitle>
 
-        <Text className="mt-[10px] text-[15.5px] leading-[22.5px] text-ink-dim">
-          {t('verification.success.subtitle')}
-        </Text>
+        <StepSubtitle className="mt-[10px]">{t('verification.success.subtitle')}</StepSubtitle>
 
         <View className="mt-[20px] gap-[10px]">
           <CheckLine variant="card">{t('verification.success.perkSealed')}</CheckLine>

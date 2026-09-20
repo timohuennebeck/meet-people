@@ -33,7 +33,6 @@ export interface ListRowProps {
   divided?: boolean;
   /** Renders the label in the destructive red used by "delete account". */
   destructive?: boolean;
-  chevron?: boolean;
   onPress?: () => void;
 }
 
@@ -45,7 +44,6 @@ export function ListRow({
   accessory,
   divided = false,
   destructive = false,
-  chevron = true,
   onPress,
 }: ListRowProps) {
   return (
@@ -69,7 +67,7 @@ export function ListRow({
       </View>
       {accessory}
       {value ? <Text className="text-[16px] text-ink-dim">{value}</Text> : null}
-      {chevron ? <ChevronRight size={13} /> : null}
+      <ChevronRight size={13} />
     </Pressable>
   );
 }

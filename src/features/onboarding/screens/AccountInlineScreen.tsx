@@ -4,7 +4,7 @@ import { View } from 'react-native';
 
 import { StepScaffold } from '@shared/components/StepScaffold';
 import { STEPS } from '@shared/lib/steps';
-import { Button, Glyph, Spacer, Text, TextField } from '@shared/ui';
+import { Button, Glyph, LabelledDivider, Spacer, Text, TextField } from '@shared/ui';
 
 import { LegalNote } from '../ui/LegalNote';
 
@@ -45,11 +45,7 @@ export function AccountInlineScreen() {
         onPress={() => router.push('/(onboarding)/confirmation')}
       />
 
-      <View className="mt-[22px] shrink-0 flex-row items-center gap-[12px]">
-        <View className="h-[1px] flex-1 bg-hair-mid" />
-        <Text className="text-[14px] text-ink-ghost">{t('common.or')}</Text>
-        <View className="h-[1px] flex-1 bg-hair-mid" />
-      </View>
+      <LabelledDivider label={t('common.or')} className="mt-[22px]" />
 
       <View className="mt-[22px] shrink-0 gap-[14px]">
         <View className="gap-[7px]">

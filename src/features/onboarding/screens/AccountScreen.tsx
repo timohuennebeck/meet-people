@@ -5,7 +5,7 @@ import { View } from 'react-native';
 
 import { StepScaffold } from '@shared/components/StepScaffold';
 import { STEPS } from '@shared/lib/steps';
-import { gradients } from '@shared/theme/tokens';
+import { gradientAngles, gradients } from '@shared/theme/tokens';
 import { Button, Glyph, Mascot, Spacer } from '@shared/ui';
 
 import { LegalNote } from '../ui/LegalNote';
@@ -24,8 +24,7 @@ export function AccountScreen() {
     >
       <LinearGradient
         colors={gradients.photo}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 0.92, y: 1 }}
+        {...gradientAngles.photo}
         className="mt-[20px] h-[288px] shrink-0 items-center justify-center rounded-[28px]"
       >
         <Mascot size={172} />

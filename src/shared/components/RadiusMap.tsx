@@ -3,7 +3,7 @@ import { View } from 'react-native';
 
 import { AVATARS } from '@shared/data/fixtures';
 import { cn } from '@shared/lib/cn';
-import { gradients } from '@shared/theme/tokens';
+import { gradientAngles, gradients } from '@shared/theme/tokens';
 import { Avatar } from '@shared/ui';
 
 /**
@@ -19,8 +19,7 @@ export function RadiusMap({ height, className }: { height: number; className?: s
     >
       <LinearGradient
         colors={gradients.photo}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 0.92, y: 1 }}
+        {...gradientAngles.photo}
         className="absolute inset-0"
       />
 

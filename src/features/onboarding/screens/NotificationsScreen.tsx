@@ -6,7 +6,7 @@ import { View } from 'react-native';
 
 import { StepScaffold } from '@shared/components/StepScaffold';
 import { STEPS } from '@shared/lib/steps';
-import { gradients, shadows } from '@shared/theme/tokens';
+import { gradientAngles, gradients, shadows } from '@shared/theme/tokens';
 import { Button, Mascot, Spacer, Text, TextButton } from '@shared/ui';
 
 const APP_MARK = require('../../../../assets/images/app-icon-mark.png');
@@ -65,8 +65,7 @@ export function NotificationsScreen() {
     >
       <LinearGradient
         colors={gradients.photo}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 0.92, y: 1 }}
+        {...gradientAngles.photo}
         className="mt-[20px] h-[300px] shrink-0 overflow-hidden rounded-[28px] p-[18px]"
       >
         <SampleNotification />

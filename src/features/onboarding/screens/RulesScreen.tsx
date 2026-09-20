@@ -7,7 +7,7 @@ import Animated, { FadeInDown } from 'react-native-reanimated';
 
 import { StepScaffold } from '@shared/components/StepScaffold';
 import { STEPS } from '@shared/lib/steps';
-import { gradients, shadows } from '@shared/theme/tokens';
+import { gradientAngles, gradients, shadows } from '@shared/theme/tokens';
 import { Button, Glyph, Mascot, Spacer, Text, TextButton } from '@shared/ui';
 
 const RULE_COUNT = 3;
@@ -106,8 +106,7 @@ export function RulesScreen() {
 
         <LinearGradient
           colors={gradients.photo}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 0.92, y: 1 }}
+          {...gradientAngles.photo}
           className="mt-[16px] min-h-0 flex-1 items-center justify-center overflow-hidden rounded-well"
         >
           <Mascot size={120} />

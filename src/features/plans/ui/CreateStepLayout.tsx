@@ -1,7 +1,6 @@
 import type { ReactNode } from 'react';
 
 import { StepScaffold } from '@shared/components/StepScaffold';
-import type { ScreenPadding } from '@shared/ui';
 
 /** The create flow runs to six steps; the age step is the optional last one. */
 export const CREATE_TOTAL = 6;
@@ -14,10 +13,8 @@ export interface CreateStepLayoutProps {
   subtitle?: string;
   children: ReactNode;
   footer?: ReactNode;
-  padding?: ScreenPadding;
   /** The seats and age steps count out of 6; the first four count out of 5. */
   total?: number;
-  className?: string;
 }
 
 /**
@@ -31,9 +28,7 @@ export function CreateStepLayout({
   subtitle,
   children,
   footer,
-  padding = 'step',
   total = 5,
-  className,
 }: CreateStepLayoutProps) {
   return (
     <StepScaffold
@@ -41,8 +36,6 @@ export function CreateStepLayout({
       title={title}
       subtitle={subtitle}
       footer={footer}
-      padding={padding}
-      className={className}
     >
       {children}
     </StepScaffold>

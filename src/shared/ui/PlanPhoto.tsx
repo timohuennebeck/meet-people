@@ -4,7 +4,7 @@ import { Pressable, View } from 'react-native';
 
 import type { PlanCategory } from '@shared/data/schemas';
 import { cn } from '@shared/lib/cn';
-import { gradients } from '@shared/theme/tokens';
+import { gradientAngles, gradients } from '@shared/theme/tokens';
 
 import { Mascot } from './Mascot';
 import { Text } from './Text';
@@ -63,9 +63,7 @@ export function PlanPhoto({
     >
       <LinearGradient
         colors={gradients.photo}
-        // 158deg measured from the CSS vertical, expressed as start/end points.
-        start={{ x: 0, y: 0 }}
-        end={{ x: 0.92, y: 1 }}
+        {...gradientAngles.photo}
         className="h-full w-full items-center justify-center"
         style={{ borderRadius: radius }}
       >

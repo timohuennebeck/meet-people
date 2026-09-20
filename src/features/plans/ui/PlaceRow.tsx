@@ -1,10 +1,10 @@
 import { MapPinSimple } from 'phosphor-react-native';
-import { Pressable, View } from 'react-native';
+import { View } from 'react-native';
 
 import type { Place } from '@shared/data/schemas';
 import { cn } from '@shared/lib/cn';
 import { colors } from '@shared/theme/tokens';
-import { SelectionDot, Text } from '@shared/ui';
+import { SelectableCard, SelectionDot, Text } from '@shared/ui';
 
 export interface PlaceRowProps {
   place: Place;
@@ -17,22 +17,14 @@ export interface PlaceRowProps {
  * create flow's recent and nearby lists.
  */
 export function PlaceRow({ place, selected = false, onPress }: PlaceRowProps) {
-  // The selected ring is inset and overlaps the padding; the resting one is not.
-  const padCompensation = selected ? 2 : 0;
-
   return (
-    <Pressable
-      accessibilityRole="radio"
-      accessibilityState={{ selected }}
+    // `SelectableCard` owns the ring swap and the padding the inset brand ring
+    // eats; only the radius differs from its default, which `cn()` resolves.
+    <SelectableCard
+      selected={selected}
       onPress={onPress}
-      className={cn(
-        'flex-row items-center gap-[12px] rounded-field bg-surface',
-        selected ? 'border-2 border-brand' : 'border border-hair',
-      )}
-      style={({ pressed }) => [
-        { paddingVertical: 14 - padCompensation, paddingHorizontal: 16 - padCompensation },
-        pressed ? { opacity: 0.85 } : null,
-      ]}
+      padding={{ vertical: 14, horizontal: 16 }}
+      className="flex-row items-center gap-[12px] rounded-field"
     >
       <View
         className={cn(
@@ -53,6 +45,6 @@ export function PlaceRow({ place, selected = false, onPress }: PlaceRowProps) {
       </View>
 
       {selected ? <SelectionDot selected /> : null}
-    </Pressable>
+    </SelectableCard>
   );
 }

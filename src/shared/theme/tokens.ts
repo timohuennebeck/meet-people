@@ -30,6 +30,15 @@ export const gradients = {
   profile: ['#E4EEFD', '#F2F7FF', 'rgba(255,255,255,0)'],
 } as const;
 
+/**
+ * Gradient directions, as the start/end points `expo-linear-gradient` takes.
+ * The design states its photo wash as `158deg` measured from the CSS vertical,
+ * which lands the end point at 92% across the bottom edge.
+ */
+export const gradientAngles = {
+  photo: { start: { x: 0, y: 0 }, end: { x: 0.92, y: 1 } },
+} as const;
+
 /** Gradient stop positions matching the design's `%` offsets. */
 export const gradientStops = {
   welcome: [0, 0.4, 0.62],

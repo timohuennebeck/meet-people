@@ -188,3 +188,19 @@ export function StepSubtitle({ children, className, style }: BlockProps) {
     </Text>
   );
 }
+
+export interface LabelledDividerProps {
+  label: string;
+  className?: string;
+}
+
+/** `1px #DFE5EF rules · 14px #8A91A0 label` — "ou" between two alternatives. */
+export function LabelledDivider({ label, className }: LabelledDividerProps) {
+  return (
+    <View className={cn('shrink-0 flex-row items-center gap-[12px]', className)}>
+      <View className="h-[1px] flex-1 bg-hair-mid" />
+      <Text className="text-[14px] text-ink-ghost">{label}</Text>
+      <View className="h-[1px] flex-1 bg-hair-mid" />
+    </View>
+  );
+}

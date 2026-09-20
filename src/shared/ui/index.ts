@@ -2,6 +2,7 @@ export { Avatar, AvatarStack, EmptySeat, FlaggedAvatar, PairAvatar, VerifiedSeal
 export { Button, Spacer, TextButton, type ButtonVariant, type TextButtonTone } from './Button';
 export {
   Card,
+  LabelledDivider,
   SectionLabel,
   SelectableCard,
   SelectionDot,

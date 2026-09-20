@@ -30,12 +30,6 @@ export interface ScreenProps extends ViewProps {
   children: ReactNode;
   /** Which padding preset from the design to apply. */
   padding?: ScreenPadding;
-  /**
-   * Honour the device safe area. The design's 56px top and 34px bottom already
-   * match an iPhone's insets closely; this keeps content clear of the notch and
-   * home indicator on hardware whose insets run larger.
-   */
-  safe?: boolean;
   className?: string;
 }
 
@@ -43,14 +37,7 @@ export interface ScreenProps extends ViewProps {
  * Root container for a screen: sets the background, applies the design's
  * padding preset and clips overflow the way the design frame does.
  */
-export function Screen({
-  children,
-  padding = 'step',
-  safe = true,
-  className,
-  style,
-  ...rest
-}: ScreenProps) {
+export function Screen({ children, padding = 'step', className, style, ...rest }: ScreenProps) {
   const insets = useSafeAreaInsets();
   const pad = PADDING[padding];
 
@@ -60,10 +47,10 @@ export function Screen({
       className={cn('flex-1 overflow-hidden bg-surface-app', className)}
       style={[
         {
-          paddingTop: safe ? Math.max(pad.top, insets.top) : pad.top,
+          paddingTop: Math.max(pad.top, insets.top),
           paddingLeft: pad.horizontal,
           paddingRight: pad.horizontal,
-          paddingBottom: safe ? Math.max(pad.bottom, insets.bottom) : pad.bottom,
+          paddingBottom: Math.max(pad.bottom, insets.bottom),
         },
         style,
       ]}

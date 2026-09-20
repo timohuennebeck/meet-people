@@ -28,9 +28,9 @@ export interface SheetSurfaceProps {
    * Vertical gap between the sheet's children. The design uses 16 for content
    * sheets and 18 for the host and confirmation sheets.
    */
-  gap?: number;
-  /** Design padding, before the safe-area floor is applied to the bottom. */
-  padding?: { top: number; horizontal: number; bottom: number };
+  gap: number;
+  /** Sheet padding. Every sheet states its own, as the design draws them. */
+  padding: { top: number; horizontal: number; bottom: number };
   className?: string;
 }
 
@@ -38,12 +38,7 @@ export interface SheetSurfaceProps {
  * `border-radius:30px 30px 0 0 · #fff · 0 -10px 40px rgba(21,24,31,.18)` — the
  * white panel that slides up from the bottom of the screen.
  */
-export function SheetSurface({
-  children,
-  gap = 16,
-  padding = { top: 12, horizontal: 18, bottom: 36 },
-  className,
-}: SheetSurfaceProps) {
+export function SheetSurface({ children, gap, padding, className }: SheetSurfaceProps) {
   return (
     <View
       className={cn('absolute bottom-0 left-0 right-0 rounded-t-sheet bg-surface', className)}

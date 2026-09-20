@@ -9,6 +9,9 @@ import { colors, shadows } from '@shared/theme/tokens';
 import { CheckSeal } from './icons';
 import { Text } from './Text';
 
+/** The home-country flag on a profile avatar is 30px everywhere it appears. */
+const FLAG_SIZE = 30;
+
 export interface RingProps {
   children: ReactNode;
   /** Diameter of the content inside the ring, in px. */
@@ -244,12 +247,10 @@ export function FlaggedAvatar({
   uri,
   flagUri,
   size = 92,
-  flagSize = 30,
 }: {
   uri: string;
   flagUri: string;
   size?: number;
-  flagSize?: number;
 }) {
   return (
     <View className="shrink-0" style={{ width: size, height: size }}>
@@ -261,10 +262,10 @@ export function FlaggedAvatar({
       >
         <Image source={{ uri }} style={{ width: size, height: size, borderRadius: size / 2 }} />
       </Ring>
-      <Ring size={flagSize} width={3} className="absolute" style={{ right: -5, bottom: -5 }}>
+      <Ring size={FLAG_SIZE} width={3} className="absolute" style={{ right: -5, bottom: -5 }}>
         <Image
           source={{ uri: flagUri }}
-          style={{ width: flagSize, height: flagSize, borderRadius: flagSize / 2 }}
+          style={{ width: FLAG_SIZE, height: FLAG_SIZE, borderRadius: FLAG_SIZE / 2 }}
         />
       </Ring>
     </View>
