@@ -53,6 +53,18 @@ const VARIANTS = {
     weight: 500 as const,
     shadow: undefined,
   },
+  /**
+   * `secondary` at `primaryCompact`'s height — the second action in a stacked
+   * pair. The design draws `secondary` at 58px for a button that stands alone;
+   * under a 56px primary that 2px reads as a mistake rather than a hierarchy.
+   */
+  secondaryCompact: {
+    container: 'bg-surface border-[1.5px] border-hair-deep',
+    text: 'text-ink text-[17px]',
+    height: 56,
+    weight: 500 as const,
+    shadow: undefined,
+  },
   /** `h:60 · white + 1.5px #DCE4F0 · 17px/600` — the Google / e-mail sign-in rows. */
   secondaryTall: {
     container: 'bg-surface border-[1.5px] border-hair-deep',

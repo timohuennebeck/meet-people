@@ -123,7 +123,7 @@ export function PersonProfileScreen() {
         <Button label={t('profile.invite')} variant="primaryCompact" />
         <Button
           label={t('profile.message')}
-          variant="secondary"
+          variant="secondaryCompact"
           disabled={openDirect.isPending}
           onPress={onMessage}
         />
