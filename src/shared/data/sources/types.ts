@@ -48,6 +48,13 @@ export interface DataSource {
   chats: {
     /** The conversations list. */
     conversations(): Promise<Conversation[]>;
+    /**
+     * The direct thread with one person, opened if the two have none yet, as
+     * its conversation id. The server decides whether the viewer may: a thread
+     * with someone they have never sat in a plan with is a Plus feature and
+     * refuses with `PLUS_REQUIRED`.
+     */
+    openDirect(userId: string): Promise<string>;
     /** Messages in one thread, oldest first. */
     thread(conversationId: string): Promise<Message[]>;
     /** Sends a message as the viewer. */

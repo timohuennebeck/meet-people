@@ -1022,6 +1022,7 @@ export type Database = {
           title: string
         }[]
       }
+      open_direct_conversation: { Args: { other: string }; Returns: string }
     }
     Enums: {
       attendance_outcome: "attended" | "cancelled" | "no_show"

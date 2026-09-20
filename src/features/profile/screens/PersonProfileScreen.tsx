@@ -1,8 +1,11 @@
 import { useLocalSearchParams, useRouter } from 'expo-router';
+import type { ParseKeys } from 'i18next';
 import { useTranslation } from 'react-i18next';
 import { ScrollView, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { useOpenDirect } from '@features/chat/data/useChat';
+import { isDataError } from '@shared/data/errors';
 import { cn } from '@shared/lib/cn';
 import { colors } from '@shared/theme/tokens';
 import { Button, CircleButton, Glyph, SealNote, Text } from '@shared/ui';
@@ -29,8 +32,31 @@ export function PersonProfileScreen() {
   const insets = useSafeAreaInsets();
   const { id } = useLocalSearchParams<{ id: string }>();
   const { data: user } = useUser(id ?? '');
+  const openDirect = useOpenDirect();
 
   if (!user) return <View className="flex-1 bg-surface" />;
+
+  const onMessage = () => {
+    if (openDirect.isPending) return;
+    openDirect.mutate(user.id, {
+      onSuccess: (conversationId) => router.push(`/chat/${conversationId}`),
+      onError: (error) => {
+        // A cold direct message is what Plus sells, so the paywall is the
+        // answer rather than a sentence explaining it. Every other refusal
+        // is read off the mutation below.
+        if (isDataError(error) && error.code === 'PLUS_REQUIRED') {
+          router.push('/(onboarding)/paywall');
+        }
+      },
+    });
+  };
+
+  // `messageKey` is a plain string on `DataError`, which stays clear of the
+  // i18n types; every key it can hold is declared in `errors.*`.
+  const refusal =
+    isDataError(openDirect.error) && openDirect.error.code !== 'PLUS_REQUIRED'
+      ? t(openDirect.error.messageKey as ParseKeys)
+      : null;
 
   return (
     <View className="flex-1 overflow-hidden bg-surface">
@@ -87,11 +113,21 @@ export function PersonProfileScreen() {
         <SealNote>{t('profile.verifiedNote')}</SealNote>
       </ScrollView>
 
+      {/* The design's `padding:12px 20px 30px · gap:10px` column draws only the
+          invite; the message action is the second row that column already
+          leaves room for. */}
       <View
-        className="shrink-0 px-[20px] pt-[12px]"
+        className="shrink-0 gap-[10px] px-[20px] pt-[12px]"
         style={{ paddingBottom: Math.max(30, insets.bottom) }}
       >
         <Button label={t('profile.invite')} variant="primaryCompact" />
+        <Button
+          label={t('profile.message')}
+          variant="secondary"
+          disabled={openDirect.isPending}
+          onPress={onMessage}
+        />
+        {refusal ? <Text className="text-center text-[14px] text-ink-dim">{refusal}</Text> : null}
       </View>
     </View>
   );

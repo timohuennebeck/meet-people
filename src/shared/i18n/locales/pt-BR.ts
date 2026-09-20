@@ -516,6 +516,7 @@ export const ptBR = {
     statAttendance: 'comparece',
     interests: 'INTERESSES',
     invite: 'Convidar para um plano',
+    message: 'Mensagem',
     distanceLine: '{{neighbourhood}} · {{distance}} de você',
     tenureLine: 'No app desde março · responde em ~2 h',
     verifiedNote: 'Selfie verificada em março. Perfil confirmado por 3 anfitriões.',
@@ -738,6 +739,7 @@ export const ptBR = {
     planFull: 'Esse plano acabou de lotar',
     blocked: 'Não dá para entrar nesse plano',
     tooManyInterests: 'Você chegou ao limite de interesses',
+    plusRequired: 'Conversar com quem você ainda não encontrou é um recurso do Plus.',
     badTransition: 'Não foi possível fazer isso agora.',
   },
 

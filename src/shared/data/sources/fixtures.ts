@@ -137,6 +137,14 @@ export const fixtureSource: DataSource = {
     conversations: (): Promise<Conversation[]> =>
       settle(conversationSchema.array(), fixtures.CONVERSATIONS),
 
+    /**
+     * The design scripts one direct thread, with Sara. Anyone else gets a
+     * fresh id so the chat screen still opens — on an empty thread, since
+     * nothing here refuses: the Plus gate is the server's rule.
+     */
+    openDirect: (userId: string): Promise<string> =>
+      Promise.resolve(userId === fixtures.SARA.id ? 'c-mara' : `c-${userId}`),
+
     thread: (conversationId: string): Promise<Message[]> =>
       settle(messageSchema.array(), [...(threads.get(conversationId) ?? [])]),
 

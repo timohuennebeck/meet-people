@@ -28,8 +28,11 @@
 /**
  * The rules the schema refuses by name.
  *
- * The first four are things a person can run into and each has its own
- * sentence. The rest are raised by the `plan_members` triggers when a client
+ * The first five are things a person can run into and each has its own
+ * sentence — `PLUS_REQUIRED` is `open_direct_conversation` refusing a cold
+ * direct message to someone who is not on Plus, and the profile answers it
+ * with the paywall rather than a sentence. The rest are raised by the
+ * `plan_members` triggers when a client
  * asks for a move the table does not allow — requesting a seat on an open
  * plan, accepting a request on somebody else's plan, a host leaving their own
  * plan. A correct client never sends those, so they are not four more
@@ -41,6 +44,7 @@ export const DATA_ERROR_CODES = [
   'PLAN_FULL',
   'BLOCKED',
   'TOO_MANY_INTERESTS',
+  'PLUS_REQUIRED',
   'PLAN_IS_OPEN',
   'PLAN_NEEDS_APPROVAL',
   'NOT_THE_HOST',
@@ -63,6 +67,7 @@ const MESSAGE_KEYS: Record<DataErrorCode, string> = {
   PLAN_FULL: 'errors.planFull',
   BLOCKED: 'errors.blocked',
   TOO_MANY_INTERESTS: 'errors.tooManyInterests',
+  PLUS_REQUIRED: 'errors.plusRequired',
   PLAN_IS_OPEN: 'errors.badTransition',
   PLAN_NEEDS_APPROVAL: 'errors.badTransition',
   NOT_THE_HOST: 'errors.badTransition',

@@ -508,6 +508,7 @@ export const en: Translation = {
     statAttendance: 'show up',
     interests: 'INTERESTS',
     invite: 'Invite to a plan',
+    message: 'Message',
     distanceLine: '{{neighbourhood}} · {{distance}} from you',
     tenureLine: 'On the app since March · replies in ~2 h',
     verifiedNote: 'Selfie verified in March. Profile confirmed by 3 hosts.',
@@ -715,6 +716,7 @@ export const en: Translation = {
     planFull: 'This plan just filled up',
     blocked: 'You cannot join this plan',
     tooManyInterests: 'You have reached the interest limit',
+    plusRequired: "Messaging someone you haven't met yet is a Plus feature.",
     badTransition: "That couldn't be done right now.",
   },
 

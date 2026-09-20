@@ -28,6 +28,26 @@ export function useThread(conversationId: string) {
   });
 }
 
+/**
+ * Opens the direct thread with one person and resolves to its conversation id.
+ *
+ * Nothing is optimistic here: the id is the server's to give, and the profile
+ * only navigates once it has one. A refused open comes back as a `DataError`
+ * — `PLUS_REQUIRED` when the two have never sat in a plan together and the
+ * viewer is not on Plus, which the profile answers with the paywall.
+ */
+export function useOpenDirect() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (userId: string) => dataSource.chats.openDirect(userId),
+    onSuccess: () => {
+      // A newly opened thread has to show up on the Chats tab.
+      void queryClient.invalidateQueries({ queryKey: chatKeys.conversations().queryKey });
+    },
+  });
+}
+
 /** Marks an optimistic bubble, so the reconciliation below can find it again. */
 const PENDING_PREFIX = 'pending-';
 

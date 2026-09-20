@@ -653,6 +653,17 @@ export const supabaseSource: DataSource = {
       return validate(conversationSchema.array(), (rows ?? []).map(toConversation));
     },
 
+    /**
+     * One RPC finds or creates the thread and seats both people in it. The
+     * Plus gate and the block check live in the function, so a screen only
+     * has to read the `DataError` it comes back with.
+     */
+    openDirect: async (userId: string): Promise<string> =>
+      unwrapSingle(
+        await client().rpc('open_direct_conversation', { other: userId }),
+        'Direct conversation',
+      ),
+
     thread: async (conversationId: string): Promise<Message[]> => {
       const db = client();
       const uid = await viewerId();
