@@ -337,6 +337,38 @@ export const ptBR = {
       confirm: 'Sair do plano',
       keep: 'Continuo indo',
     },
+
+    attendance: {
+      // The text button on the joined sheet once the plan is over.
+      open: 'Quem apareceu?',
+      navTitle: 'Depois do plano',
+      title: 'Quem apareceu?',
+      subtitle: '{{plan}} · {{when}}. Desmarque quem faltou.',
+      whenToday: 'hoje {{time}}',
+      whenYesterday: 'ontem {{time}}',
+      whenOn: '{{date}} {{time}}',
+      host: 'Anfitrião',
+      hostPlans_one: 'Anfitrião · {{count}} plano',
+      hostPlans_other: 'Anfitrião · {{count}} planos',
+      shared_one: '{{neighbourhood}} · {{count}} plano em comum',
+      shared_other: '{{neighbourhood}} · {{count}} planos em comum',
+      first: 'primeiro plano juntos',
+      warning: 'Uma falta só entra no perfil quando duas pessoas do plano marcam igual.',
+      confirm: 'Confirmar',
+
+      thanks: {
+        title: 'Obrigado por responder',
+        // The two counts are pluralised on their own, then read into the
+        // sentence — one key cannot pluralise twice.
+        subtitle: 'Marcamos {{present}} e {{absent}}. Ninguém vê quem respondeu o quê.',
+        present_one: '{{count}} presença',
+        present_other: '{{count}} presenças',
+        absent_one: '{{count}} falta',
+        absent_other: '{{count}} faltas',
+        back: 'Voltar aos planos',
+        report: 'Denunciar quem faltou',
+      },
+    },
   },
 
   create: {
@@ -444,6 +476,57 @@ export const ptBR = {
     distanceLine: '{{neighbourhood}} · {{distance}} de você',
     tenureLine: 'No app desde março · responde em ~2 h',
     verifiedNote: 'Selfie verificada em março. Perfil confirmado por 3 anfitriões.',
+  },
+
+  safety: {
+    report: {
+      navTitle: 'Denunciar',
+      title: 'O que aconteceu?',
+      subtitle: '{{name}} não fica sabendo que você denunciou.',
+    },
+
+    // Keyed by the `report_reason` enum of docs/database.md §3.1 — the value
+    // that goes into `reports.reason`, not the row's position.
+    reasons: {
+      no_show: {
+        title: 'Não apareceu',
+        detail: 'Confirmou presença e faltou sem avisar',
+      },
+      harassment: {
+        title: 'Mensagens incômodas',
+        detail: 'Insistência, conteúdo sexual ou ofensas',
+      },
+      fake_profile: {
+        title: 'Perfil falso',
+        detail: 'Fotos ou informações que não conferem',
+      },
+      inappropriate: {
+        title: 'Comportamento no encontro',
+        detail: 'Você se sentiu inseguro ou desconfortável',
+      },
+      other: {
+        title: 'Outro motivo',
+        detail: 'Conte com suas palavras',
+      },
+    },
+
+    detail: {
+      navTitle: 'Denunciar · {{reason}}',
+      noteLabel: 'O QUE VOCÊ QUER CONTAR · OPCIONAL',
+      notePlaceholder: 'Confirmou na véspera e não respondeu no dia.',
+      chipNoReply: 'Não respondeu',
+      chipSecondTime: 'Já é a 2ª vez',
+      warning: 'Analisamos em até 24 h. Em caso de risco imediato, procure a polícia.',
+      send: 'Enviar denúncia',
+    },
+
+    sent: {
+      title: 'Recebemos sua denúncia',
+      subtitle:
+        'Analisamos em até 24 h e avisamos por aqui. {{name}} foi bloqueada e não vê mais os seus planos.',
+      back: 'Voltar aos planos',
+      unblock: 'Desbloquear {{name}}',
+    },
   },
 
   settings: {

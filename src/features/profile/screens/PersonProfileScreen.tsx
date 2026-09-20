@@ -50,7 +50,17 @@ export function PersonProfileScreen() {
             >
               <Glyph.ChevronLeft size={13} />
             </CircleButton>
-            <CircleButton size={40} className="bg-white/75" accessibilityLabel={t('common.more')}>
+            {/* The overflow the design draws is a menu, and reporting is the
+                one thing it will ever hold that exists today (§9 of the
+                database plan lists block and report as the pair). Until the
+                block half has somewhere to be stored, the glyph goes straight
+                to the report flow rather than opening a menu of one. */}
+            <CircleButton
+              size={40}
+              className="bg-white/75"
+              accessibilityLabel={t('safety.report.navTitle')}
+              onPress={() => router.push(`/report/${user.id}`)}
+            >
               <Glyph.DotsVertical size={17} color={colors.inkStrong} />
             </CircleButton>
           </View>

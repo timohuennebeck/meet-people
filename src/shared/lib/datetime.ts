@@ -96,6 +96,20 @@ export function isToday(date: Date): boolean {
   );
 }
 
+/**
+ * How recently a date fell, as the "ontem 19:00" line under a finished plan
+ * needs it. Anything older than yesterday is named by its date instead, which
+ * is what `other` stands for.
+ */
+export function relativeDay(date: Date, now = new Date()): 'today' | 'yesterday' | 'other' {
+  const day = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const days = Math.round((today.getTime() - day.getTime()) / 86_400_000);
+  if (days <= 0) return 'today';
+  if (days === 1) return 'yesterday';
+  return 'other';
+}
+
 /** `14 de março de 2002` in pt-BR, `March 14, 2002` in en. */
 export function formatBirthdate(date: Date, locale: string): string {
   return date.toLocaleDateString(locale, { day: 'numeric', month: 'long', year: 'numeric' });
@@ -104,6 +118,11 @@ export function formatBirthdate(date: Date, locale: string): string {
 /** `sex., 14 de mar.` — the day a plan starts, short enough for a row. */
 export function formatPlanDate(date: Date, locale: string): string {
   return date.toLocaleDateString(locale, { weekday: 'short', day: 'numeric', month: 'short' });
+}
+
+/** `12 de set.` — a day without its weekday, for a plan already behind us. */
+export function formatDayMonth(date: Date, locale: string): string {
+  return date.toLocaleDateString(locale, { day: 'numeric', month: 'short' });
 }
 
 /** `19:00` where the locale is 24-hour, `7:00 PM` where it is not. */

@@ -64,6 +64,7 @@ function RootNavigator() {
         <Stack.Screen name="create" />
         <Stack.Screen name="chat/[id]" />
         <Stack.Screen name="people/[id]" />
+        <Stack.Screen name="report" />
         <Stack.Screen name="search" />
         <Stack.Screen name="settings" />
         <Stack.Screen name="verification-badge" />

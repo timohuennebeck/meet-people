@@ -21,6 +21,7 @@ import {
 } from '@shared/ui';
 
 import { usePlan, useSetMembership } from '../data/usePlans';
+import { hasEnded } from '../lib/attendance';
 import { openSeatCount, seatsFor } from '../lib/seats';
 import { HostRequestList } from '../ui/HostRequestList';
 import { PlanSheetHeader } from '../ui/PlanSheetHeader';
@@ -125,9 +126,24 @@ function RequestedState({ plan, onWithdraw }: { plan: Plan; onWithdraw: () => vo
   );
 }
 
-/** The viewer is in: green badge, their face in the seats, chat as the action. */
-function JoinedState({ plan, onLeave }: { plan: Plan; onLeave: () => void }) {
+/**
+ * The viewer is in: green badge, their face in the seats, chat as the action.
+ *
+ * The second action follows the clock. Until the plan ends it is the way out of
+ * it; afterwards there is nothing left to leave, and the slot asks the question
+ * the plan has just raised instead — who actually turned up.
+ */
+function JoinedState({
+  plan,
+  onLeave,
+  onReview,
+}: {
+  plan: Plan;
+  onLeave: () => void;
+  onReview: () => void;
+}) {
   const { t } = useTranslation();
+  const ended = hasEnded(plan);
 
   return (
     <SheetSurface gap={16} padding={{ top: 12, horizontal: 18, bottom: 36 }}>
@@ -144,7 +160,11 @@ function JoinedState({ plan, onLeave }: { plan: Plan; onLeave: () => void }) {
           </Text>
         ) : null}
         <Button label={t('plan.openGroupChat')} variant="primarySheet" />
-        <TextButton label={t('plan.notGoing')} tone="muted" onPress={onLeave} />
+        {ended ? (
+          <TextButton label={t('plan.attendance.open')} tone="muted" onPress={onReview} />
+        ) : (
+          <TextButton label={t('plan.notGoing')} tone="muted" onPress={onLeave} />
+        )}
       </View>
     </SheetSurface>
   );
@@ -269,7 +289,11 @@ export function PlanSheetScreen() {
       ) : plan.membership === 'requested' ? (
         <RequestedState plan={plan} onWithdraw={() => setMembership('guest')} />
       ) : plan.membership === 'joined' ? (
-        <JoinedState plan={plan} onLeave={() => router.push(`/plan/${plan.id}/leave`)} />
+        <JoinedState
+          plan={plan}
+          onLeave={() => router.push(`/plan/${plan.id}/leave`)}
+          onReview={() => router.push(`/plan/${plan.id}/attendance`)}
+        />
       ) : (
         <OpenState plan={plan} onJoin={() => router.push(`/plan/${plan.id}/join`)} />
       )}

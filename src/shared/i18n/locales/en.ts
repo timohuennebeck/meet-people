@@ -337,6 +337,35 @@ export const en: Translation = {
       confirm: 'Leave plan',
       keep: "I'm still going",
     },
+
+    attendance: {
+      open: 'Who turned up?',
+      navTitle: 'After the plan',
+      title: 'Who turned up?',
+      subtitle: '{{plan}} · {{when}}. Untick anyone who missed it.',
+      whenToday: 'today {{time}}',
+      whenYesterday: 'yesterday {{time}}',
+      whenOn: '{{date}} {{time}}',
+      host: 'Host',
+      hostPlans_one: 'Host · {{count}} plan',
+      hostPlans_other: 'Host · {{count}} plans',
+      shared_one: '{{neighbourhood}} · {{count}} plan in common',
+      shared_other: '{{neighbourhood}} · {{count}} plans in common',
+      first: 'first plan together',
+      warning: 'A no-show only reaches a profile once two people from the plan say the same.',
+      confirm: 'Confirm',
+
+      thanks: {
+        title: 'Thanks for answering',
+        subtitle: 'We marked {{present}} and {{absent}}. Nobody sees who answered what.',
+        present_one: '{{count}} person present',
+        present_other: '{{count}} people present',
+        absent_one: '{{count}} absent',
+        absent_other: '{{count}} absent',
+        back: 'Back to plans',
+        report: 'Report whoever missed it',
+      },
+    },
   },
 
   create: {
@@ -444,6 +473,55 @@ export const en: Translation = {
     distanceLine: '{{neighbourhood}} · {{distance}} from you',
     tenureLine: 'On the app since March · replies in ~2 h',
     verifiedNote: 'Selfie verified in March. Profile confirmed by 3 hosts.',
+  },
+
+  safety: {
+    report: {
+      navTitle: 'Report',
+      title: 'What happened?',
+      subtitle: '{{name}} is never told that you reported them.',
+    },
+
+    reasons: {
+      no_show: {
+        title: "Didn't turn up",
+        detail: 'Confirmed they were coming and missed it without a word',
+      },
+      harassment: {
+        title: 'Uncomfortable messages',
+        detail: 'Pushiness, sexual content or insults',
+      },
+      fake_profile: {
+        title: 'Fake profile',
+        detail: "Photos or details that don't add up",
+      },
+      inappropriate: {
+        title: 'Behaviour at the meet-up',
+        detail: 'You felt unsafe or uncomfortable',
+      },
+      other: {
+        title: 'Something else',
+        detail: 'Tell us in your own words',
+      },
+    },
+
+    detail: {
+      navTitle: 'Report · {{reason}}',
+      noteLabel: 'WHAT YOU WANT TO TELL US · OPTIONAL',
+      notePlaceholder: 'They confirmed the night before and never replied on the day.',
+      chipNoReply: 'No reply',
+      chipSecondTime: "That's the 2nd time",
+      warning: 'We look into it within 24 h. If you are in immediate danger, call the police.',
+      send: 'Send report',
+    },
+
+    sent: {
+      title: 'We have your report',
+      subtitle:
+        'We look into it within 24 h and let you know here. {{name}} is blocked and no longer sees your plans.',
+      back: 'Back to plans',
+      unblock: 'Unblock {{name}}',
+    },
   },
 
   settings: {
