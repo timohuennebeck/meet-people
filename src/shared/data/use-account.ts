@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 
-import { dataSource } from './source';
+import { account } from '@shared/data/api/account';
 
 /**
  * Ends the account.
@@ -13,7 +13,7 @@ export function useDeleteAccount() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: () => dataSource.account.delete(),
+    mutationFn: () => account.delete(),
     onSuccess: () => {
       // Every cached answer belonged to an account that no longer exists.
       queryClient.clear();

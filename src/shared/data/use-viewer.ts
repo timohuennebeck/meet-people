@@ -1,7 +1,8 @@
 import { useQuery } from '@tanstack/react-query';
 
+import { users } from '@shared/data/api/users';
+
 import { userKeys } from './query-keys';
-import { dataSource } from './source';
 
 /**
  * The signed-in user, for the features that need to render them into their own
@@ -17,7 +18,7 @@ import { dataSource } from './source';
 export function useViewer() {
   return useQuery({
     ...userKeys.me(),
-    queryFn: () => dataSource.users.me(),
+    queryFn: () => users.me(),
   });
 }
 

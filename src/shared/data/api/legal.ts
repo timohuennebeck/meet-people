@@ -3,13 +3,17 @@ import { Platform } from 'react-native';
 
 import { parseLegalMarkdown, type LegalDoc } from '@shared/lib/legal';
 
-import type { LegalDocument } from '../../schemas';
-import type { DataSource } from '../types';
+import type { LegalDocument } from '../schemas';
 import { client, unwrap, viewerId } from './shared';
 
 /** The terms and the privacy policy, and the record that somebody accepted them. */
 
-export const legalSource: DataSource['legal'] = {
+export const legal = {
+  /**
+   * The document in force for a kind, in the closest locale it exists in.
+   * Readable signed out: the welcome screen links to both before anybody has
+   * an account.
+   */
   current: async (kind: LegalDoc, locale: string): Promise<LegalDocument | null> => {
     // The function picks the closest locale it has and falls back to the
     // source one, so the client never has to know which translations exist.

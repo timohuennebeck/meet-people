@@ -1,7 +1,6 @@
 import { distanceLabel } from '@shared/lib/supabase/mapping';
 
-import type { DistanceUnit, Place } from '../../schemas';
-import type { DataSource } from '../types';
+import type { DistanceUnit, Place } from '../schemas';
 import { planContext } from './preferences';
 import { client, unwrap, viewerId } from './shared';
 
@@ -39,7 +38,7 @@ async function placesWithDistance(
     }));
 }
 
-export const placesSource: DataSource['places'] = {
+export const places = {
   /** Places the viewer added themselves, which is what "recent" means so far. */
   recent: async (): Promise<Place[]> => {
     const db = client();
@@ -56,6 +55,7 @@ export const placesSource: DataSource['places'] = {
     return await placesWithDistance(rows ?? [], unit);
   },
 
+  /** Suggested places near the viewer. */
   nearby: async (): Promise<Place[]> => {
     const db = client();
     const { unit } = await planContext();

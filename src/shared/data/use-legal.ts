@@ -1,10 +1,10 @@
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 
+import { legal } from '@shared/data/api/legal';
 import type { LegalDoc } from '@shared/lib/legal';
 
 import { legalKeys } from './query-keys';
-import { dataSource } from './source';
 
 /**
  * The document in force, in the reader's language.
@@ -18,7 +18,7 @@ export function useLegalDocument(kind: LegalDoc) {
 
   return useQuery({
     ...legalKeys.document(kind, i18n.language),
-    queryFn: () => dataSource.legal.current(kind, i18n.language),
+    queryFn: () => legal.current(kind, i18n.language),
     // Two rows that change a few times a year; re-reading them per visit is
     // a round trip spent on nothing.
     staleTime: 60 * 60 * 1000,
@@ -33,6 +33,6 @@ export function useLegalDocument(kind: LegalDoc) {
  */
 export function useAcceptLegal() {
   return useMutation({
-    mutationFn: (documentIds: readonly string[]) => dataSource.legal.accept(documentIds),
+    mutationFn: (documentIds: readonly string[]) => legal.accept(documentIds),
   });
 }

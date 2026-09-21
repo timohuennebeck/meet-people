@@ -1,14 +1,15 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
+import { preferences } from '@shared/data/api/preferences';
+
 import { preferenceKeys, userKeys } from './query-keys';
 import type { Preferences } from './schemas';
-import { dataSource } from './source';
 
 /** The signed-in user's discovery and app preferences. */
 export function usePreferences() {
   return useQuery({
     ...preferenceKeys.mine(),
-    queryFn: () => dataSource.preferences.get(),
+    queryFn: () => preferences.get(),
   });
 }
 
@@ -21,7 +22,7 @@ export function useUpdatePreferences() {
   const key = preferenceKeys.mine().queryKey;
 
   return useMutation({
-    mutationFn: (patch: Partial<Preferences>) => dataSource.preferences.update(patch),
+    mutationFn: (patch: Partial<Preferences>) => preferences.update(patch),
     onMutate: async (patch) => {
       await queryClient.cancelQueries({ queryKey: key });
       const previous = queryClient.getQueryData<Preferences>(key);

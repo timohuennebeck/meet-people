@@ -1,9 +1,8 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
+import { plans } from '@shared/data/api/plans';
 import { chatKeys, planKeys, userKeys } from '@shared/data/query-keys';
-import type { Membership, Plan, User } from '@shared/data/schemas';
-import { dataSource } from '@shared/data/source';
-import type { NewPlan } from '@shared/data/sources/types';
+import type { Membership, Plan, User, NewPlan } from '@shared/data/schemas';
 import { useViewer } from '@shared/data/use-viewer';
 
 /**
@@ -16,7 +15,7 @@ import { useViewer } from '@shared/data/use-viewer';
 export function usePlans() {
   return useQuery({
     ...planKeys.list(),
-    queryFn: () => dataSource.plans.list(),
+    queryFn: () => plans.list(),
   });
 }
 
@@ -24,7 +23,7 @@ export function usePlans() {
 export function usePlan(planId: string) {
   return useQuery({
     ...planKeys.detail(planId),
-    queryFn: () => dataSource.plans.detail(planId),
+    queryFn: () => plans.detail(planId),
   });
 }
 
@@ -104,7 +103,7 @@ export function useSetMembership(planId: string) {
 
   return usePlanMutation<MembershipChange>(
     planId,
-    ({ membership, note }) => dataSource.plans.setMembership(planId, membership, note),
+    ({ membership, note }) => plans.setMembership(planId, membership, note),
     (plan, { membership }) => ({
       ...plan,
       membership,
@@ -145,7 +144,7 @@ function seatViewer(plan: Plan, membership: Membership, viewer: User | undefined
 export function useAcceptRequest(planId: string) {
   return usePlanMutation<string>(
     planId,
-    (requestId) => dataSource.plans.acceptRequest(planId, requestId),
+    (requestId) => plans.acceptRequest(planId, requestId),
     (plan, requestId) => {
       const request = plan.requests.find((candidate) => candidate.id === requestId);
       if (!request) return plan;
@@ -170,7 +169,7 @@ export function useAcceptRequest(planId: string) {
 export function useAddSeat(planId: string) {
   return usePlanMutation<string>(
     planId,
-    (profileId) => dataSource.plans.addSeat(planId, profileId),
+    (profileId) => plans.addSeat(planId, profileId),
     (plan, profileId) => {
       const waiting = plan.waitlist.find((candidate) => candidate.id === profileId);
       if (!waiting) return plan;
@@ -200,7 +199,7 @@ export function useAddSeat(planId: string) {
 export function useDeclineRequest(planId: string) {
   return usePlanMutation<string>(
     planId,
-    (requestId) => dataSource.plans.declineRequest(planId, requestId),
+    (requestId) => plans.declineRequest(planId, requestId),
     (plan, requestId) => ({
       ...plan,
       requests: plan.requests.filter((candidate) => candidate.id !== requestId),
@@ -220,7 +219,7 @@ export function usePublishPlan() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (plan: NewPlan) => dataSource.plans.create(plan),
+    mutationFn: (plan: NewPlan) => plans.create(plan),
     onSuccess: (plan) => {
       queryClient.setQueryData(planKeys.detail(plan.id).queryKey, plan);
       void queryClient.invalidateQueries({ queryKey: planKeys.lists() });
@@ -244,8 +243,7 @@ export function useRecordAttendance(planId: string) {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (absentIds: readonly string[]) =>
-      dataSource.plans.recordAttendance(planId, absentIds),
+    mutationFn: (absentIds: readonly string[]) => plans.recordAttendance(planId, absentIds),
     onSuccess: () => {
       // Everyone in the plan has a new attendance rate on their profile.
       void queryClient.invalidateQueries({ queryKey: userKeys.all });

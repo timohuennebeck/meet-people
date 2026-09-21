@@ -1,10 +1,9 @@
-import { throwAsDataError } from '../../errors';
-import type { DataSource } from '../types';
+import { throwAsDataError } from '../errors';
 import { client } from './shared';
 
 /** Signing out, and deleting the account for good. */
 
-export const accountSource: DataSource['account'] = {
+export const account = {
   /**
    * Calls the `delete-account` edge function.
    *

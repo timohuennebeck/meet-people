@@ -1,9 +1,9 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEffect } from 'react';
 
+import { chats } from '@shared/data/api/chats';
 import { chatKeys } from '@shared/data/query-keys';
 import type { Message } from '@shared/data/schemas';
-import { dataSource } from '@shared/data/source';
 import { useViewerId } from '@shared/data/use-viewer';
 import { i18n } from '@shared/i18n';
 
@@ -11,7 +11,7 @@ import { i18n } from '@shared/i18n';
 export function useConversations() {
   return useQuery({
     ...chatKeys.conversations(),
-    queryFn: () => dataSource.chats.conversations(),
+    queryFn: () => chats.conversations(),
   });
 }
 
@@ -31,7 +31,7 @@ export function useUnreadCount(): number {
  */
 export function useOpenPlanChat() {
   return useMutation({
-    mutationFn: (planId: string) => dataSource.chats.planConversation(planId),
+    mutationFn: (planId: string) => chats.planConversation(planId),
   });
 }
 
@@ -39,7 +39,7 @@ export function useOpenPlanChat() {
 export function useThread(conversationId: string) {
   return useQuery({
     ...chatKeys.thread(conversationId),
-    queryFn: () => dataSource.chats.thread(conversationId),
+    queryFn: () => chats.thread(conversationId),
   });
 }
 
@@ -63,7 +63,7 @@ export function useChatInbox() {
 
   useEffect(
     () =>
-      dataSource.chats.subscribeToMessages((message) => {
+      chats.subscribeToMessages((message) => {
         queryClient.setQueryData<Message[]>(
           chatKeys.thread(message.conversationId).queryKey,
           (previous) => {
@@ -100,7 +100,7 @@ export function useMarkRead(conversationId: string, messageCount: number) {
     if (!conversationId) return;
     let cancelled = false;
 
-    void dataSource.chats
+    void chats
       .markRead(conversationId)
       .then(() => {
         if (cancelled) return;
@@ -126,7 +126,7 @@ export function useOpenDirect() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (userId: string) => dataSource.chats.openDirect(userId),
+    mutationFn: (userId: string) => chats.openDirect(userId),
     onSuccess: () => {
       // A newly opened thread has to show up on the Chats tab.
       void queryClient.invalidateQueries({ queryKey: chatKeys.conversations().queryKey });
@@ -154,7 +154,7 @@ export function useSendMessage(conversationId: string) {
   const viewerId = useViewerId();
 
   return useMutation({
-    mutationFn: (body: string) => dataSource.chats.send(conversationId, body),
+    mutationFn: (body: string) => chats.send(conversationId, body),
     onMutate: async (body: string) => {
       await queryClient.cancelQueries({ queryKey: key });
       const previous = queryClient.getQueryData<Message[]>(key) ?? [];

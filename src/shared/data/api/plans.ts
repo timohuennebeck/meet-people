@@ -1,8 +1,7 @@
 import { toPlan, type LanguageCode, type NearbyPlanRow } from '@shared/lib/supabase/mapping';
 
-import { DataError } from '../../errors';
-import type { Membership, Plan } from '../../schemas';
-import type { DataSource, NewPlan } from '../types';
+import { DataError } from '../errors';
+import type { Membership, NewPlan, Plan } from '../schemas';
 import { planContext } from './preferences';
 import { client, unwrap, unwrapSingle, viewerId } from './shared';
 
@@ -128,9 +127,11 @@ async function findPlan(planId: string): Promise<Plan | null> {
   return plan ? plan : null;
 }
 
-export const plansSource: DataSource['plans'] = {
+export const plans = {
+  /** Every plan the viewer may see, soonest first. */
   list: async (): Promise<Plan[]> => await fetchPlans(),
 
+  /** One plan, with its participants, its requests and its waitlist. */
   detail: planDetail,
 
   /**
@@ -290,6 +291,19 @@ export const plansSource: DataSource['plans'] = {
     return findPlan(planId);
   },
 
+  /**
+   * Host records who turned up, once the plan has ended.
+   *
+   * `plan_members.outcome` is not in the column grant — anyone could otherwise
+   * award themselves an attendance record, and that number is what a stranger
+   * reads before deciding to sit down with them — so the write goes through a
+   * function that checks the caller hosts this plan and that the plan has
+   * actually happened.
+   *
+   * Everyone seated counts as having attended except the ids passed here, so
+   * an honest answer costs a tap only when somebody did not come. Re-running
+   * replaces the answer rather than adding to it.
+   */
   recordAttendance: async (planId: string, absentIds: readonly string[]): Promise<void> => {
     unwrap(await client().rpc('record_attendance', { plan: planId, absentees: [...absentIds] }));
   },

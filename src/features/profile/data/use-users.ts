@@ -1,14 +1,14 @@
 import { useMutation, useQuery } from '@tanstack/react-query';
 
+import { users } from '@shared/data/api/users';
 import { isDataError } from '@shared/data/errors';
 import { userKeys } from '@shared/data/query-keys';
-import { dataSource } from '@shared/data/source';
 
 /** Another person's profile. */
 export function useUser(userId: string) {
   return useQuery({
     ...userKeys.detail(userId),
-    queryFn: () => dataSource.users.detail(userId),
+    queryFn: () => users.detail(userId),
     enabled: userId.length > 0,
   });
 }
@@ -17,7 +17,7 @@ export function useUser(userId: string) {
 export function useUserSearch(term: string) {
   return useQuery({
     ...userKeys.search(term),
-    queryFn: () => dataSource.users.search(term),
+    queryFn: () => users.search(term),
     enabled: term.trim().length > 0,
   });
 }
@@ -26,7 +26,7 @@ export function useUserSearch(term: string) {
 export function useRecentSearches() {
   return useQuery({
     ...userKeys.recent(),
-    queryFn: () => dataSource.users.recent(),
+    queryFn: () => users.recent(),
   });
 }
 
@@ -37,7 +37,7 @@ export function useRecentSearches() {
 export function useProfileViewCount() {
   return useQuery({
     ...userKeys.views(),
-    queryFn: () => dataSource.users.viewCount(),
+    queryFn: () => users.viewCount(),
   });
 }
 
@@ -53,7 +53,7 @@ export function useProfileViewCount() {
 export function useProfileViewers() {
   return useQuery({
     ...userKeys.viewers(),
-    queryFn: () => dataSource.users.viewers(),
+    queryFn: () => users.viewers(),
     retry: (failureCount, error) =>
       isDataError(error) && error.code === 'PLUS_REQUIRED' ? false : failureCount < 1,
   });
@@ -68,6 +68,6 @@ export function useProfileViewers() {
  */
 export function useRecordProfileView() {
   return useMutation({
-    mutationFn: (userId: string) => dataSource.users.recordView(userId),
+    mutationFn: (userId: string) => users.recordView(userId),
   });
 }

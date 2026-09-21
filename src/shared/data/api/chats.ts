@@ -2,8 +2,7 @@ import { i18n } from '@shared/i18n';
 import { supabase } from '@shared/lib/supabase/client';
 import { avatarUrlFor, conversationTimeLabel } from '@shared/lib/supabase/mapping';
 
-import type { Conversation, Message } from '../../schemas';
-import type { DataSource } from '../types';
+import type { Conversation, Message } from '../schemas';
 import { planConversationId } from './plans';
 import { client, unwrap, unwrapSingle, viewerId } from './shared';
 
@@ -98,7 +97,8 @@ function withSentReceipt(messages: Message[], uid: string): Message[] {
   );
 }
 
-export const chatsSource: DataSource['chats'] = {
+export const chats = {
+  /** The conversations list. */
   conversations: async (): Promise<Conversation[]> => {
     const rows = unwrap(
       await client()
@@ -144,8 +144,18 @@ export const chatsSource: DataSource['chats'] = {
     };
   },
 
+  /**
+   * The group chat a plan opened, or `null` for a plan made before the trigger
+   * that opens one. Every plan sheet's primary action needs it.
+   */
   planConversation: planConversationId,
 
+  /**
+   * Marks everything in one conversation as read, up to now.
+   *
+   * `conversation_list.unread_count` counts messages newer than the viewer's
+   * `last_read_at`, so nothing clears a badge except writing this.
+   */
   markRead: async (conversationId: string): Promise<void> => {
     const db = client();
     const uid = await viewerId();
@@ -158,6 +168,7 @@ export const chatsSource: DataSource['chats'] = {
     );
   },
 
+  /** Messages in one thread, oldest first. */
   thread: async (conversationId: string): Promise<Message[]> => {
     const db = client();
     const uid = await viewerId();
@@ -177,6 +188,7 @@ export const chatsSource: DataSource['chats'] = {
     return withSentReceipt(messages, uid);
   },
 
+  /** Sends a message as the viewer. */
   send: async (conversationId: string, body: string): Promise<Message> => {
     const db = client();
     const uid = await viewerId();

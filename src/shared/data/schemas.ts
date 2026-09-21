@@ -59,6 +59,21 @@ export interface User {
   sharedPlansCount?: number;
 }
 
+/** A plan as the create flow has it, just before it becomes a row. */
+export interface NewPlan {
+  title: string;
+  placeId: string;
+  /** ISO instant. */
+  startsAt: string;
+  /** Null is "Sem hora de fim". */
+  durationMinutes: number | null;
+  joinMode: JoinMode;
+  languages: string[];
+  /** Null is an uncapped event. */
+  seats: number | null;
+  ageRange: readonly [number, number] | null;
+}
+
 export interface Place {
   id: string;
   name: string;

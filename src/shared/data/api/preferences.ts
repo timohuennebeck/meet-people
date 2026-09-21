@@ -6,9 +6,8 @@ import {
   type PlanContext,
 } from '@shared/lib/supabase/mapping';
 
-import { DEFAULT_PREFERENCES } from '../../preference-defaults';
-import type { AudienceGender, DistanceUnit, Preferences } from '../../schemas';
-import type { DataSource } from '../types';
+import { DEFAULT_PREFERENCES } from '../preference-defaults';
+import type { AudienceGender, DistanceUnit, Preferences } from '../schemas';
 import { client, sessionId, unwrap, unwrapSingle, viewerId } from './shared';
 
 /**
@@ -97,7 +96,7 @@ export async function flushDeferredPreferences(): Promise<void> {
   const patch = deferredPreferences;
   deferredPreferences = {};
   try {
-    await preferencesSource.update(patch);
+    await preferences.update(patch);
   } catch (error) {
     // Put it back rather than lose it: a later step, or the next launch, tries
     // again. Anything newer than the failed patch wins, since it is what the
@@ -107,7 +106,7 @@ export async function flushDeferredPreferences(): Promise<void> {
   }
 }
 
-export const preferencesSource: DataSource['preferences'] = {
+export const preferences = {
   /**
    * The viewer's preferences, which are columns on their `profiles` row —
    * discovery settings, the app's own settings, and the two lists the
@@ -195,6 +194,6 @@ export const preferencesSource: DataSource['preferences'] = {
       unwrap(await db.from('profiles').update(columns).eq('id', uid));
     }
 
-    return preferencesSource.get();
+    return preferences.get();
   },
 };

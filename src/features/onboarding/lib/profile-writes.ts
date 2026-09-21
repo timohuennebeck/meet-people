@@ -1,6 +1,6 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
 
-import { flushDeferredPreferences } from '@shared/data/sources/supabase';
+import { flushDeferredPreferences } from '@shared/data/api/preferences';
 import { supabase } from '@shared/lib/supabase/client';
 import type { Database, TablesUpdate } from '@shared/lib/supabase/database-types';
 import { currentProfileId } from '@shared/lib/supabase/session';

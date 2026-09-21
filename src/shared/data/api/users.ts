@@ -7,9 +7,8 @@ import {
   type PublicProfileRow,
 } from '@shared/lib/supabase/mapping';
 
-import { throwAsDataError } from '../../errors';
-import type { ProfileView, SearchResults, User } from '../../schemas';
-import type { DataSource } from '../types';
+import { throwAsDataError } from '../errors';
+import type { ProfileView, SearchResults, User } from '../schemas';
 import { client, unwrap, unwrapSingle, viewerId } from './shared';
 
 /** People: the viewer's own profile, somebody else's, the search and the views. */
@@ -96,7 +95,7 @@ async function searchPeople(term: string): Promise<SearchResults> {
   });
 }
 
-export const usersSource: DataSource['users'] = {
+export const users = {
   /**
    * The signed-in user, from their own `profiles` row.
    *
@@ -175,6 +174,7 @@ export const usersSource: DataSource['users'] = {
     });
   },
 
+  /** People whose name matches the term. */
   search: searchPeople,
 
   /**

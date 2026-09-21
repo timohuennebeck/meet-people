@@ -1,8 +1,8 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 
+import { safety } from '@shared/data/api/safety';
 import { chatKeys, planKeys, userKeys } from '@shared/data/query-keys';
 import type { ReportReason } from '@shared/data/schemas';
-import { dataSource } from '@shared/data/source';
 
 export interface ReportInput {
   subjectId: string;
@@ -26,8 +26,8 @@ export function useReportAndBlock() {
 
   return useMutation({
     mutationFn: async ({ subjectId, reason, detail, planId }: ReportInput) => {
-      await dataSource.safety.report(subjectId, reason, detail, planId);
-      await dataSource.safety.block(subjectId);
+      await safety.report(subjectId, reason, detail, planId);
+      await safety.block(subjectId);
     },
     onSuccess: () => invalidateAfterBlock(queryClient),
   });
@@ -38,7 +38,7 @@ export function useUnblock() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (profileId: string) => dataSource.safety.unblock(profileId),
+    mutationFn: (profileId: string) => safety.unblock(profileId),
     onSuccess: () => invalidateAfterBlock(queryClient),
   });
 }

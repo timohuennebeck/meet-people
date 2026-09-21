@@ -1,11 +1,10 @@
-import { throwAsDataError } from '../../errors';
-import type { ReportReason } from '../../schemas';
-import type { DataSource } from '../types';
+import { throwAsDataError } from '../errors';
+import type { ReportReason } from '../schemas';
 import { client, unwrap, viewerId } from './shared';
 
 /** Reporting and blocking. */
 
-export const safetySource: DataSource['safety'] = {
+export const safety = {
   /**
    * Files a report. The reporter is `auth.uid()`: the insert policy takes
    * nothing else, and `no_self_report` refuses a report against yourself.
@@ -45,6 +44,7 @@ export const safetySource: DataSource['safety'] = {
     if (result.error && result.error.code !== '23505') throwAsDataError(result.error);
   },
 
+  /** Lifts a block. */
   unblock: async (profileId: string): Promise<void> => {
     const db = client();
     const uid = await viewerId();

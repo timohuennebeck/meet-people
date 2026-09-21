@@ -1,10 +1,16 @@
 import { supabase } from '@shared/lib/supabase/client';
 
-import { throwAsDataError } from '../../errors';
+import { throwAsDataError } from '../errors';
 
 /**
  * Talking to Supabase at all: the client, who is asking, and what to do with
  * what comes back.
+ *
+ * Each module beside this one is a group of calls — `plans`, `users`, `chats`
+ * and so on — exported as a plain object and typed by what it returns. There
+ * used to be a `DataSource` interface declaring all of them a second time,
+ * from when a fixture source stood beside the Supabase one. With one
+ * implementation left, the implementation is the contract.
  *
  * Only what more than one group needs is here. A helper with a single caller
  * stays beside that caller — `likeLiteral` with the people search,
