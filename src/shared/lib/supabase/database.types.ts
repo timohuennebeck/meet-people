@@ -1022,6 +1022,7 @@ export type Database = {
       }
     }
     Functions: {
+      add_seat: { Args: { plan: string; profile: string }; Returns: undefined }
       attendance_rate_of: { Args: { uid: string }; Returns: number }
       current_legal_document: {
         Args: {
@@ -1044,6 +1045,7 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      delete_my_account: { Args: never; Returns: undefined }
       distance_to: { Args: { place: string }; Returns: number }
       export_my_data: { Args: never; Returns: Json }
       nearby_plans: {

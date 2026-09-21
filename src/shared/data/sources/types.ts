@@ -82,6 +82,12 @@ export interface DataSource {
      * replaces the answer rather than adding to it.
      */
     recordAttendance(planId: string, absentIds: readonly string[]): Promise<void>;
+    /**
+     * Host widens a full plan by one seat and gives it to somebody waiting.
+     * One write, because a plan left one seat wider than the host meant is
+     * worse than the request staying where it was.
+     */
+    addSeat(planId: string, profileId: string): Promise<Plan | null>;
   };
 
   users: {
@@ -124,6 +130,11 @@ export interface DataSource {
      * `last_read_at`, so nothing clears a badge except writing this.
      */
     markRead(conversationId: string): Promise<void>;
+    /**
+     * The group chat a plan opened, or `null` for a plan made before the
+     * trigger that opens one. Every plan sheet's primary action needs it.
+     */
+    planConversation(planId: string): Promise<string | null>;
     /**
      * Watches every conversation the viewer is in for new messages.
      *

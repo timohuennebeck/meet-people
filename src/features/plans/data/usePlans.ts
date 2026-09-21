@@ -162,6 +162,33 @@ export function useAcceptRequest(planId: string) {
 }
 
 /**
+ * Host makes room for somebody on the waitlist.
+ *
+ * The seat and the person arrive together, so the optimistic update does both:
+ * the plan grows by one and they move off the list into it.
+ */
+export function useAddSeat(planId: string) {
+  return usePlanMutation<string>(
+    planId,
+    (profileId) => dataSource.plans.addSeat(planId, profileId),
+    (plan, profileId) => {
+      const waiting = plan.waitlist.find((candidate) => candidate.id === profileId);
+      if (!waiting) return plan;
+      return {
+        ...plan,
+        capacity: plan.capacity === null ? null : plan.capacity + 1,
+        waitlist: plan.waitlist.filter((candidate) => candidate.id !== profileId),
+        requests: plan.requests.filter((candidate) => candidate.id !== profileId),
+        participants: [
+          ...plan.participants,
+          { user: waiting.user, isHost: false, isViewer: false },
+        ],
+      };
+    },
+  );
+}
+
+/**
  * Host turns a request down; it leaves the list and seats nobody.
  *
  * This is also the only thing that gives the applicant their weekly request

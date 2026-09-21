@@ -330,6 +330,7 @@ export const ptBR = {
     addSeat: '+1 vaga',
     waitlistNote: 'Entra se alguém desistir',
     inviteFriends: 'Convidar amigos',
+    shareMessage: 'Bora nesse plano? “{{title}}” — {{url}}',
     noRequestsTitle: 'Nenhum pedido ainda',
     noRequestsBody:
       'Seu plano acabou de entrar no mapa. Quem está a até 2 mi vê nas próximas horas.',

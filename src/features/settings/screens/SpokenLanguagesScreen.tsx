@@ -26,7 +26,11 @@ export function SpokenLanguagesScreen() {
 
         <SpokenLanguageList codes={OPTIONS} />
 
-        <TextButton label={t('onboarding.languages.searchAnother')} tone="brand" />
+        <TextButton
+          label={t('onboarding.languages.searchAnother')}
+          tone="brand"
+          onPress={() => router.push('/(onboarding)/language-search')}
+        />
       </ScrollView>
     </Screen>
   );

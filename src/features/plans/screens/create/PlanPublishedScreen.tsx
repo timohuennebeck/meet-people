@@ -2,7 +2,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
-import { View } from 'react-native';
+import { Pressable, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { gradients, gradientStops } from '@shared/theme/tokens';
@@ -18,24 +18,32 @@ import {
   TextButton,
 } from '@shared/ui';
 
+import { planLink, sharePlan } from '../../lib/share';
+
 /** `56px circle · 13.5px caption` — the QR and "more" actions in the share row. */
-function ShareAction({ icon, label }: { icon: ReactNode; label: string }) {
+function ShareAction({
+  icon,
+  label,
+  onPress,
+}: {
+  icon: ReactNode;
+  label: string;
+  onPress?: () => void;
+}) {
   return (
-    <View className="shrink-0 items-center gap-[7px]">
+    <Pressable
+      accessibilityRole={onPress ? 'button' : undefined}
+      accessibilityLabel={onPress ? label : undefined}
+      disabled={!onPress}
+      onPress={onPress}
+      className="shrink-0 items-center gap-[7px] active:opacity-60"
+    >
       <View className="h-[56px] w-[56px] items-center justify-center rounded-full bg-surface-chip">
         {icon}
       </View>
       <Text className="text-[13.5px] text-ink-dim">{label}</Text>
-    </View>
+    </Pressable>
   );
-}
-
-/**
- * The public link to a plan. Short ids are what a person can read out loud, so
- * the uuid's first segment stands in for it until there is a slug.
- */
-function planLink(planId: string | undefined): string {
-  return planId ? `treff.app/p/${planId.split('-')[0]}` : 'treff.app';
 }
 
 /** The confirmation after publishing, with the share row. */
@@ -84,7 +92,13 @@ export function PlanPublishedScreen() {
           {t('create.published.subtitle')}
         </Text>
 
-        <Button label={t('create.published.invite')} className="mt-[20px]" />
+        <Button
+          label={t('create.published.invite')}
+          className="mt-[20px]"
+          onPress={() => {
+            if (id) void sharePlan(id, t('create.published.title'));
+          }}
+        />
 
         <LabelledDivider label={t('create.published.orShare')} className="mt-[20px]" />
 
@@ -93,7 +107,7 @@ export function PlanPublishedScreen() {
             <View className="h-[56px] w-full flex-row items-center gap-[9px] self-stretch rounded-pill border border-hair bg-surface px-[20px]">
               <Glyph.LinkGlyph size={16} />
               <Text numberOfLines={1} className="min-w-0 flex-1 text-[16px]">
-                {planLink(id)}
+                {id ? planLink(id).replace('https://', '') : 'treff.app'}
               </Text>
             </View>
             <Text className="text-[13.5px] text-ink-dim">{t('create.published.link')}</Text>
@@ -103,6 +117,9 @@ export function PlanPublishedScreen() {
           <ShareAction
             icon={<Glyph.DotsHorizontal size={22} />}
             label={t('create.published.more')}
+            onPress={() => {
+              if (id) void sharePlan(id, t('create.published.title'));
+            }}
           />
         </View>
 

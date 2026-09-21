@@ -21,6 +21,20 @@ export function useUnreadCount(): number {
   return (conversations ?? []).reduce((total, conversation) => total + conversation.unreadCount, 0);
 }
 
+/**
+ * Opens a plan's group chat.
+ *
+ * The chat is made by `private.open_plan_chat()` on the plan's own insert, so
+ * this is a lookup rather than a create — and a plan that predates that
+ * trigger answers `null`, which leaves the button doing nothing rather than
+ * navigating to a thread that is not there.
+ */
+export function useOpenPlanChat() {
+  return useMutation({
+    mutationFn: (planId: string) => dataSource.chats.planConversation(planId),
+  });
+}
+
 /** Messages in one thread. */
 export function useThread(conversationId: string) {
   return useQuery({

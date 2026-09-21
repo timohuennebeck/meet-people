@@ -327,6 +327,7 @@ export const en: Translation = {
     addSeat: '+1 seat',
     waitlistNote: 'Joins if someone drops out',
     inviteFriends: 'Invite friends',
+    shareMessage: 'Come to this? “{{title}}” — {{url}}',
     noRequestsTitle: 'No requests yet',
     noRequestsBody:
       'Your plan just landed on the map. People within 2 mi will see it over the next few hours.',

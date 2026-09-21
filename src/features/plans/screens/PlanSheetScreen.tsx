@@ -2,6 +2,7 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { ScrollView, View } from 'react-native';
 
+import { useOpenPlanChat } from '@features/chat/data/useChat';
 import type { Plan } from '@shared/data/schemas';
 import {
   Button,
@@ -60,7 +61,15 @@ function PlanSeats({ plan }: { plan: Plan }) {
 }
 
 /** The plan is open and the viewer can ask to join. */
-function OpenState({ plan, onJoin }: { plan: Plan; onJoin: () => void }) {
+function OpenState({
+  plan,
+  onJoin,
+  onDismiss,
+}: {
+  plan: Plan;
+  onJoin: () => void;
+  onDismiss: () => void;
+}) {
   const { t } = useTranslation();
 
   return (
@@ -84,7 +93,7 @@ function OpenState({ plan, onJoin }: { plan: Plan; onJoin: () => void }) {
 
       <View className="gap-[10px]">
         <Button label={t('plan.askToJoin')} variant="primarySheet" onPress={onJoin} />
-        <TextButton label={t('plan.maybeLater')} tone="muted" />
+        <TextButton label={t('plan.maybeLater')} tone="muted" onPress={onDismiss} />
       </View>
     </SheetSurface>
   );
@@ -146,10 +155,12 @@ function JoinedState({
   plan,
   onLeave,
   onReview,
+  onOpenChat,
 }: {
   plan: Plan;
   onLeave: () => void;
   onReview: () => void;
+  onOpenChat: () => void;
 }) {
   const { t } = useTranslation();
   const ended = hasEnded(plan);
@@ -170,7 +181,7 @@ function JoinedState({
             {plan.description}
           </Text>
         ) : null}
-        <Button label={t('plan.openGroupChat')} variant="primarySheet" />
+        <Button label={t('plan.openGroupChat')} variant="primarySheet" onPress={onOpenChat} />
         {ended ? (
           <TextButton label={t('plan.attendance.open')} tone="muted" onPress={onReview} />
         ) : (
@@ -188,7 +199,7 @@ function JoinedState({
  * seats header while requests are outstanding, a short photo and a bare seat
  * row once the plan is fresh or full — so the geometry follows the state.
  */
-function HostState({ plan }: { plan: Plan }) {
+function HostState({ plan, onOpenChat }: { plan: Plan; onOpenChat: () => void }) {
   const { t } = useTranslation();
   const open = openSeatCount(plan);
   // An uncapped plan never reads as full, so the seats header stays.
@@ -244,7 +255,7 @@ function HostState({ plan }: { plan: Plan }) {
           </View>
         )}
 
-        <HostRequestList plan={plan} full={full} />
+        <HostRequestList plan={plan} full={full} onOpenChat={onOpenChat} />
       </ScrollView>
     </SheetSurface>
   );
@@ -269,6 +280,21 @@ export function PlanSheetScreen() {
   const router = useRouter();
   const { data: plan } = usePlan(id ?? '');
   const { mutate: setMembership } = useSetMembership(id ?? '');
+  const { mutate: openPlanChat } = useOpenPlanChat();
+
+  /**
+   * The plan's group chat, which `private.open_plan_chat()` made on the plan's
+   * own insert. A plan that predates that trigger has none, and the button
+   * stays where it is rather than pushing an empty thread.
+   */
+  const openChat = () => {
+    if (!plan) return;
+    openPlanChat(plan.id, {
+      onSuccess: (conversationId) => {
+        if (conversationId) router.push(`/chat/${conversationId}`);
+      },
+    });
+  };
 
   // A sheet sized to its contents has no height while the plan is loading, so
   // hold the open state's photo height rather than flashing an empty sliver.
@@ -280,7 +306,7 @@ export function PlanSheetScreen() {
     );
   }
 
-  if (plan.membership === 'host') return <HostState plan={plan} />;
+  if (plan.membership === 'host') return <HostState plan={plan} onOpenChat={openChat} />;
 
   if (plan.membership === 'requested') {
     return <RequestedState plan={plan} onWithdraw={() => setMembership({ membership: 'guest' })} />;
@@ -292,9 +318,16 @@ export function PlanSheetScreen() {
         plan={plan}
         onLeave={() => router.push(`/plan/${plan.id}/leave`)}
         onReview={() => router.push(`/plan/${plan.id}/attendance`)}
+        onOpenChat={openChat}
       />
     );
   }
 
-  return <OpenState plan={plan} onJoin={() => router.push(`/plan/${plan.id}/join`)} />;
+  return (
+    <OpenState
+      plan={plan}
+      onJoin={() => router.push(`/plan/${plan.id}/join`)}
+      onDismiss={() => router.back()}
+    />
+  );
 }

@@ -261,17 +261,23 @@ async function ownMembershipRow(planId: string, uid: string) {
  * has nothing to post to, because failing to leave over an undelivered goodbye
  * would be the worse outcome.
  */
+/** The conversation `private.open_plan_chat()` made for a plan. */
+async function planConversationId(planId: string): Promise<string | null> {
+  const row = unwrap(
+    await client().from('conversations').select('id').eq('plan_id', planId).maybeSingle(),
+  );
+  return row?.id ?? null;
+}
+
 async function postToPlanChat(planId: string, uid: string, body: string): Promise<void> {
   const db = client();
-  const conversation = unwrap(
-    await db.from('conversations').select('id').eq('plan_id', planId).maybeSingle(),
-  );
-  if (!conversation) return;
+  const conversationId = await planConversationId(planId);
+  if (!conversationId) return;
 
   unwrap(
     await db
       .from('messages')
-      .insert({ conversation_id: conversation.id, author_id: uid, content: body }),
+      .insert({ conversation_id: conversationId, author_id: uid, content: body }),
   );
 }
 
@@ -696,6 +702,11 @@ export const supabaseSource: DataSource = {
      * is a function, which checks that the caller hosts this plan and that the
      * plan has actually happened.
      */
+    addSeat: async (planId: string, profileId: string): Promise<Plan | null> => {
+      unwrap(await client().rpc('add_seat', { plan: planId, profile: profileId }));
+      return findPlan(planId);
+    },
+
     recordAttendance: async (planId: string, absentIds: readonly string[]): Promise<void> => {
       unwrap(await client().rpc('record_attendance', { plan: planId, absentees: [...absentIds] }));
     },
@@ -885,6 +896,8 @@ export const supabaseSource: DataSource = {
         void db.removeChannel(channel);
       };
     },
+
+    planConversation: planConversationId,
 
     markRead: async (conversationId: string): Promise<void> => {
       const db = client();

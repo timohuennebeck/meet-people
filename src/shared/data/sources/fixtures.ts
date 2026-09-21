@@ -183,6 +183,16 @@ export const fixtureSource: DataSource = {
      * Accepted and dropped: no fixture screen reads an outcome back, and the
      * attendance rate the design draws is a constant on the profile.
      */
+    /** Widen the plan, then seat them — the same two steps the function does. */
+    addSeat: (planId: string, profileId: string): Promise<Plan> => {
+      plans = plans.map((plan) =>
+        plan.id === planId && plan.capacity !== null
+          ? { ...plan, capacity: plan.capacity + 1 }
+          : plan,
+      );
+      return answerRequest(planId, profileId, true);
+    },
+
     recordAttendance: (): Promise<void> => Promise.resolve(),
   },
 
@@ -231,6 +241,14 @@ export const fixtureSource: DataSource = {
      * screen this source exists to render.
      */
     markRead: (): Promise<void> => Promise.resolve(),
+
+    /**
+     * The fixture plans and the fixture conversations were transcribed from
+     * the design separately, so only the run has both halves. Everything else
+     * answers `null`, which the sheet reads as "no chat to open yet".
+     */
+    planConversation: (planId: string): Promise<string | null> =>
+      Promise.resolve(planId === 'plan-run' ? 'c-run' : null),
 
     /**
      * Nothing to watch: the only other person in a fixture thread is the

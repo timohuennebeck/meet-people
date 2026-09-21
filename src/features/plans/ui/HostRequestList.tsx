@@ -5,10 +5,11 @@ import { Swipeable } from 'react-native-gesture-handler';
 import type { Plan } from '@shared/data/schemas';
 import { ActionPill, Button, GlowingMascot, PersonRow, SectionLabel, Text } from '@shared/ui';
 
-import { useAcceptRequest, useDeclineRequest } from '../data/usePlans';
+import { useAcceptRequest, useAddSeat, useDeclineRequest } from '../data/usePlans';
+import { sharePlan } from '../lib/share';
 
 /** `1.5px dashed` panel shown while a freshly published plan has no requests. */
-function NoRequestsYet() {
+function NoRequestsYet({ plan }: { plan: Plan }) {
   const { t } = useTranslation();
 
   return (
@@ -26,7 +27,11 @@ function NoRequestsYet() {
           {t('plan.noRequestsBody')}
         </Text>
       </View>
-      <Button label={t('plan.inviteFriends')} variant="outlineBrand" />
+      <Button
+        label={t('plan.inviteFriends')}
+        variant="outlineBrand"
+        onPress={() => void sharePlan(plan.id, plan.title)}
+      />
     </View>
   );
 }
@@ -35,16 +40,19 @@ export interface HostRequestListProps {
   plan: Plan;
   /** Switches to the waitlist presentation once every seat is taken. */
   full: boolean;
+  /** Opens the plan's group chat, which the host's full state leads with. */
+  onOpenChat: () => void;
 }
 
 /**
  * The host's view of who wants in: pending requests while seats remain, or the
  * waitlist plus a chat action once the plan is full.
  */
-export function HostRequestList({ plan, full }: HostRequestListProps) {
+export function HostRequestList({ plan, full, onOpenChat }: HostRequestListProps) {
   const { t } = useTranslation();
   const { mutate: accept } = useAcceptRequest(plan.id);
   const { mutate: decline } = useDeclineRequest(plan.id);
+  const { mutate: addSeat } = useAddSeat(plan.id);
 
   if (full) {
     return (
@@ -59,16 +67,18 @@ export function HostRequestList({ plan, full }: HostRequestListProps) {
               avatarUri={request.user.avatarUrl}
               name={`${request.user.name}, ${request.user.age}`}
               detail={t('plan.waitlistNote')}
-              trailing={<ActionPill label={t('plan.addSeat')} muted />}
+              trailing={
+                <ActionPill label={t('plan.addSeat')} muted onPress={() => addSeat(request.id)} />
+              }
             />
           ))}
         </View>
-        <Button label={t('plan.openGroupChatHost')} variant="primarySheet" />
+        <Button label={t('plan.openGroupChatHost')} variant="primarySheet" onPress={onOpenChat} />
       </>
     );
   }
 
-  if (plan.requests.length === 0) return <NoRequestsYet />;
+  if (plan.requests.length === 0) return <NoRequestsYet plan={plan} />;
 
   return (
     <View className="gap-[12px]">
