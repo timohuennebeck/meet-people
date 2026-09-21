@@ -164,6 +164,18 @@ export const conversationSchema = z.object({
   avatarUrls: z.array(z.string().url()).min(1).max(2),
   /** "+N" pill on the avatar pair for larger groups. */
   extraMembers: z.number().int().positive().optional(),
+  /**
+   * Everyone in the conversation but the viewer.
+   *
+   * The thread needs it to put a name and a face on somebody else's bubble in a
+   * group. It comes with the conversation rather than with each message because
+   * a message arriving over Realtime carries only its own columns — there is no
+   * embed on a replication payload — and a bubble that appears nameless until
+   * the next refetch is worse than one that never had to wait.
+   */
+  members: z
+    .array(z.object({ id: z.string(), name: z.string(), avatarUrl: z.string().url() }))
+    .default([]),
   preview: z.string(),
   /** Pre-formatted, e.g. "9:24", "Ontem", "Seg". */
   timeLabel: z.string(),

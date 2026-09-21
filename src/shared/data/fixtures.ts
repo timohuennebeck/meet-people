@@ -304,12 +304,26 @@ export const COFFEE_PLAN: Plan = {
 
 export const PLANS: Plan[] = [RUN_PLAN, GAME_PLAN, WALK_PLAN, COFFEE_PLAN];
 
+/** The other Mara — the design's scripted direct thread is with her. */
+export const MARA_OTHER: User = {
+  ...VIEWER,
+  id: 'u-mara-other',
+  name: 'Mara',
+  avatarUrl: AVATARS.mara,
+};
+
+/** The thread needs a name and a face per member, not a whole profile. */
+function asConversationMember(user: User): Conversation['members'][number] {
+  return { id: user.id, name: user.name, avatarUrl: user.avatarUrl };
+}
+
 export const CONVERSATIONS: Conversation[] = [
   {
     id: 'c-run',
     kind: 'group',
     title: 'Corrida 3 mi · Kanal',
     avatarUrls: [AVATARS.lea, AVATARS.phil],
+    members: [LEA, PHIL, SARA].map(asConversationMember),
     extraMembers: 4,
     preview: 'Lea: Encontro na ponte às 18h50',
     timeLabel: '9:24',
@@ -322,6 +336,7 @@ export const CONVERSATIONS: Conversation[] = [
     kind: 'direct',
     title: 'Tarde de jogos no Café Kotti',
     avatarUrls: [AVATARS.mara],
+    members: [MARA_OTHER].map(asConversationMember),
     preview: 'Mara enviou uma foto',
     timeLabel: '8:10',
     unreadCount: 1,
@@ -334,6 +349,7 @@ export const CONVERSATIONS: Conversation[] = [
     kind: 'group',
     title: 'Vôlei no Tempelhof',
     avatarUrls: [AVATARS.jonas, AVATARS.noah],
+    members: [NOAH, TOM].map(asConversationMember),
     extraMembers: 5,
     preview: 'Você: Levo a bola',
     timeLabel: 'Ontem',
@@ -346,6 +362,7 @@ export const CONVERSATIONS: Conversation[] = [
     kind: 'direct',
     title: 'Cinema ao ar livre',
     avatarUrls: [AVATARS.phil],
+    members: [PHIL].map(asConversationMember),
     preview: 'Tom: Alguém pega cobertor?',
     timeLabel: 'Seg',
     unreadCount: 0,
@@ -357,6 +374,7 @@ export const CONVERSATIONS: Conversation[] = [
     kind: 'direct',
     title: 'Café da manhã domingo',
     avatarUrls: [AVATARS.ana],
+    members: [ELIF].map(asConversationMember),
     preview: 'Ana: Bora às 10?',
     timeLabel: 'Seg',
     unreadCount: 0,
@@ -368,6 +386,7 @@ export const CONVERSATIONS: Conversation[] = [
     kind: 'group',
     title: 'Caminhada no lago',
     avatarUrls: [AVATARS.tom, AVATARS.elif],
+    members: [TOM, ELIF].map(asConversationMember),
     extraMembers: 3,
     preview: 'Você: Até sábado!',
     timeLabel: 'Dom',
@@ -459,7 +478,7 @@ export const PEOPLE: Record<string, User> = {
   [NOAH.id]: NOAH,
   [ELIF.id]: ELIF,
   [TOM.id]: TOM,
-  'u-mara-other': { ...VIEWER, id: 'u-mara-other', name: 'Mara', avatarUrl: AVATARS.mara },
+  [MARA_OTHER.id]: MARA_OTHER,
 };
 
 export const DEFAULT_PREFERENCES: Preferences = {

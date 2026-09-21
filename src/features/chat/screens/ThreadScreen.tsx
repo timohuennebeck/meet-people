@@ -4,7 +4,6 @@ import { useTranslation } from 'react-i18next';
 import { Keyboard, KeyboardAvoidingView, Platform, ScrollView, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { PEOPLE } from '@shared/data/fixtures';
 import { useViewerId } from '@shared/data/useViewer';
 import { Avatar, CircleButton, Glyph, PairAvatar, Text } from '@shared/ui';
 
@@ -75,7 +74,13 @@ export function ThreadScreen() {
     ? [t('chat.quickWater'), t('chat.quickConfirmed'), t('chat.quickBike')]
     : [t('chat.quickAgreed'), t('chat.quickOnMyWay'), t('chat.quickLate')];
 
-  const typingAuthor = thread.typingAuthorId ? PEOPLE[thread.typingAuthorId] : undefined;
+  // Who is in this thread besides the reader, by id. It comes with the
+  // conversation rather than with each message, because a message arriving over
+  // Realtime carries only its own columns — there is no embed on a replication
+  // payload — and a bubble that appears nameless until the next refetch is
+  // worse than one that never had to wait.
+  const membersById = new Map((conversation?.members ?? []).map((member) => [member.id, member]));
+  const typingAuthor = thread.typingAuthorId ? membersById.get(thread.typingAuthorId) : undefined;
   // Whose bubbles sit on the right. `VIEWER.id` was a fixture id, so against a
   // real account nothing ever matched: every message the person had just sent
   // came back as somebody else's, left-aligned and without its receipt.
@@ -162,11 +167,7 @@ export function ThreadScreen() {
         >
           {(messages ?? []).map((message, index) => {
             const mine = message.authorId === viewerId;
-            // Names and faces for other people's bubbles come from the fixture
-            // directory, which only holds the fixture conversations' authors.
-            // A real thread has none, so a group bubble carries no name rather
-            // than a stranger's — until `Message` learns to carry its author.
-            const author = PEOPLE[message.authorId];
+            const author = membersById.get(message.authorId);
             return (
               <MessageBubble
                 key={message.id}

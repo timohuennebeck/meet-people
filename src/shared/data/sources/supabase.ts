@@ -448,6 +448,11 @@ function toConversation(row: {
     // fallback is seeded on the conversation so it at least stays put.
     avatarUrls: avatarUrls.length > 0 ? avatarUrls : [avatarUrlFor(null, id)],
     extraMembers: extra > 0 ? extra : undefined,
+    members: members.map((member) => ({
+      id: member.id,
+      name: member.name ?? '',
+      avatarUrl: avatarUrlFor(member.avatarStoragePath, member.id),
+    })),
     preview: row.preview ?? '',
     timeLabel: conversationTimeLabel(row.last_message_at),
     unreadCount: row.unread_count ?? 0,
