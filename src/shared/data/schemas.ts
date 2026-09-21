@@ -145,6 +145,24 @@ export const planSchema = z.object({
 });
 export type Plan = z.infer<typeof planSchema>;
 
+/**
+ * A legal document as the screen renders it: the title, then the sections in
+ * reading order.
+ *
+ * `legal_documents.content_md` is markdown — `#` for the title, `##` per
+ * section — and this is what it parses into. `id` and `version` matter as much
+ * as the prose: an acceptance points at them, so a record of consent says which
+ * text was consented to.
+ */
+export const legalDocumentSchema = z.object({
+  id: z.string(),
+  version: z.string(),
+  effectiveAt: z.string(),
+  title: z.string(),
+  sections: z.array(z.object({ heading: z.string(), body: z.string() })),
+});
+export type LegalDocument = z.infer<typeof legalDocumentSchema>;
+
 export const messageSchema = z.object({
   id: z.string(),
   conversationId: z.string(),

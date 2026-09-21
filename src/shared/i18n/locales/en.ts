@@ -670,6 +670,7 @@ export const en: Translation = {
 
   legal: {
     updated: 'Updated 20 September 2026 · version 1.0',
+    updatedOn: 'Updated {{date}} · version {{version}}',
     understood: 'Got it',
 
     terms: {

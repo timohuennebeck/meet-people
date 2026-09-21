@@ -689,6 +689,7 @@ export const ptBR = {
   // real thing. Production text comes from `legal_documents.content_md`.
   legal: {
     updated: 'Atualizado em 20 de setembro de 2026 · versão 1.0',
+    updatedOn: 'Atualizado em {{date}} · versão {{version}}',
     understood: 'Entendi',
 
     terms: {

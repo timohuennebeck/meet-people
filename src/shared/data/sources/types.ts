@@ -1,3 +1,4 @@
+import type { LegalDoc } from '../../lib/legal';
 import type {
   Conversation,
   JoinMode,
@@ -5,6 +6,7 @@ import type {
   Message,
   Place,
   Plan,
+  LegalDocument,
   Preferences,
   ProfileView,
   ReportReason,
@@ -148,6 +150,20 @@ export interface DataSource {
      * Realtime, so the method resolves to `null` and writes nothing.
      */
     receive(conversationId: string, authorId: string, body: string): Promise<Message | null>;
+  };
+
+  legal: {
+    /**
+     * The document in force for a kind, in the closest locale it exists in.
+     * Readable signed out: the welcome screen links to both before anybody has
+     * an account.
+     */
+    current(kind: LegalDoc, locale: string): Promise<LegalDocument | null>;
+    /**
+     * Records that the viewer accepted these documents. Consent is to a
+     * version, so this takes the ids the screen actually showed.
+     */
+    accept(documentIds: readonly string[]): Promise<void>;
   };
 
   account: {

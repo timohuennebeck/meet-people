@@ -1,7 +1,10 @@
+import Constants from 'expo-constants';
+import { Platform } from 'react-native';
 import type { z } from 'zod';
 
 import { i18n } from '@shared/i18n';
 import { ageFromBirthdate } from '@shared/lib/datetime';
+import { parseLegalMarkdown, type LegalDoc } from '@shared/lib/legal';
 import { supabase } from '@shared/lib/supabase/client';
 import {
   avatarUrlFor,
@@ -21,6 +24,7 @@ import { DataError, throwAsDataError } from '../errors';
 import { DEFAULT_PREFERENCES } from '../fixtures';
 import {
   conversationSchema,
+  legalDocumentSchema,
   messageSchema,
   placeSchema,
   planSchema,
@@ -31,6 +35,7 @@ import {
   type AudienceGender,
   type Conversation,
   type DistanceUnit,
+  type LegalDocument,
   type Membership,
   type Message,
   type Place,
@@ -941,6 +946,49 @@ export const supabaseSource: DataSource = {
      * policy would refuse it if there were.
      */
     receive: (): Promise<Message | null> => Promise.resolve(null),
+  },
+
+  legal: {
+    current: async (kind: LegalDoc, locale: string): Promise<LegalDocument | null> => {
+      // The function picks the closest locale it has and falls back to the
+      // source one, so the client never has to know which translations exist.
+      const row = unwrap(
+        await client().rpc('current_legal_document', { doc_kind: kind, want_locale: locale }),
+      );
+      if (!row) return null;
+
+      const { title, sections } = parseLegalMarkdown(row.content_md);
+      return validate(legalDocumentSchema, {
+        id: row.id,
+        version: row.version,
+        effectiveAt: row.effective_at,
+        title,
+        sections,
+      });
+    },
+
+    /**
+     * One row per document. `on conflict do nothing` is not available — the
+     * table has no unique key on (profile, document) because accepting the
+     * same version twice on two devices is a fact rather than a mistake, and
+     * the audit trail keeps both.
+     */
+    accept: async (documentIds: readonly string[]): Promise<void> => {
+      if (documentIds.length === 0) return;
+      const db = client();
+      const uid = await viewerId();
+
+      unwrap(
+        await db.from('legal_acceptances').insert(
+          documentIds.map((documentId) => ({
+            profile_id: uid,
+            document_id: documentId,
+            app_version: Constants.expoConfig?.version ?? null,
+            platform: Platform.OS === 'ios' ? ('ios' as const) : ('android' as const),
+          })),
+        ),
+      );
+    },
   },
 
   account: {

@@ -205,3 +205,12 @@ export function formatPastMoment(date: Date, locale: string, now = new Date()): 
   }[relativeDay(date, now)]();
   return i18n.t('datetime.dayAtTime', { day, time });
 }
+
+/** "20 de setembro de 2026" — the date a legal document came into force. */
+export function formatDayMonthYear(date: Date, locale: string): string {
+  return new Intl.DateTimeFormat(locale, {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+  }).format(date);
+}

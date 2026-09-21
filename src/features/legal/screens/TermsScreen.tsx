@@ -4,6 +4,8 @@ import { useTranslation } from 'react-i18next';
 import { ScrollView, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { useLegalDocument } from '@shared/data/useLegal';
+import { formatDayMonthYear } from '@shared/lib/datetime';
 import { resolveLegalDoc } from '@shared/lib/legal';
 import { useSession } from '@shared/providers/SessionProvider';
 import { gradients, gradientStops } from '@shared/theme/tokens';
@@ -23,13 +25,38 @@ const FOOTER_SPACE = 104;
  * which `Screen`'s bottom padding would hold it clear of.
  */
 export function TermsScreen() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const { isAuthenticated, hasOnboarded } = useSession();
 
   const { doc } = useLocalSearchParams<{ doc?: string }>();
-  const document = LEGAL_DOCUMENTS[resolveLegalDoc(doc)];
+  const kind = resolveLegalDoc(doc);
+
+  /**
+   * The document in force, from `legal_documents`. It is what an acceptance
+   * points at, so it has to be what was read.
+   *
+   * With no project configured there is no table, and the prose transcribed
+   * into the locale files stands in — this is the only screen where the two
+   * sources say the same words, because the rows were seeded from those keys.
+   */
+  const { data: published } = useLegalDocument(kind);
+  const fallback = LEGAL_DOCUMENTS[kind];
+
+  const title = published?.title ?? t(fallback.titleKey);
+  const sections =
+    published?.sections ??
+    fallback.sections.map((section) => ({
+      heading: t(section.heading),
+      body: t(section.body),
+    }));
+  const updated = published
+    ? t('legal.updatedOn', {
+        date: formatDayMonthYear(new Date(published.effectiveAt), i18n.language),
+        version: published.version,
+      })
+    : t('legal.updated');
 
   // This screen is reachable from the welcome page, from the account step and
   // from settings, so it normally has something to go back to. It sits outside
@@ -64,17 +91,17 @@ export function TermsScreen() {
       >
         <View className="gap-[6px]">
           <Text weight={600} className="text-[28px] leading-[30.2px] tracking-[-0.84px]">
-            {t(document.titleKey)}
+            {title}
           </Text>
-          <Text className="text-[13.5px] text-ink-ghost">{t('legal.updated')}</Text>
+          <Text className="text-[13.5px] text-ink-ghost">{updated}</Text>
         </View>
 
-        {document.sections.map((section) => (
+        {sections.map((section) => (
           <View key={section.heading} className="gap-[7px]">
             <Text weight={600} className="text-[16px]">
-              {t(section.heading)}
+              {section.heading}
             </Text>
-            <Text className="text-[14.5px] leading-[22.5px] text-ink-body">{t(section.body)}</Text>
+            <Text className="text-[14.5px] leading-[22.5px] text-ink-body">{section.body}</Text>
           </View>
         ))}
       </ScrollView>

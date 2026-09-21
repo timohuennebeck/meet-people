@@ -281,6 +281,16 @@ export const fixtureSource: DataSource = {
     },
   },
 
+  legal: {
+    /**
+     * Null, which the screen reads as "render the prose in the locale files".
+     * The offline source has no document table and therefore no version to
+     * accept — and an acceptance nobody can produce should not be invented.
+     */
+    current: (): Promise<null> => Promise.resolve(null),
+    accept: (): Promise<void> => Promise.resolve(),
+  },
+
   account: {
     /** Nothing to end: the offline source has no account behind it. */
     delete: (): Promise<void> => Promise.resolve(),

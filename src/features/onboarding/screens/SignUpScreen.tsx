@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { View } from 'react-native';
 
 import { StepScaffold } from '@shared/components/StepScaffold';
+import { useAcceptLegal, useLegalDocument } from '@shared/data/useLegal';
 import { cn } from '@shared/lib/cn';
 import { STEPS } from '@shared/lib/steps';
 import { supabase } from '@shared/lib/supabase/client';
@@ -68,6 +69,14 @@ export function SignUpScreen() {
   const [failure, setFailure] = useState<AuthFailure | null>(null);
   const strength = strengthOf(password);
 
+  // "Ao criar a conta você aceita os Termos de uso e a Política de privacidade"
+  // sits under this button, so creating the account is the acceptance. Both
+  // documents are already loaded by the time it is tapped — the same two the
+  // links above open.
+  const { data: terms } = useLegalDocument('terms');
+  const { data: privacy } = useLegalDocument('privacy');
+  const { mutateAsync: acceptLegal } = useAcceptLegal();
+
   /**
    * Closes the button to a second tap before React has re-rendered it
    * disabled. `submitting` greys the button out; this is what stops the two
@@ -105,6 +114,20 @@ export function SignUpScreen() {
 
       // Everything answered before there was an account to hang it on.
       await flushProfileWrites();
+
+      // Consent is consent to a version, so this records the ids of the
+      // documents actually in force. It must not stop the sign-up: the account
+      // exists either way, and a lost acceptance row is recoverable where a
+      // person stranded on the password screen with an account already made is
+      // not. With no session yet — confirmations on — there is nobody to write
+      // it as, and the row waits for the sign-in that follows.
+      const documentIds = [terms?.id, privacy?.id].filter((id): id is string => Boolean(id));
+      if (documentIds.length > 0) {
+        await acceptLegal(documentIds).catch((error: unknown) =>
+          console.warn('[legal] Could not record acceptance:', error),
+        );
+      }
+
       router.push('/(onboarding)/confirmation');
     } finally {
       inFlight.current = false;

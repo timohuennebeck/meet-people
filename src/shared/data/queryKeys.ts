@@ -61,6 +61,13 @@ export const chatKeys = {
   thread: (conversationId: string) => key([...chatKeys.threads(), conversationId] as const),
 } as const;
 
+export const legalKeys = {
+  all: ['legal'] as const,
+  /** One document, keyed on the language it was asked for. */
+  document: (kind: string, locale: string) =>
+    key([...legalKeys.all, 'document', kind, locale] as const),
+} as const;
+
 export const preferenceKeys = {
   all: ['preferences'] as const,
   mine: () => key([...preferenceKeys.all, 'mine'] as const),
