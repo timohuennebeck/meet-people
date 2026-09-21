@@ -4,7 +4,7 @@ import { ScrollView, View } from 'react-native';
 
 import { useOpenPlanChat } from '@shared/data/queries/use-chat';
 import { usePlan, useSetMembership } from '@shared/data/queries/use-plans';
-import type { Plan } from '@shared/data/schemas';
+import { MEMBERSHIP, type Plan } from '@shared/data/schemas';
 import { formatMonthYear } from '@shared/lib/datetime';
 import { Button, TextButton } from '@shared/ui/button';
 import { HostCard } from '@shared/ui/person-row';
@@ -325,13 +325,18 @@ export function PlanSheetScreen() {
     );
   }
 
-  if (plan.membership === 'host') return <HostState plan={plan} onOpenChat={openChat} />;
+  if (plan.membership === MEMBERSHIP.HOST) return <HostState plan={plan} onOpenChat={openChat} />;
 
-  if (plan.membership === 'requested') {
-    return <RequestedState plan={plan} onWithdraw={() => setMembership({ membership: 'guest' })} />;
+  if (plan.membership === MEMBERSHIP.REQUESTED) {
+    return (
+      <RequestedState
+        plan={plan}
+        onWithdraw={() => setMembership({ membership: MEMBERSHIP.GUEST })}
+      />
+    );
   }
 
-  if (plan.membership === 'joined') {
+  if (plan.membership === MEMBERSHIP.JOINED) {
     return (
       <JoinedState
         plan={plan}

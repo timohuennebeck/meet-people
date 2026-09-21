@@ -3,7 +3,13 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { plans } from '@shared/data/api/plans';
 import { useViewer } from '@shared/data/queries/use-viewer';
 import { chatKeys, planKeys, userKeys } from '@shared/data/query-keys';
-import type { Membership, Plan, User, NewPlan } from '@shared/data/schemas';
+import {
+  MEMBERSHIP,
+  type Membership,
+  type NewPlan,
+  type Plan,
+  type User,
+} from '@shared/data/schemas';
 
 /**
  * Every plan on the map: upcoming, inside the radius, ordered by `starts_at`.
@@ -133,7 +139,7 @@ function seatViewer({
   /** Undefined until the viewer's own profile has loaded. */
   viewer: User | undefined;
 }) {
-  if (membership !== 'joined') {
+  if (membership !== MEMBERSHIP.JOINED) {
     return plan.participants.filter((participant) => !participant.isViewer);
   }
   if (!viewer || plan.participants.some((participant) => participant.isViewer)) {

@@ -1,4 +1,5 @@
 import { supabase } from '@shared/lib/supabase/client';
+import { DB_AUDIENCE_GENDER, type DbAudienceGender } from '@shared/lib/supabase/enums';
 import {
   radiusMetres,
   spokenLanguagesFor,
@@ -7,7 +8,13 @@ import {
 } from '@shared/lib/supabase/mapping';
 
 import { DEFAULT_PREFERENCES } from '../preference-defaults';
-import type { AudienceGender, DistanceUnit, Preferences } from '../schemas';
+import {
+  AUDIENCE_GENDER,
+  type AudienceGender,
+  DISTANCE_UNIT,
+  type DistanceUnit,
+  type Preferences,
+} from '../schemas';
 import { client, sessionId, unwrap, unwrapSingle, viewerId } from './shared';
 
 /**
@@ -26,25 +33,25 @@ type PreferencesUpdate = Partial<{
   distance_unit: DistanceUnit;
   age_min: number;
   age_max: number;
-  audience_gender: 'everyone' | 'women' | 'men' | 'non_binary';
+  audience_gender: DbAudienceGender;
   app_language: string;
   notifications_enabled: boolean;
   interests: string[];
   languages: LanguageCode[];
 }>;
 
-const AUDIENCE_TO_DB: Record<AudienceGender, 'everyone' | 'women' | 'men' | 'non_binary'> = {
-  everyone: 'everyone',
-  women: 'women',
-  men: 'men',
-  nonBinary: 'non_binary',
+const AUDIENCE_TO_DB: Record<AudienceGender, DbAudienceGender> = {
+  [AUDIENCE_GENDER.EVERYONE]: DB_AUDIENCE_GENDER.EVERYONE,
+  [AUDIENCE_GENDER.WOMEN]: DB_AUDIENCE_GENDER.WOMEN,
+  [AUDIENCE_GENDER.MEN]: DB_AUDIENCE_GENDER.MEN,
+  [AUDIENCE_GENDER.NON_BINARY]: DB_AUDIENCE_GENDER.NON_BINARY,
 };
 
-const AUDIENCE_FROM_DB: Record<'everyone' | 'women' | 'men' | 'non_binary', AudienceGender> = {
-  everyone: 'everyone',
-  women: 'women',
-  men: 'men',
-  non_binary: 'nonBinary',
+const AUDIENCE_FROM_DB: Record<DbAudienceGender, AudienceGender> = {
+  [DB_AUDIENCE_GENDER.EVERYONE]: AUDIENCE_GENDER.EVERYONE,
+  [DB_AUDIENCE_GENDER.WOMEN]: AUDIENCE_GENDER.WOMEN,
+  [DB_AUDIENCE_GENDER.MEN]: AUDIENCE_GENDER.MEN,
+  [DB_AUDIENCE_GENDER.NON_BINARY]: AUDIENCE_GENDER.NON_BINARY,
 };
 
 /**
@@ -57,7 +64,7 @@ export async function planContext(): Promise<PlanContext> {
   const row = unwrap(
     await db.from('profiles').select('radius, distance_unit').eq('id', uid).maybeSingle(),
   );
-  const unit: DistanceUnit = row?.distance_unit ?? 'mi';
+  const unit: DistanceUnit = row?.distance_unit ?? DISTANCE_UNIT.MILES;
   // The default matches `profiles.radius`'s own default, so a profile whose row
   // has not been created yet still places its pins somewhere sensible.
   const radius = row?.radius ?? 2;

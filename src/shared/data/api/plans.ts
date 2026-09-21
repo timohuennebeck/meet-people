@@ -1,7 +1,8 @@
+import { MEMBER_STATUS } from '@shared/lib/supabase/enums';
 import { toPlan, type LanguageCode, type NearbyPlanRow } from '@shared/lib/supabase/mapping';
 
 import { DataError } from '../errors';
-import type { Membership, NewPlan, Plan } from '../schemas';
+import { MEMBERSHIP, type Membership, type NewPlan, type Plan } from '../schemas';
 import { planContext } from './preferences';
 import { client, unwrap, unwrapSingle, viewerId } from './shared';
 
@@ -89,14 +90,14 @@ async function answerRequest({
   planId: string;
   /** The applicant's profile id — a request has no id of its own. */
   requestId: string;
-  status: 'seated' | 'declined';
+  status: typeof MEMBER_STATUS.SEATED | typeof MEMBER_STATUS.DECLINED;
 }): Promise<Plan | null> {
   const answered = await client()
     .from('plan_members')
     .update({ status }, { count: 'exact' })
     .eq('plan_id', planId)
     .eq('profile_id', requestId)
-    .eq('status', 'requested');
+    .eq('status', MEMBER_STATUS.REQUESTED);
   unwrap(answered);
   if ((answered.count ?? 0) === 0) throw new DataError('BAD_TRANSITION');
   return findPlan(planId);
@@ -223,13 +224,14 @@ export const plans = {
     const uid = await viewerId();
 
     switch (membership) {
-      case 'requested':
-      case 'joined': {
-        const status = membership === 'requested' ? 'requested' : 'seated';
+      case MEMBERSHIP.REQUESTED:
+      case MEMBERSHIP.JOINED: {
+        const status =
+          membership === MEMBERSHIP.REQUESTED ? MEMBER_STATUS.REQUESTED : MEMBER_STATUS.SEATED;
         // The note travels with a request and is cleared by a plain join, so
         // a host never reads a message written for a plan the person later
         // walked straight into.
-        const message = status === 'requested' ? note?.trim() || null : null;
+        const message = status === MEMBER_STATUS.REQUESTED ? note?.trim() || null : null;
         const moved = await db
           .from('plan_members')
           .update({ status, message }, { count: 'exact' })
@@ -246,24 +248,24 @@ export const plans = {
         break;
       }
 
-      case 'guest': {
+      case MEMBERSHIP.GUEST: {
         const own = await ownMembershipRow(planId, uid);
         // "RECADO PARA O GRUPO" on the leave sheet is a message to the plan's
         // chat, and it has to go first: `private.sync_plan_chat()` takes the
         // leaver out of the conversation, and after that the messages insert
         // policy has nothing to let them write through.
-        if (own?.status === 'seated' && note?.trim()) {
+        if (own?.status === MEMBER_STATUS.SEATED && note?.trim()) {
           await postToPlanChat({ planId, uid, body: note.trim() });
         }
-        if (own?.status === 'requested') {
+        if (own?.status === MEMBER_STATUS.REQUESTED) {
           unwrap(
             await db.from('plan_members').delete().eq('plan_id', planId).eq('profile_id', uid),
           );
-        } else if (own?.status === 'seated') {
+        } else if (own?.status === MEMBER_STATUS.SEATED) {
           unwrap(
             await db
               .from('plan_members')
-              .update({ status: 'left' })
+              .update({ status: MEMBER_STATUS.LEFT })
               .eq('plan_id', planId)
               .eq('profile_id', uid),
           );
@@ -287,7 +289,7 @@ export const plans = {
    * `seated`. The trigger stamps `seated_at` and may refuse with PLAN_FULL.
    */
   acceptRequest: (planId: string, requestId: string): Promise<Plan | null> =>
-    answerRequest({ planId, requestId, status: 'seated' }),
+    answerRequest({ planId, requestId, status: MEMBER_STATUS.SEATED }),
 
   /**
    * Host turns a request down, which is also what gives the applicant their
@@ -296,7 +298,7 @@ export const plans = {
    * good.
    */
   declineRequest: (planId: string, requestId: string): Promise<Plan | null> =>
-    answerRequest({ planId, requestId, status: 'declined' }),
+    answerRequest({ planId, requestId, status: MEMBER_STATUS.DECLINED }),
 
   /**
    * `plan_members.outcome` is not in the column grant — anyone could

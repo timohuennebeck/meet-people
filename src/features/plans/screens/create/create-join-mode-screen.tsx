@@ -4,7 +4,7 @@ import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { View } from 'react-native';
 
-import type { JoinMode } from '@shared/data/schemas';
+import { JOIN_MODE, type JoinMode } from '@shared/data/schemas';
 import { cn } from '@shared/lib/cn';
 import { colors } from '@shared/theme/tokens';
 import { Button } from '@shared/ui/button';
@@ -74,16 +74,20 @@ export function CreateJoinModeScreen() {
     >
       <View className="mt-[22px] flex-1 gap-[12px]">
         <ModeOption
-          selected={mode === 'open'}
-          onPress={() => setMode('open')}
-          icon={<HandWaving size={23} color={mode === 'open' ? colors.brand : colors.inkDim} />}
+          selected={mode === JOIN_MODE.OPEN}
+          onPress={() => setMode(JOIN_MODE.OPEN)}
+          icon={
+            <HandWaving size={23} color={mode === JOIN_MODE.OPEN ? colors.brand : colors.inkDim} />
+          }
           title={t('create.joinMode.openTitle')}
           body={t('create.joinMode.openBody')}
         />
         <ModeOption
-          selected={mode === 'approval'}
-          onPress={() => setMode('approval')}
-          icon={<Key size={23} color={mode === 'approval' ? colors.brand : colors.inkDim} />}
+          selected={mode === JOIN_MODE.APPROVAL}
+          onPress={() => setMode(JOIN_MODE.APPROVAL)}
+          icon={
+            <Key size={23} color={mode === JOIN_MODE.APPROVAL ? colors.brand : colors.inkDim} />
+          }
           title={t('create.joinMode.approvalTitle')}
           body={t('create.joinMode.approvalBody')}
         />

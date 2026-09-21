@@ -1,5 +1,6 @@
 import { i18n } from '@shared/i18n';
 import { supabase } from '@shared/lib/supabase/client';
+import { CONVERSATION_KIND } from '@shared/lib/supabase/enums';
 import { avatarUrlFor, conversationTimeLabel } from '@shared/lib/supabase/mapping';
 
 import type { Conversation, Message } from '../schemas';
@@ -46,7 +47,7 @@ function toConversation(row: {
 
   return {
     id,
-    kind: row.kind === 'group' ? 'group' : 'direct',
+    kind: row.kind === CONVERSATION_KIND.GROUP ? CONVERSATION_KIND.GROUP : CONVERSATION_KIND.DIRECT,
     title: row.title ?? '',
     // A conversation with no other members still has to draw one avatar, and
     // there is nobody whose photo it could be — so it draws the no-photo state.

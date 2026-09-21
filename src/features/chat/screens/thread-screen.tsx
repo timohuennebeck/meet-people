@@ -6,6 +6,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useConversations, useMarkRead, useThread } from '@shared/data/queries/use-chat';
 import { useViewerId } from '@shared/data/queries/use-viewer';
+import { CONVERSATION_KIND } from '@shared/lib/supabase/enums';
 import { Avatar, PairAvatar } from '@shared/ui/avatar';
 import { CircleButton } from '@shared/ui/header';
 import * as Glyph from '@shared/ui/icons';
@@ -57,7 +58,7 @@ export function ThreadScreen() {
   const { data: messages } = useThread(conversationId);
 
   const conversation = conversations?.find((entry) => entry.id === conversationId);
-  const isGroup = conversation?.kind === 'group';
+  const isGroup = conversation?.kind === CONVERSATION_KIND.GROUP;
 
   const composer = useComposer(conversationId);
 

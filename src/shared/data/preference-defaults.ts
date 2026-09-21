@@ -1,4 +1,4 @@
-import type { Preferences } from './schemas';
+import { AUDIENCE_GENDER, DISTANCE_UNIT, type Preferences } from './schemas';
 
 /**
  * What a profile's preference columns hold before anybody has changed them.
@@ -15,9 +15,9 @@ import type { Preferences } from './schemas';
  */
 export const DEFAULT_PREFERENCES: Preferences = {
   radius: 2,
-  distanceUnit: 'mi',
+  distanceUnit: DISTANCE_UNIT.MILES,
   ageRange: [21, 34],
-  audienceGender: 'everyone',
+  audienceGender: AUDIENCE_GENDER.EVERYONE,
   interests: [],
   spokenLanguages: [],
   appLanguage: 'pt-BR',

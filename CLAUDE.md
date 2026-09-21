@@ -38,6 +38,15 @@ check that file first.
   took two strings and `pinFor` two numbers. Destructure in the signature and
   name each field, so the call site reads as a sentence and the compiler
   catches a swap.
+- **A shared set of values is a named constant, never a literal.** The app's
+  vocabulary is in `@shared/data/schemas` (`MEMBERSHIP.HOST`,
+  `AUDIENCE_GENDER.EVERYONE`), the database's own words in
+  `@shared/lib/supabase/enums` (`MEMBER_STATUS.SEATED`). They are not the same
+  sets — `'requested'` is in both and means different things — so the mapping
+  layer translates between them and a screen only ever sees the app's.
+  SCREAMING_SNAKE for the object, PascalCase for the type of the same name.
+  A union of _shapes_ discriminated by a tag, like `AttendeeDetail`, is not
+  one of these and stays as it is.
 - **No barrel files.** Metro does not tree-shake, so a re-export hub pulls every
   module behind it into whatever imports one name. Import the module you mean:
   `@shared/ui/text`, not `@shared/ui`.

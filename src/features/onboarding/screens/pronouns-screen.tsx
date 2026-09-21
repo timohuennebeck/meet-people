@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { View } from 'react-native';
 
-import type { Pronouns } from '@shared/data/schemas';
+import { PRONOUNS, type Pronouns } from '@shared/data/schemas';
 import { STEPS } from '@shared/lib/steps';
 import { Button, Spacer, TextButton } from '@shared/ui/button';
 import { ChoiceTile } from '@shared/ui/choice-tile';
@@ -16,7 +16,7 @@ import { saveProfile } from '../lib/profile-writes';
 export function PronounsScreen() {
   const { t } = useTranslation();
   const router = useRouter();
-  const [selected, setSelected] = useState<Pronouns>('she');
+  const [selected, setSelected] = useState<Pronouns>(PRONOUNS.SHE);
 
   const next = () => router.push('/(onboarding)/photo');
 
@@ -31,10 +31,10 @@ export function PronounsScreen() {
   };
 
   const options: { value: Pronouns; label: string }[] = [
-    { value: 'she', label: t('onboarding.pronouns.she') },
-    { value: 'he', label: t('onboarding.pronouns.he') },
-    { value: 'they', label: t('onboarding.pronouns.they') },
-    { value: 'unspecified', label: t('common.preferNotToSay') },
+    { value: PRONOUNS.SHE, label: t('onboarding.pronouns.she') },
+    { value: PRONOUNS.HE, label: t('onboarding.pronouns.he') },
+    { value: PRONOUNS.THEY, label: t('onboarding.pronouns.they') },
+    { value: PRONOUNS.UNSPECIFIED, label: t('common.preferNotToSay') },
   ];
 
   return (
@@ -68,7 +68,7 @@ export function PronounsScreen() {
               selected={selected === option.value}
               onPress={() => setSelected(option.value)}
               icon={
-                option.value === 'unspecified' ? (
+                option.value === PRONOUNS.UNSPECIFIED ? (
                   <Text className="text-[26px] leading-[26px] text-ink-dim">—</Text>
                 ) : undefined
               }

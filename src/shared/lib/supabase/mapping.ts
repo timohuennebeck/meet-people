@@ -11,7 +11,15 @@
  * and the map pin the database cannot store.
  */
 
-import type { DistanceUnit, Membership, Plan, SpokenLanguage, User } from '@shared/data/schemas';
+import {
+  DISTANCE_UNIT,
+  type DistanceUnit,
+  MEMBERSHIP,
+  type Membership,
+  type Plan,
+  type SpokenLanguage,
+  type User,
+} from '@shared/data/schemas';
 import { i18n } from '@shared/i18n';
 import { formatPlanDate, formatTime, isToday, relativeDay } from '@shared/lib/datetime';
 import { SEARCHABLE_LANGUAGES } from '@shared/lib/languages';
@@ -200,7 +208,7 @@ const METRES_PER_MILE = 1609.34;
 
 /** A discovery radius, in the unit the person set it in, as metres. */
 export function radiusMetres(radius: number, unit: DistanceUnit): number {
-  return unit === 'mi' ? radius * METRES_PER_MILE : radius * 1000;
+  return unit === DISTANCE_UNIT.MILES ? radius * METRES_PER_MILE : radius * 1000;
 }
 
 /**
@@ -213,7 +221,7 @@ export function radiusMetres(radius: number, unit: DistanceUnit): number {
 export function distanceLabel(metres: number | null | undefined, unit: DistanceUnit): string {
   if (metres == null || !Number.isFinite(metres)) return '';
   if (metres < 1000) return `${Math.round(metres / 50) * 50} m`;
-  const value = unit === 'mi' ? metres / METRES_PER_MILE : metres / 1000;
+  const value = unit === DISTANCE_UNIT.MILES ? metres / METRES_PER_MILE : metres / 1000;
   const formatted = value.toLocaleString(i18n.language, {
     minimumFractionDigits: 1,
     maximumFractionDigits: 1,
@@ -363,10 +371,10 @@ export function pinFor({
 // Plans
 // ---------------------------------------------------------------------------
 
-const MEMBERSHIPS = new Set<Membership>(['guest', 'requested', 'joined', 'host', 'waitlisted']);
+const MEMBERSHIPS = new Set<Membership>(Object.values(MEMBERSHIP));
 
 function toMembership(value: string): Membership {
-  return MEMBERSHIPS.has(value as Membership) ? (value as Membership) : 'guest';
+  return MEMBERSHIPS.has(value as Membership) ? (value as Membership) : MEMBERSHIP.GUEST;
 }
 
 /**
@@ -403,7 +411,6 @@ export function toPlan(row: NearbyPlanRow, context: PlanContext): Plan {
     // `note` — "Já participou de 3 planos" in the design — has no column behind
     // it; it was host-facing copy about a track record nothing computes yet.
     note: undefined,
-    status: 'pending' as const,
     createdAt: entry.createdAt,
   }));
 

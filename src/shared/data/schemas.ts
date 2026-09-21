@@ -8,27 +8,76 @@
  */
 
 /**
- * Why somebody is being reported — the `report_reason` Postgres enum.
+ * The app's own vocabulary, each set declared once as a constant.
  *
- * The order here is the design's, which is not the enum's declaration order;
- * the column stores a value, not a position. Rows are labelled through i18n and
- * identified by these, never by their copy.
+ * A bare `'requested'` in a file says nothing about where else it is used, and
+ * two of these sets are worse than that: `'requested'` is both a `Membership`
+ * here and a `member_status` in Postgres, meaning different things, and
+ * `AUDIENCE_GENDER.NON_BINARY` is `'nonBinary'` here against `'non_binary'` in
+ * the column. Naming the member makes it obvious which vocabulary a value
+ * belongs to. The database's own words live in `@shared/lib/supabase/enums`
+ * and are translated at the edge, never used in a screen.
+ *
+ * Each is a frozen object plus a type of the same name, so `MEMBERSHIP.HOST`
+ * is the value and `Membership` is the type. A `const enum` would be neither —
+ * TypeScript's `enum` emits runtime code that its own erasable-syntax mode
+ * rejects, and its members are not assignable from the plain strings that
+ * arrive out of the database.
+ */
+
+/** Why somebody is being reported — mirrors the `report_reason` enum. */
+export const REPORT_REASON = {
+  NO_SHOW: 'no_show',
+  HARASSMENT: 'harassment',
+  FAKE_PROFILE: 'fake_profile',
+  INAPPROPRIATE: 'inappropriate',
+  OTHER: 'other',
+} as const;
+export type ReportReason = (typeof REPORT_REASON)[keyof typeof REPORT_REASON];
+
+/**
+ * The reasons in the order the design lists them, which is not the enum's
+ * declaration order — the column stores a value, not a position. Rows are
+ * labelled through i18n and identified by these, never by their copy.
  */
 export const REPORT_REASONS = [
-  'no_show',
-  'harassment',
-  'fake_profile',
-  'inappropriate',
-  'other',
+  REPORT_REASON.NO_SHOW,
+  REPORT_REASON.HARASSMENT,
+  REPORT_REASON.FAKE_PROFILE,
+  REPORT_REASON.INAPPROPRIATE,
+  REPORT_REASON.OTHER,
 ] as const;
-export type ReportReason = (typeof REPORT_REASONS)[number];
 
-export type JoinMode = 'open' | 'approval';
+/** Whether a seat is taken straight away or has to be asked for. */
+export const JOIN_MODE = {
+  OPEN: 'open',
+  APPROVAL: 'approval',
+} as const;
+export type JoinMode = (typeof JOIN_MODE)[keyof typeof JOIN_MODE];
 
-/** Where the viewer stands relative to a plan. Drives which sheet state renders. */
-export type Membership = 'guest' | 'requested' | 'joined' | 'host' | 'waitlisted';
+/**
+ * Where the viewer stands relative to a plan. Drives which sheet state renders.
+ *
+ * Not the same set as the database's `member_status`, and deliberately so: a
+ * row that is `left` or `declined` reads as `GUEST` here, because the sheet
+ * asks "can this person join?" and both answers are yes.
+ */
+export const MEMBERSHIP = {
+  GUEST: 'guest',
+  REQUESTED: 'requested',
+  JOINED: 'joined',
+  HOST: 'host',
+  WAITLISTED: 'waitlisted',
+} as const;
+export type Membership = (typeof MEMBERSHIP)[keyof typeof MEMBERSHIP];
 
-export type Pronouns = 'she' | 'he' | 'they' | 'unspecified';
+export const PRONOUNS = {
+  SHE: 'she',
+  HE: 'he',
+  THEY: 'they',
+  UNSPECIFIED: 'unspecified',
+} as const;
+export type Pronouns = (typeof PRONOUNS)[keyof typeof PRONOUNS];
 
 export interface SpokenLanguage {
   /** BCP-47 language code, e.g. `de`, `en`. */
@@ -105,7 +154,6 @@ export interface JoinRequest {
   message?: string;
   /** Shown instead of a message when the applicant has a track record. */
   note?: string;
-  status: 'pending' | 'accepted' | 'declined';
   createdAt: string;
 }
 
@@ -216,9 +264,20 @@ export interface Conversation {
   online?: boolean;
 }
 
-export type DistanceUnit = 'mi' | 'km';
+export const DISTANCE_UNIT = {
+  MILES: 'mi',
+  KILOMETRES: 'km',
+} as const;
+export type DistanceUnit = (typeof DISTANCE_UNIT)[keyof typeof DISTANCE_UNIT];
 
-export type AudienceGender = 'everyone' | 'women' | 'men' | 'nonBinary';
+/** `NON_BINARY` is `'nonBinary'`; the column's own spelling is `'non_binary'`. */
+export const AUDIENCE_GENDER = {
+  EVERYONE: 'everyone',
+  WOMEN: 'women',
+  MEN: 'men',
+  NON_BINARY: 'nonBinary',
+} as const;
+export type AudienceGender = (typeof AUDIENCE_GENDER)[keyof typeof AUDIENCE_GENDER];
 
 export interface Preferences {
   /** Discovery radius in the user's chosen unit. */

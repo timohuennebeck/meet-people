@@ -1,7 +1,7 @@
 import { createContext, useCallback, useContext, useMemo, useState } from 'react';
 import type { ReactNode } from 'react';
 
-import type { JoinMode, Place } from '@shared/data/schemas';
+import { JOIN_MODE, type JoinMode, type Place } from '@shared/data/schemas';
 import { inAnHour } from '@shared/lib/datetime';
 import type { AgeRange } from '@shared/ui/age-range-control';
 
@@ -42,7 +42,7 @@ function emptyDraft(): PlanDraft {
     place: null,
     startsAt: inAnHour(),
     durationMinutes: 120,
-    joinMode: 'open',
+    joinMode: JOIN_MODE.OPEN,
     // What a plan is held in unless the host says otherwise — the shortlist on
     // step 5 opens on these, so they have to be the draft's value too, or an
     // untouched step would publish a plan in no language at all.

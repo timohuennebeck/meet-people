@@ -5,6 +5,7 @@ import { View } from 'react-native';
 
 import { isDataError } from '@shared/data/errors';
 import { usePlan, useSetMembership } from '@shared/data/queries/use-plans';
+import { MEMBERSHIP } from '@shared/data/schemas';
 import { Button, TextButton } from '@shared/ui/button';
 import { SectionLabel } from '@shared/ui/card';
 import { Chip } from '@shared/ui/chip';
@@ -35,7 +36,7 @@ export function LeavePlanScreen() {
   const leave = () => {
     if (!plan || isPending) return;
     setMembership(
-      { membership: 'guest', note },
+      { membership: MEMBERSHIP.GUEST, note },
       {
         // Both this sheet and the plan sheet under it have to go — going back
         // once would land on the sheet for the plan just left — so name the map

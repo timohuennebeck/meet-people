@@ -1,5 +1,6 @@
 import { i18n } from '@shared/i18n';
 import { ageFromBirthdate } from '@shared/lib/datetime';
+import { MEMBER_STATUS } from '@shared/lib/supabase/enums';
 import {
   avatarUrlFor,
   spokenLanguagesFor,
@@ -32,7 +33,11 @@ async function viewerPlanIds(): Promise<string[]> {
   const db = client();
   const uid = await viewerId();
   const rows = unwrap(
-    await db.from('plan_members').select('plan_id').eq('profile_id', uid).eq('status', 'seated'),
+    await db
+      .from('plan_members')
+      .select('plan_id')
+      .eq('profile_id', uid)
+      .eq('status', MEMBER_STATUS.SEATED),
   );
   return (rows ?? []).map((row) => row.plan_id);
 }
@@ -50,7 +55,7 @@ async function sharedPlanCounts(profileIds: string[]): Promise<Map<string, numbe
       .select('profile_id')
       .in('plan_id', planIds)
       .in('profile_id', profileIds)
-      .eq('status', 'seated'),
+      .eq('status', MEMBER_STATUS.SEATED),
   );
   for (const row of rows ?? []) {
     counts.set(row.profile_id, (counts.get(row.profile_id) ?? 0) + 1);
@@ -157,7 +162,7 @@ export const users = {
         .from('plan_members')
         .select('plan_id', { count: 'exact', head: true })
         .eq('profile_id', userId)
-        .eq('status', 'seated')
+        .eq('status', MEMBER_STATUS.SEATED)
         .then((result) => {
           if (result.error) throwAsDataError(result.error);
           return result.count ?? 0;

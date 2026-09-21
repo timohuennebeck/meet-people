@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { View } from 'react-native';
 
 import { usePreferences, useUpdatePreferences } from '@shared/data/queries/use-preferences';
-import type { AudienceGender } from '@shared/data/schemas';
+import { AUDIENCE_GENDER, type AudienceGender } from '@shared/data/schemas';
 import { AgeRangeControl } from '@shared/ui/age-range-control';
 import { Button, Spacer } from '@shared/ui/button';
 import { SectionLabel } from '@shared/ui/card';
@@ -19,15 +19,15 @@ export function AudienceSettingsScreen() {
   const { data: preferences } = usePreferences();
   const { mutate: update } = useUpdatePreferences();
 
-  const gender = preferences?.audienceGender ?? 'everyone';
+  const gender = preferences?.audienceGender ?? AUDIENCE_GENDER.EVERYONE;
   const range = preferences?.ageRange ?? [21, 34];
 
   const options: { value: AudienceGender; label: string; detail?: string }[] = [
-    { value: 'everyone', label: t('settings.audiencePage.everyone') },
-    { value: 'women', label: t('settings.audiencePage.women') },
-    { value: 'men', label: t('settings.audiencePage.men') },
+    { value: AUDIENCE_GENDER.EVERYONE, label: t('settings.audiencePage.everyone') },
+    { value: AUDIENCE_GENDER.WOMEN, label: t('settings.audiencePage.women') },
+    { value: AUDIENCE_GENDER.MEN, label: t('settings.audiencePage.men') },
     {
-      value: 'nonBinary',
+      value: AUDIENCE_GENDER.NON_BINARY,
       label: t('settings.audiencePage.nonBinary'),
       detail: t('settings.audiencePage.nonBinaryDetail'),
     },

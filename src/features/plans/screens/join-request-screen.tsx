@@ -5,6 +5,7 @@ import { View } from 'react-native';
 
 import { isDataError } from '@shared/data/errors';
 import { usePlan, useSetMembership } from '@shared/data/queries/use-plans';
+import { MEMBERSHIP } from '@shared/data/schemas';
 import { Avatar } from '@shared/ui/avatar';
 import { Button, TextButton } from '@shared/ui/button';
 import { Chip } from '@shared/ui/chip';
@@ -40,7 +41,7 @@ export function JoinRequestScreen() {
   const send = () => {
     if (!plan || isPending) return;
     setMembership(
-      { membership: 'requested', note: message },
+      { membership: MEMBERSHIP.REQUESTED, note: message },
       {
         onSuccess: () => router.back(),
         onError: (failure) => {
