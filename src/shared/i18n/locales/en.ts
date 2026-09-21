@@ -640,6 +640,8 @@ export const en: Translation = {
         "Your Plus subscription is billed by your phone's store. Cancel it there, or it keeps renewing.",
       confirm: 'Delete permanently',
       keep: 'Keep account',
+      deleting: 'Deleting…',
+      failed: "We couldn't delete the account just now. Try again.",
     },
     signOutPage: {
       title: 'Sign out',

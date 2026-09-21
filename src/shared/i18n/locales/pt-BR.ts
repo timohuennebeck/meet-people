@@ -657,6 +657,8 @@ export const ptBR = {
         'Sua assinatura Plus é cobrada pela loja do seu celular. Cancele por lá, senão ela continua sendo renovada.',
       confirm: 'Apagar definitivamente',
       keep: 'Manter conta',
+      deleting: 'Apagando…',
+      failed: 'Não foi possível apagar a conta agora. Tente de novo.',
     },
     signOutPage: {
       title: 'Sair',

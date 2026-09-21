@@ -7,7 +7,16 @@ module.exports = defineConfig([
   expoConfig,
   prettierConfig,
   {
-    ignores: ['dist/*', '.expo/*', 'node_modules/*', 'project/*', 'chats/*', 'supabase/.temp/*'],
+    ignores: [
+      'dist/*',
+      '.expo/*',
+      'node_modules/*',
+      'project/*',
+      'chats/*',
+      'supabase/.temp/*',
+      // Deno, not React Native — its own globals and module resolution.
+      'supabase/functions/*',
+    ],
   },
   {
     plugins: { prettier: prettierPlugin },

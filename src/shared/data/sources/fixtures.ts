@@ -281,6 +281,11 @@ export const fixtureSource: DataSource = {
     },
   },
 
+  account: {
+    /** Nothing to end: the offline source has no account behind it. */
+    delete: (): Promise<void> => Promise.resolve(),
+  },
+
   safety: {
     /**
      * Accepted and dropped. The offline source has no moderation queue and no

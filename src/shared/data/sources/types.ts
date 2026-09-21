@@ -150,6 +150,15 @@ export interface DataSource {
     receive(conversationId: string, authorId: string, body: string): Promise<Message | null>;
   };
 
+  account: {
+    /**
+     * Ends the account: the profile is anonymised in place, storage is purged
+     * and the login is closed. Resolves once all three have happened — a
+     * deletion reported as done has to be done.
+     */
+    delete(): Promise<void>;
+  };
+
   safety: {
     /**
      * Files a report. `planId` is context when the report started from a plan
