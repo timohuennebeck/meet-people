@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ScrollView, View } from 'react-native';
 
+import { isDataError } from '@shared/data/errors';
 import { formatDayMonth, formatTime, relativeDay } from '@shared/lib/datetime';
 import {
   Button,
@@ -10,11 +11,12 @@ import {
   Screen,
   StepSubtitle,
   StepTitle,
+  Text,
   TextButton,
   WarningNote,
 } from '@shared/ui';
 
-import { usePlan } from '../data/usePlans';
+import { usePlan, useRecordAttendance } from '../data/usePlans';
 import { attendeeDetail, attendeesOf, type Attendee } from '../lib/attendance';
 import { AttendeeRow } from '../ui/AttendeeRow';
 
@@ -23,16 +25,26 @@ import { AttendeeRow } from '../ui/AttendeeRow';
  *
  * Everyone starts ticked, so answering honestly costs a tap only when someone
  * did not turn up — which is why the subtitle's instruction is "desmarque quem
- * faltou" rather than "marque quem veio". Nothing is written: `plan_members.outcome`
- * is derived server-side from cancellations, and host-confirmed attendance is
- * deferred, so the answer travels to the thank-you screen as counts and goes no
- * further.
+ * faltou" rather than "marque quem veio".
+ *
+ * The answer is written before the thank-you screen is reached: it decides
+ * everyone's attendance rate, which is the number a stranger reads before
+ * deciding to sit down with them, so it must not be lost to a dismissed screen.
  */
 export function AttendanceCheckScreen() {
   const { t, i18n } = useTranslation();
   const router = useRouter();
   const { id } = useLocalSearchParams<{ id: string }>();
   const { data: plan } = usePlan(id ?? '');
+  const { mutate: record, isPending, error } = useRecordAttendance(id ?? '');
+
+  // The function names the two things it refuses: somebody who does not host
+  // this plan, and a plan that has not happened yet.
+  const refusal = error
+    ? isDataError(error)
+      ? t(error.messageKey)
+      : t('errors.publishFailed')
+    : null;
 
   // Absences are tracked rather than attendances, so the list needs no seeding
   // once the plan loads: an empty set already means "everyone was there".
@@ -80,13 +92,21 @@ export function AttendanceCheckScreen() {
     }
   };
 
-  // Replaces rather than pushes: the answer is in, and the back gesture on the
-  // thank-you screen should not offer to give it again.
-  const confirm = () =>
-    router.replace(
-      `/plan/${id}/attendance-thanks?present=${present}&absent=${missed.length}` +
-        `&missed=${missed.map((attendee) => attendee.user.id).join(',')}`,
+  const confirm = () => {
+    if (isPending || !id) return;
+    record(
+      missed.map((attendee) => attendee.user.id),
+      {
+        // Replaces rather than pushes: the answer is in, and the back gesture
+        // on the thank-you screen should not offer to give it again.
+        onSuccess: () =>
+          router.replace(
+            `/plan/${id}/attendance-thanks?present=${present}&absent=${missed.length}` +
+              `&missed=${missed.map((attendee) => attendee.user.id).join(',')}`,
+          ),
+      },
     );
+  };
 
   return (
     <Screen>
@@ -120,7 +140,12 @@ export function AttendanceCheckScreen() {
       </View>
 
       <View className="mt-[16px] shrink-0 gap-[12px]">
-        <Button label={t('plan.attendance.confirm')} onPress={confirm} />
+        {refusal ? <Text className="text-center text-[14px] text-ink-dim">{refusal}</Text> : null}
+        <Button
+          label={isPending ? t('plan.attendance.confirming') : t('plan.attendance.confirm')}
+          disabled={isPending}
+          onPress={confirm}
+        />
         <TextButton label={t('common.notNow')} tone="bodyStrong" onPress={() => router.back()} />
       </View>
     </Screen>

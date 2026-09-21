@@ -178,6 +178,12 @@ export const fixtureSource: DataSource = {
 
     declineRequest: (planId: string, requestId: string): Promise<Plan> =>
       answerRequest(planId, requestId, false),
+
+    /**
+     * Accepted and dropped: no fixture screen reads an outcome back, and the
+     * attendance rate the design draws is a constant on the profile.
+     */
+    recordAttendance: (): Promise<void> => Promise.resolve(),
   },
 
   users: {

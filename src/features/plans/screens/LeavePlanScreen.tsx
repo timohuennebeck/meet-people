@@ -39,7 +39,7 @@ export function LeavePlanScreen() {
   const leave = () => {
     if (!plan || isPending) return;
     setMembership(
-      { membership: 'guest' },
+      { membership: 'guest', note },
       {
         // Both this sheet and the plan sheet under it have to go — going back
         // once would land on the sheet for the plan just left — so name the map

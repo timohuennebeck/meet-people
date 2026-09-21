@@ -248,6 +248,29 @@ async function ownMembershipRow(planId: string, uid: string) {
 }
 
 /**
+ * Posts a message into a plan's group chat.
+ *
+ * Used by the leave sheet, whose note is addressed to the people still going.
+ * A plan whose chat has not been opened — it is made by a trigger on the plan's
+ * own insert, so this is only ever a plan that predates that trigger — silently
+ * has nothing to post to, because failing to leave over an undelivered goodbye
+ * would be the worse outcome.
+ */
+async function postToPlanChat(planId: string, uid: string, body: string): Promise<void> {
+  const db = client();
+  const conversation = unwrap(
+    await db.from('conversations').select('id').eq('plan_id', planId).maybeSingle(),
+  );
+  if (!conversation) return;
+
+  unwrap(
+    await db
+      .from('messages')
+      .insert({ conversation_id: conversation.id, author_id: uid, content: body }),
+  );
+}
+
+/**
  * Answers one pending request, as the host.
  *
  * `requestId` is the applicant's profile id — a request has no id of its own
@@ -606,6 +629,13 @@ export const supabaseSource: DataSource = {
 
         case 'guest': {
           const own = await ownMembershipRow(planId, uid);
+          // "RECADO PARA O GRUPO" on the leave sheet is a message to the plan's
+          // chat, and it has to go first: `private.sync_plan_chat()` takes the
+          // leaver out of the conversation, and after that the messages insert
+          // policy has nothing to let them write through.
+          if (own?.status === 'seated' && note?.trim()) {
+            await postToPlanChat(planId, uid, note.trim());
+          }
           if (own?.status === 'requested') {
             unwrap(
               await db.from('plan_members').delete().eq('plan_id', planId).eq('profile_id', uid),
@@ -648,6 +678,17 @@ export const supabaseSource: DataSource = {
      */
     declineRequest: (planId: string, requestId: string): Promise<Plan | null> =>
       answerRequest(planId, requestId, 'declined'),
+
+    /**
+     * `plan_members.outcome` is not in the column grant — anyone could
+     * otherwise award themselves an attendance record, and that number is what
+     * a stranger reads before deciding to sit down with somebody. So the write
+     * is a function, which checks that the caller hosts this plan and that the
+     * plan has actually happened.
+     */
+    recordAttendance: async (planId: string, absentIds: readonly string[]): Promise<void> => {
+      unwrap(await client().rpc('record_attendance', { plan: planId, absentees: [...absentIds] }));
+    },
   },
 
   users: {

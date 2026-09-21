@@ -1081,6 +1081,10 @@ export type Database = {
           viewer: Json
         }[]
       }
+      record_attendance: {
+        Args: { absentees?: string[]; plan: string }
+        Returns: number
+      }
       record_profile_view: { Args: { profile: string }; Returns: undefined }
     }
     Enums: {

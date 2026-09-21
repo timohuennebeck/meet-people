@@ -381,6 +381,7 @@ export const en: Translation = {
       first: 'first plan together',
       warning: 'A no-show only reaches a profile once two people from the plan say the same.',
       confirm: 'Confirm',
+      confirming: 'Saving…',
 
       thanks: {
         title: 'Thanks for answering',

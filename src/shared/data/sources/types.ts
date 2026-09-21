@@ -51,9 +51,13 @@ export interface DataSource {
     /** One plan, with its participants, its requests and its waitlist. */
     detail(planId: string): Promise<Plan>;
     /**
-     * Moves the viewer between guest / requested / joined on a plan. `note` is
-     * the message to the host that goes with a request, and means nothing on
-     * any other move.
+     * Moves the viewer between guest / requested / joined on a plan.
+     *
+     * `note` is a message to somebody, and who depends on the move: on a
+     * request it is the line the host reads on the request row, and on leaving
+     * it is the "recado para o grupo" the leave sheet collects, posted to the
+     * plan's chat before the seat is given up. It means nothing on a plain
+     * join.
      *
      * Resolves to the plan as it now reads, or to `null` when the write landed
      * on a plan the viewer can no longer see — a refusal throws, so `null` is
@@ -68,6 +72,14 @@ export interface DataSource {
      * that is not `declined` — so a request left to rot costs them one for good.
      */
     declineRequest(planId: string, requestId: string): Promise<Plan | null>;
+    /**
+     * Host records who turned up, once the plan has ended.
+     *
+     * Everyone seated counts as having attended except the ids passed here, so
+     * an honest answer costs a tap only when somebody did not come. Re-running
+     * replaces the answer rather than adding to it.
+     */
+    recordAttendance(planId: string, absentIds: readonly string[]): Promise<void>;
   };
 
   users: {

@@ -116,7 +116,10 @@ export function useSetMembership(planId: string) {
 /** What `useSetMembership` is told: where to move, and the note if it is a request. */
 export interface MembershipChange {
   membership: Membership;
-  /** The message to the host. Only a request carries one. */
+  /**
+   * A message that travels with the move: to the host on a request, to the
+   * plan's group chat on the way out. A plain join carries none.
+   */
   note?: string;
 }
 
@@ -198,6 +201,28 @@ export function usePublishPlan() {
       // host, so both the Chats tab and the host's own counts have moved.
       void queryClient.invalidateQueries({ queryKey: chatKeys.conversations().queryKey });
       void queryClient.invalidateQueries({ queryKey: userKeys.all });
+    },
+  });
+}
+
+/**
+ * Host records who turned up.
+ *
+ * `plan_members.outcome` is what `attendance_rate_of` counts, and that number
+ * is what a stranger reads before deciding to sit down with somebody — so the
+ * column is not in the client's grant and this goes through a function that
+ * checks the caller hosts the plan and that the plan has ended.
+ */
+export function useRecordAttendance(planId: string) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (absentIds: readonly string[]) =>
+      dataSource.plans.recordAttendance(planId, absentIds),
+    onSuccess: () => {
+      // Everyone in the plan has a new attendance rate on their profile.
+      void queryClient.invalidateQueries({ queryKey: userKeys.all });
+      void queryClient.invalidateQueries({ queryKey: planKeys.detail(planId).queryKey });
     },
   });
 }

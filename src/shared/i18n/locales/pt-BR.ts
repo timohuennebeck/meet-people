@@ -385,6 +385,7 @@ export const ptBR = {
       first: 'primeiro plano juntos',
       warning: 'Uma falta só entra no perfil quando duas pessoas do plano marcam igual.',
       confirm: 'Confirmar',
+      confirming: 'Salvando…',
 
       thanks: {
         title: 'Obrigado por responder',
