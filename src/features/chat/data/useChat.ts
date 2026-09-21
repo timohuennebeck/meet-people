@@ -1,4 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useEffect } from 'react';
 
 import { chatKeys } from '@shared/data/queryKeys';
 import type { Message } from '@shared/data/schemas';
@@ -26,6 +27,36 @@ export function useThread(conversationId: string) {
     ...chatKeys.thread(conversationId),
     queryFn: () => dataSource.chats.thread(conversationId),
   });
+}
+
+/**
+ * Marks a thread read once it is on screen.
+ *
+ * `conversation_list.unread_count` counts messages newer than the viewer's
+ * `last_read_at`, and nothing was writing that column — so the tab badge and
+ * "3 novas" only ever counted up, however much of the conversation had been
+ * read. Fired on open and again whenever a new message lands while the thread
+ * is the screen in front of the reader.
+ */
+export function useMarkRead(conversationId: string, messageCount: number) {
+  const queryClient = useQueryClient();
+
+  useEffect(() => {
+    if (!conversationId) return;
+    let cancelled = false;
+
+    void dataSource.chats
+      .markRead(conversationId)
+      .then(() => {
+        if (cancelled) return;
+        void queryClient.invalidateQueries({ queryKey: chatKeys.conversations().queryKey });
+      })
+      .catch((error: unknown) => console.warn('[chat] Could not mark the thread read:', error));
+
+    return () => {
+      cancelled = true;
+    };
+  }, [conversationId, messageCount, queryClient]);
 }
 
 /**

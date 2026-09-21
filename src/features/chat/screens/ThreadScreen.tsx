@@ -8,7 +8,7 @@ import { PEOPLE } from '@shared/data/fixtures';
 import { useViewerId } from '@shared/data/useViewer';
 import { Avatar, CircleButton, Glyph, PairAvatar, Text } from '@shared/ui';
 
-import { useConversations, useThread } from '../data/useChat';
+import { useConversations, useMarkRead, useThread } from '../data/useChat';
 import { useScriptedThread } from '../hooks/useScriptedThread';
 import { nextDirectReply, nextGroupReply } from '../lib/scriptedReplies';
 import { Composer } from '../ui/Composer';
@@ -60,6 +60,8 @@ export function ThreadScreen() {
   const isGroup = conversation?.kind === 'group';
 
   const thread = useScriptedThread(conversationId, isGroup ? nextGroupReply : nextDirectReply);
+
+  useMarkRead(conversationId, (messages ?? []).length);
 
   // Keep the newest message in view as the thread grows, and again when the
   // keyboard takes half the screen — otherwise opening it leaves the reader

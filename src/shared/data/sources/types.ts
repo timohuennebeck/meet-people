@@ -29,16 +29,20 @@ export interface DataSource {
      * Moves the viewer between guest / requested / joined on a plan. `note` is
      * the message to the host that goes with a request, and means nothing on
      * any other move.
+     *
+     * Resolves to the plan as it now reads, or to `null` when the write landed
+     * on a plan the viewer can no longer see — a refusal throws, so `null` is
+     * success with nothing left to show.
      */
-    setMembership(planId: string, membership: Membership, note?: string): Promise<Plan>;
+    setMembership(planId: string, membership: Membership, note?: string): Promise<Plan | null>;
     /** Host accepts a pending request; the applicant takes the next open seat. */
-    acceptRequest(planId: string, requestId: string): Promise<Plan>;
+    acceptRequest(planId: string, requestId: string): Promise<Plan | null>;
     /**
      * Host turns a pending request down. This is what refunds the applicant's
      * weekly request credit — `private.request_quota_spent()` counts every row
      * that is not `declined` — so a request left to rot costs them one for good.
      */
-    declineRequest(planId: string, requestId: string): Promise<Plan>;
+    declineRequest(planId: string, requestId: string): Promise<Plan | null>;
   };
 
   users: {
@@ -74,6 +78,13 @@ export interface DataSource {
   chats: {
     /** The conversations list. */
     conversations(): Promise<Conversation[]>;
+    /**
+     * Marks everything in one conversation as read, up to now.
+     *
+     * `conversation_list.unread_count` counts messages newer than the viewer's
+     * `last_read_at`, so nothing clears a badge except writing this.
+     */
+    markRead(conversationId: string): Promise<void>;
     /**
      * The direct thread with one person, opened if the two have none yet, as
      * its conversation id. The server decides whether the viewer may: a thread

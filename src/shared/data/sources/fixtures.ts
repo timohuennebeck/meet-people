@@ -182,6 +182,13 @@ export const fixtureSource: DataSource = {
       settle(conversationSchema.array(), fixtures.CONVERSATIONS),
 
     /**
+     * The fixture conversations carry the unread counts the design draws, and
+     * they are what the Chats tab is *for* here — clearing them would empty the
+     * screen this source exists to render.
+     */
+    markRead: (): Promise<void> => Promise.resolve(),
+
+    /**
      * The design scripts one direct thread, with Sara. Anyone else gets a
      * fresh id so the chat screen still opens — on an empty thread, since
      * nothing here refuses: the Plus gate is the server's rule.

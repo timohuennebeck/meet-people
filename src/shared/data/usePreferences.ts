@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
-import { preferenceKeys } from './queryKeys';
+import { preferenceKeys, userKeys } from './queryKeys';
 import type { Preferences } from './schemas';
 import { dataSource } from './source';
 
@@ -33,6 +33,10 @@ export function useUpdatePreferences() {
     },
     onSettled: () => {
       void queryClient.invalidateQueries({ queryKey: key });
+      // Interests and spoken languages are columns on `profiles`, so this
+      // writes the same row `users.me()` reads — editing them in settings left
+      // the profile screen showing the old list.
+      void queryClient.invalidateQueries({ queryKey: userKeys.me().queryKey });
     },
   });
 }

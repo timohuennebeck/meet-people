@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
-import { planKeys } from '@shared/data/queryKeys';
+import { chatKeys, planKeys, userKeys } from '@shared/data/queryKeys';
 import type { Membership, Plan, User } from '@shared/data/schemas';
 import { dataSource } from '@shared/data/source';
 import { useViewer } from '@shared/data/useViewer';
@@ -48,7 +48,11 @@ export function usePlan(planId: string) {
  */
 function usePlanMutation<TVariables>(
   planId: string,
-  mutationFn: (variables: TVariables) => Promise<Plan>,
+  // The plan comes back `null` when the write landed on one the viewer can no
+  // longer see — past its start, or outside a radius that has since narrowed.
+  // Nothing here reads the result: the optimistic state stands and `onSettled`
+  // refetches, so `null` is a success with nothing new to show.
+  mutationFn: (variables: TVariables) => Promise<Plan | null>,
   applyOptimistic: (plan: Plan, variables: TVariables) => Plan,
 ) {
   const queryClient = useQueryClient();
@@ -75,6 +79,13 @@ function usePlanMutation<TVariables>(
       if (!isLastInFlight()) return;
       void queryClient.invalidateQueries({ queryKey: key });
       void queryClient.invalidateQueries({ queryKey: planKeys.lists() });
+      // A seat change is not only a seat change. `private.sync_plan_chat()`
+      // adds or removes the `conversation_members` row for the plan's group
+      // chat, so joining makes a thread the Chats tab would not show and
+      // leaving leaves a dead one behind. The same move changes `plansCount`
+      // and `sharedPlansCount`, which hang off the profile screens.
+      void queryClient.invalidateQueries({ queryKey: chatKeys.conversations().queryKey });
+      void queryClient.invalidateQueries({ queryKey: userKeys.all });
     },
   });
 }

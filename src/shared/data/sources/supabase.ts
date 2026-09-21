@@ -115,6 +115,22 @@ export async function flushDeferredPreferences(): Promise<void> {
   }
 }
 
+/**
+ * How much of a conversation one read brings back. The screen scrolls to the
+ * end on open, so this is the tail; older messages need a "load earlier" path
+ * that does not exist yet.
+ */
+const THREAD_PAGE_SIZE = 100;
+
+/**
+ * Escapes the three characters `like` treats as syntax, so a search term is
+ * matched as itself. Typing `%` otherwise matched every name, and `_` matched
+ * any single character.
+ */
+function likeLiteral(term: string): string {
+  return term.replace(/[\\%_]/g, (character) => `\\${character}`);
+}
+
 /** Rejects with a typed `DataError` where the schema named the rule it broke. */
 function unwrap<T>(result: { data: T; error: unknown | null }): T {
   if (result.error) throwAsDataError(result.error);
@@ -245,7 +261,7 @@ async function answerRequest(
   planId: string,
   requestId: string,
   status: 'seated' | 'declined',
-): Promise<Plan> {
+): Promise<Plan | null> {
   const answered = await client()
     .from('plan_members')
     .update({ status }, { count: 'exact' })
@@ -254,7 +270,7 @@ async function answerRequest(
     .eq('status', 'requested');
   unwrap(answered);
   if ((answered.count ?? 0) === 0) throw new DataError('BAD_TRANSITION');
-  return planDetail(planId);
+  return findPlan(planId);
 }
 
 // ---------------------------------------------------------------------------
@@ -279,9 +295,25 @@ async function fetchPlans(): Promise<Plan[]> {
 }
 
 async function planDetail(planId: string): Promise<Plan> {
-  const plan = (await fetchPlans()).find((candidate) => candidate.id === planId);
+  const plan = await findPlan(planId);
   if (!plan) throw new Error(`Plan ${planId} not found`);
-  return validate(planSchema, plan);
+  return plan;
+}
+
+/**
+ * The plan as `nearby_plans()` now reports it, or `null` when it is not in
+ * there any more.
+ *
+ * That is not the same question as "did the write work". `nearby_plans` drops
+ * a plan three hours after it starts and clips the list to the viewer's radius,
+ * which the free tier clamps further — so a plan joined from a list rendered a
+ * moment ago can be gone by the time the seat is written. Reading that as a
+ * failure rolled the seat back and told the person the join had not worked
+ * while the server had them seated.
+ */
+async function findPlan(planId: string): Promise<Plan | null> {
+  const plan = (await fetchPlans()).find((candidate) => candidate.id === planId);
+  return plan ? validate(planSchema, plan) : null;
 }
 
 // ---------------------------------------------------------------------------
@@ -328,7 +360,7 @@ async function searchPeople(term: string): Promise<SearchResults> {
       await db
         .from('public_profiles')
         .select('*')
-        .ilike('name', `%${needle}%`)
+        .ilike('name', `%${likeLiteral(needle)}%`)
         .neq('id', uid)
         .order('name')
         .limit(20),
@@ -500,7 +532,11 @@ export const supabaseSource: DataSource = {
      * exactly that), a seat is given up by updating it to `left`. The row's
      * own status decides which.
      */
-    setMembership: async (planId: string, membership: Membership, note?: string): Promise<Plan> => {
+    setMembership: async (
+      planId: string,
+      membership: Membership,
+      note?: string,
+    ): Promise<Plan | null> => {
       const db = client();
       const uid = await viewerId();
 
@@ -554,14 +590,14 @@ export const supabaseSource: DataSource = {
           throw new Error(`[data] Membership ${membership} is not settable.`);
       }
 
-      return planDetail(planId);
+      return findPlan(planId);
     },
 
     /**
      * Host accepts a request: the applicant's row moves from `requested` to
      * `seated`. The trigger stamps `seated_at` and may refuse with PLAN_FULL.
      */
-    acceptRequest: (planId: string, requestId: string): Promise<Plan> =>
+    acceptRequest: (planId: string, requestId: string): Promise<Plan | null> =>
       answerRequest(planId, requestId, 'seated'),
 
     /**
@@ -570,7 +606,7 @@ export const supabaseSource: DataSource = {
      * is not `declined`, so a request nobody ever answers costs them one for
      * good.
      */
-    declineRequest: (planId: string, requestId: string): Promise<Plan> =>
+    declineRequest: (planId: string, requestId: string): Promise<Plan | null> =>
       answerRequest(planId, requestId, 'declined'),
   },
 
@@ -733,17 +769,35 @@ export const supabaseSource: DataSource = {
         'Direct conversation',
       ),
 
+    markRead: async (conversationId: string): Promise<void> => {
+      const db = client();
+      const uid = await viewerId();
+      unwrap(
+        await db
+          .from('conversation_members')
+          .update({ last_read_at: new Date().toISOString() })
+          .eq('conversation_id', conversationId)
+          .eq('profile_id', uid),
+      );
+    },
+
     thread: async (conversationId: string): Promise<Message[]> => {
       const db = client();
       const uid = await viewerId();
+      // Newest first so the limit keeps the end of the conversation rather
+      // than its beginning, then reversed for the screen, which renders
+      // oldest at the top. A months-old group chat would otherwise be fetched
+      // whole every time it is opened.
       const rows = unwrap(
         await db
           .from('messages')
           .select('*')
           .eq('conversation_id', conversationId)
-          .order('created_at', { ascending: true }),
+          .order('created_at', { ascending: false })
+          .limit(THREAD_PAGE_SIZE),
       );
-      return validate(messageSchema.array(), withSentReceipt((rows ?? []).map(toMessage), uid));
+      const messages = (rows ?? []).reverse().map(toMessage);
+      return validate(messageSchema.array(), withSentReceipt(messages, uid));
     },
 
     send: async (conversationId: string, body: string): Promise<Message> => {
