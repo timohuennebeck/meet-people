@@ -24,7 +24,7 @@ export function useUnreadCount(): number {
 /**
  * Opens a plan's group chat.
  *
- * The chat is made by `private.open_plan_chat()` on the plan's own insert, so
+ * The chat is made by `private.open_plan()` on the plan's own insert, so
  * this is a lookup rather than a create — and a plan that predates that
  * trigger answers `null`, which leaves the button doing nothing rather than
  * navigating to a thread that is not there.

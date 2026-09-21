@@ -30,11 +30,8 @@ insert into public.app_config (key, value, description) values
   ('free_request_window_days', '7',       'Rolling window for the free request quota — "Grátis: 3 por semana".'),
   ('min_supported_version',    '"1.0.0"', 'Builds below this are sent to the App Store before sign-in.'),
   ('maintenance_mode',         'false',   'Blocks the app with a notice while something is being fixed.'),
-  ('verification_sla_hours',   '3',       'Quoted on the pending screen: "Normalmente menos de 3 horas".'),
   ('selfie_retention_days',    '7',       'How long a reviewed selfie survives before the purge job deletes it.'),
-  ('plan_seats_max',           '20',      'Ceiling on the create flow''s seat stepper.'),
-  ('free_radius_max_mi',       '3',       'Radius a free account is clamped to in nearby_plans().'),
-  ('max_interests',            '10',      'Interests one profile may hold; enforced by trigger and by TagInput.')
+  ('free_radius_max_mi',       '3',       'Radius a free account is clamped to in nearby_plans().')
 on conflict (key) do update set value = excluded.value, description = excluded.description;
 
 -- ---------------------------------------------------------------------------
