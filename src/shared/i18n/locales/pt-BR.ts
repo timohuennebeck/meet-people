@@ -507,6 +507,10 @@ export const ptBR = {
     scopePlans: 'Planos',
     scopePlaces: 'Lugares',
     peopleCount: 'PESSOAS · {{count}}',
+    plansCount: 'PLANOS · {{count}}',
+    placesCount: 'LUGARES · {{count}}',
+    open: 'Abrir',
+    noResults: 'Nada encontrado para “{{query}}”.',
     placeholder: 'Buscar pessoas',
     recent: 'BUSCAS RECENTES',
     // The line under a name in the results: neighbourhood, then how many plans
