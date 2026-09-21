@@ -2,7 +2,7 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { useUnblock } from '@shared/data/queries/use-safety';
+import { useUnblock } from '@shared/data/queries/use-moderation';
 import { useUser } from '@shared/data/queries/use-users';
 import { Button, TextButton } from '@shared/ui/button';
 import { MascotScreen } from '@shared/ui/mascot-screen';
@@ -29,14 +29,14 @@ export function ReportSentScreen() {
 
   return (
     <MascotScreen
-      title={t('safety.sent.title')}
-      subtitle={t('safety.sent.subtitle', { name })}
+      title={t('moderation.sent.title')}
+      subtitle={t('moderation.sent.subtitle', { name })}
       footer={
         <>
-          <Button label={t('safety.sent.back')} variant="primaryCompact" onPress={toPlans} />
+          <Button label={t('moderation.sent.back')} variant="primaryCompact" onPress={toPlans} />
           {blocked ? (
             <TextButton
-              label={t('safety.sent.unblock', { name })}
+              label={t('moderation.sent.unblock', { name })}
               tone="bodyStrong"
               onPress={() => {
                 setBlocked(false);

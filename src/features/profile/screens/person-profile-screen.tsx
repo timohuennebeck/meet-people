@@ -107,7 +107,7 @@ export function PersonProfileScreen() {
             <CircleButton
               size={40}
               className="bg-white/75"
-              accessibilityLabel={t('safety.report.navTitle')}
+              accessibilityLabel={t('moderation.report.navTitle')}
               onPress={() => router.push(`/report/${user.id}`)}
             >
               <Glyph.DotsVertical size={17} color={colors.inkStrong} />

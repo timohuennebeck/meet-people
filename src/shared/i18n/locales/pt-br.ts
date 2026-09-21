@@ -547,7 +547,7 @@ export const ptBR = {
     },
   },
 
-  safety: {
+  moderation: {
     report: {
       navTitle: 'Denunciar',
       title: 'O que aconteceu?',

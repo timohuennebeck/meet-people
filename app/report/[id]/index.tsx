@@ -1,1 +1,1 @@
-export { ReportReasonScreen as default } from '@features/safety/screens/report-reason-screen';
+export { ReportReasonScreen as default } from '@features/moderation/screens/report-reason-screen';

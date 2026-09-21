@@ -2,9 +2,15 @@ import { throwAsDataError } from '../errors';
 import type { ReportReason } from '../schemas';
 import { client, unwrap, viewerId } from './shared';
 
-/** Reporting and blocking. */
+/**
+ * What one person does about another: reporting them, blocking them, and
+ * lifting a block.
+ *
+ * Named for the actions rather than for `safety`, which named a feeling and
+ * not a verb — nothing about the word said that blocking lived here.
+ */
 
-export const safety = {
+export const moderation = {
   /**
    * Files a report. The reporter is `auth.uid()`: the insert policy takes
    * nothing else, and `no_self_report` refuses a report against yourself.

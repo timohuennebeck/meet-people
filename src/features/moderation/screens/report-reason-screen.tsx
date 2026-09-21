@@ -78,11 +78,11 @@ export function ReportReasonScreen() {
 
   return (
     <Screen>
-      <NavHeader title={t('safety.report.navTitle')} onBack={() => router.back()} />
+      <NavHeader title={t('moderation.report.navTitle')} onBack={() => router.back()} />
 
       <View className="mt-[20px] shrink-0 gap-[10px]">
-        <StepTitle>{t('safety.report.title')}</StepTitle>
-        <StepSubtitle>{t('safety.report.subtitle', { name: user?.name ?? '' })}</StepSubtitle>
+        <StepTitle>{t('moderation.report.title')}</StepTitle>
+        <StepSubtitle>{t('moderation.report.subtitle', { name: user?.name ?? '' })}</StepSubtitle>
       </View>
 
       <ScrollView
@@ -93,8 +93,8 @@ export function ReportReasonScreen() {
         {REPORT_REASONS.map((candidate) => (
           <ReasonRow
             key={candidate}
-            title={t(`safety.reasons.${candidate}.title`)}
-            detail={t(`safety.reasons.${candidate}.detail`)}
+            title={t(`moderation.reasons.${candidate}.title`)}
+            detail={t(`moderation.reasons.${candidate}.detail`)}
             selected={reason === candidate}
             onPress={() => setReason(candidate)}
           />

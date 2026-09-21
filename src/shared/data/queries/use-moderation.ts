@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 
-import { safety } from '@shared/data/api/safety';
+import { moderation } from '@shared/data/api/moderation';
 import { chatKeys, planKeys, userKeys } from '@shared/data/query-keys';
 import type { ReportReason } from '@shared/data/schemas';
 
@@ -26,8 +26,8 @@ export function useReportAndBlock() {
 
   return useMutation({
     mutationFn: async ({ subjectId, reason, detail, planId }: ReportInput) => {
-      await safety.report({ subjectId, reason, detail, planId });
-      await safety.block(subjectId);
+      await moderation.report({ subjectId, reason, detail, planId });
+      await moderation.block(subjectId);
     },
     onSuccess: () => invalidateAfterBlock(queryClient),
   });
@@ -38,7 +38,7 @@ export function useUnblock() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (profileId: string) => safety.unblock(profileId),
+    mutationFn: (profileId: string) => moderation.unblock(profileId),
     onSuccess: () => invalidateAfterBlock(queryClient),
   });
 }

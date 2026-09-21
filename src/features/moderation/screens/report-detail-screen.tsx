@@ -3,8 +3,8 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { View } from 'react-native';
 
+import { useReportAndBlock } from '@shared/data/queries/use-moderation';
 import { usePlans } from '@shared/data/queries/use-plans';
-import { useReportAndBlock } from '@shared/data/queries/use-safety';
 import { useUser } from '@shared/data/queries/use-users';
 import { formatDayMonth } from '@shared/lib/datetime';
 import { Button, Spacer } from '@shared/ui/button';
@@ -69,8 +69,8 @@ export function ReportDetailScreen() {
   return (
     <Screen>
       <NavHeader
-        title={t('safety.detail.navTitle', {
-          reason: isReportReason(reason) ? t(`safety.reasons.${reason}.title`) : '',
+        title={t('moderation.detail.navTitle', {
+          reason: isReportReason(reason) ? t(`moderation.reasons.${reason}.title`) : '',
         })}
         onBack={() => router.back()}
       />
@@ -85,21 +85,21 @@ export function ReportDetailScreen() {
       </View>
 
       <View className="mt-[20px] shrink-0 gap-[10px]">
-        <SectionLabel>{t('safety.detail.noteLabel')}</SectionLabel>
+        <SectionLabel>{t('moderation.detail.noteLabel')}</SectionLabel>
         <NoteField
           value={note}
           onChangeText={setNote}
-          placeholder={t('safety.detail.notePlaceholder')}
+          placeholder={t('moderation.detail.notePlaceholder')}
           autoFocus
         />
         <View className="flex-row flex-wrap gap-[8px]">
           {(['chipNoReply', 'chipSecondTime'] as const).map((key) => (
             <Chip
               key={key}
-              label={t(`safety.detail.${key}`)}
+              label={t(`moderation.detail.${key}`)}
               size="soft"
               tone="fill"
-              onPress={() => append(t(`safety.detail.${key}`))}
+              onPress={() => append(t(`moderation.detail.${key}`))}
             />
           ))}
         </View>
@@ -108,12 +108,14 @@ export function ReportDetailScreen() {
       <Spacer min={16} />
 
       <View className="shrink-0 gap-[14px]">
-        <WarningNote>{t('safety.detail.warning')}</WarningNote>
+        <WarningNote>{t('moderation.detail.warning')}</WarningNote>
         {isError ? (
-          <Text className="text-center text-[14px] text-ink-dim">{t('safety.detail.failed')}</Text>
+          <Text className="text-center text-[14px] text-ink-dim">
+            {t('moderation.detail.failed')}
+          </Text>
         ) : null}
         <Button
-          label={isPending ? t('safety.detail.sending') : t('safety.detail.send')}
+          label={isPending ? t('moderation.detail.sending') : t('moderation.detail.send')}
           variant="danger"
           disabled={isPending}
           onPress={send}

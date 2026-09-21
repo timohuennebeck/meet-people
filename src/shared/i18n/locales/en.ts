@@ -535,7 +535,7 @@ export const en: Translation = {
     },
   },
 
-  safety: {
+  moderation: {
     report: {
       navTitle: 'Report',
       title: 'What happened?',
