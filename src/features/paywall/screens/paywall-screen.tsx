@@ -81,8 +81,8 @@ export function PaywallScreen() {
   const finish = (subscribed: boolean) => {
     signIn();
     completeOnboarding();
-    // The real purchase runs through RevenueCat; until then, starting the trial
-    // is what grants the entitlement.
+    // No store is wired up yet, so starting the trial is what grants Plus, and
+    // only for this session.
     if (subscribed) setSubscribed(true);
     router.replace('/(tabs)');
   };

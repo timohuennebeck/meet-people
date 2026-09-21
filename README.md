@@ -16,14 +16,13 @@ npm start
 
 Supabase is required: it is the app's only data layer, so without those two
 values a build stops at the welcome screen rather than pretending to sign
-anybody in. PostHog and RevenueCat are optional and stay inert until their keys
-are present.
+anybody in.
 
 ### On a device
 
-**Expo Go cannot run this app.** `react-native-purchases`, `expo-camera`,
-`expo-image-picker`, `expo-haptics` and `@react-native-community/datetimepicker`
-all ship their own iOS and Android native code, and Expo Go only carries the
+**Expo Go cannot run this app.** `expo-camera`, `expo-image-picker`,
+`expo-haptics` and `@react-native-community/datetimepicker` all ship their own
+iOS and Android native code, and Expo Go only carries the
 modules compiled into its binary. A development build is required, which is why
 `expo-dev-client` is a dependency — `npm start` therefore opens in dev-client
 mode, not Expo Go.
@@ -94,7 +93,7 @@ src/
     data/                 types, query keys, the data source
     lib/                  cn, env, languages, the step sequence, Supabase
     i18n/                 pt-BR and en
-    providers/            session, analytics, billing
+    providers/            session
     theme/                the palette and the tokens derived from it
 supabase/                 local dev config and migrations
 ```

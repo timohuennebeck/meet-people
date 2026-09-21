@@ -23,8 +23,6 @@ import { useChatInbox } from '@shared/data/queries/use-chat';
 import { usePreferences } from '@shared/data/queries/use-preferences';
 import { createQueryClient } from '@shared/data/query-client';
 import { setLocale } from '@shared/i18n';
-import { AnalyticsProvider } from '@shared/providers/analytics-provider';
-import { BillingProvider } from '@shared/providers/billing-provider';
 import { SessionProvider, useSession } from '@shared/providers/session-provider';
 
 import '../global.css';
@@ -158,16 +156,12 @@ export default function RootLayout() {
     <GestureHandlerRootView style={{ flex: 1 }}>
       <SafeAreaProvider>
         <QueryClientProvider client={queryClient}>
-          <AnalyticsProvider>
-            <BillingProvider>
-              <SessionProvider>
-                <StatusBar style="dark" />
-                <LocaleSync />
-                <ChatInbox />
-                <RootNavigator />
-              </SessionProvider>
-            </BillingProvider>
-          </AnalyticsProvider>
+          <SessionProvider>
+            <StatusBar style="dark" />
+            <LocaleSync />
+            <ChatInbox />
+            <RootNavigator />
+          </SessionProvider>
         </QueryClientProvider>
       </SafeAreaProvider>
     </GestureHandlerRootView>

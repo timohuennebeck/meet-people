@@ -55,45 +55,6 @@ export type Database = {
           },
         ]
       }
-      billing_events: {
-        Row: {
-          id: string
-          payload: Json
-          profile_id: string | null
-          received_at: string
-          type: string
-        }
-        Insert: {
-          id: string
-          payload: Json
-          profile_id?: string | null
-          received_at?: string
-          type: string
-        }
-        Update: {
-          id?: string
-          payload?: Json
-          profile_id?: string | null
-          received_at?: string
-          type?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "billing_events_profile_id_fkey"
-            columns: ["profile_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "billing_events_profile_id_fkey"
-            columns: ["profile_id"]
-            isOneToOne: false
-            referencedRelation: "public_profiles"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       blocks: {
         Row: {
           blocked_id: string
@@ -244,63 +205,6 @@ export type Database = {
             columns: ["plan_id"]
             isOneToOne: false
             referencedRelation: "plans"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      entitlements: {
-        Row: {
-          current_period_end: string | null
-          entitlement_id: string
-          is_sandbox: boolean
-          last_event_at: string | null
-          last_event_id: string | null
-          product_id: string | null
-          profile_id: string
-          status: Database["public"]["Enums"]["entitlement_status"]
-          store: string | null
-          updated_at: string
-          will_renew: boolean | null
-        }
-        Insert: {
-          current_period_end?: string | null
-          entitlement_id: string
-          is_sandbox?: boolean
-          last_event_at?: string | null
-          last_event_id?: string | null
-          product_id?: string | null
-          profile_id: string
-          status: Database["public"]["Enums"]["entitlement_status"]
-          store?: string | null
-          updated_at?: string
-          will_renew?: boolean | null
-        }
-        Update: {
-          current_period_end?: string | null
-          entitlement_id?: string
-          is_sandbox?: boolean
-          last_event_at?: string | null
-          last_event_id?: string | null
-          product_id?: string | null
-          profile_id?: string
-          status?: Database["public"]["Enums"]["entitlement_status"]
-          store?: string | null
-          updated_at?: string
-          will_renew?: boolean | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "entitlements_profile_id_fkey"
-            columns: ["profile_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "entitlements_profile_id_fkey"
-            columns: ["profile_id"]
-            isOneToOne: false
-            referencedRelation: "public_profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -1092,14 +996,6 @@ export type Database = {
       attendance_outcome: "attended" | "cancelled" | "no_show"
       audience_gender: "everyone" | "women" | "men" | "non_binary"
       distance_unit: "mi" | "km"
-      entitlement_status:
-        | "active"
-        | "in_trial"
-        | "in_grace"
-        | "billing_issue"
-        | "paused"
-        | "expired"
-        | "refunded"
       gender: "woman" | "man" | "non_binary"
       join_mode: "open" | "approval"
       language_code:
@@ -1265,15 +1161,6 @@ export const Constants = {
       attendance_outcome: ["attended", "cancelled", "no_show"],
       audience_gender: ["everyone", "women", "men", "non_binary"],
       distance_unit: ["mi", "km"],
-      entitlement_status: [
-        "active",
-        "in_trial",
-        "in_grace",
-        "billing_issue",
-        "paused",
-        "expired",
-        "refunded",
-      ],
       gender: ["woman", "man", "non_binary"],
       join_mode: ["open", "approval"],
       language_code: [

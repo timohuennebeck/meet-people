@@ -12,7 +12,11 @@ export interface SessionState {
   hasOnboarded: boolean;
   /** Holds the verification badge. */
   isVerified: boolean;
-  /** Has an active Nearby Plus entitlement. */
+  /**
+   * Holds Nearby Plus. Nothing on the server decides this yet — the store
+   * integration is not wired — so it lives for the life of the session and
+   * starts false.
+   */
   isSubscribed: boolean;
 }
 
@@ -28,36 +32,25 @@ interface SessionContextValue extends SessionState {
   setSubscribed: (subscribed: boolean) => void;
 }
 
-/**
- * The entitlement that unlocks Nearby Plus, and the statuses that count as
- * holding it. `billing_issue` is deliberately not among them: the store has
- * stopped collecting and the grace period has run out, so the subscription is
- * over until it is fixed.
- */
-const PLUS = 'plus';
-const LIVE_STATUSES = ['active', 'in_trial', 'in_grace'] as const;
+/** What the database decides about one account, as opposed to what the session holds. */
+type ServerFlags = Pick<SessionState, 'hasOnboarded' | 'isVerified'>;
 
-const SIGNED_OUT: SessionState = {
-  isAuthenticated: false,
-  hasOnboarded: false,
-  isVerified: false,
-  isSubscribed: false,
-};
+const SIGNED_OUT: ServerFlags = { hasOnboarded: false, isVerified: false };
 
 const SessionContext = createContext<SessionContextValue | null>(null);
 
 /**
- * Reads the three derived flags for one account.
+ * Reads the derived flags for one account.
  *
  * Each is a row the database will only hand over to its owner, so what comes
  * back is the answer rather than a claim the client made about itself. A query
  * that errors resolves to `false` rather than throwing: a network blip must not
  * leave the app with no session state at all, and the next read corrects it.
  */
-async function readFlags(profileId: string): Promise<Omit<SessionState, 'isAuthenticated'>> {
-  if (!supabase) return { hasOnboarded: false, isVerified: false, isSubscribed: false };
+async function readFlags(profileId: string): Promise<ServerFlags> {
+  if (!supabase) return { hasOnboarded: false, isVerified: false };
 
-  const [profile, verification, entitlement] = await Promise.all([
+  const [profile, verification] = await Promise.all([
     supabase.from('profiles').select('onboarding_completed_at').eq('id', profileId).maybeSingle(),
     // The latest submission decides: an earlier rejection is history once a
     // later one comes back verified.
@@ -68,30 +61,22 @@ async function readFlags(profileId: string): Promise<Omit<SessionState, 'isAuthe
       .order('submitted_at', { ascending: false })
       .limit(1)
       .maybeSingle(),
-    // `entitlements` has no write policy at all, so this is the one direction
-    // it ever moves: the store's webhook writes it, the app reads it.
-    supabase
-      .from('entitlements')
-      .select('status')
-      .eq('profile_id', profileId)
-      .eq('entitlement_id', PLUS)
-      .maybeSingle(),
   ]);
 
   return {
     hasOnboarded: Boolean(profile.data?.onboarding_completed_at),
     isVerified: verification.data?.outcome === 'verified',
-    isSubscribed: LIVE_STATUSES.some((status) => status === entitlement.data?.status),
   };
 }
 
 /**
  * Holds the flags the router's `Protected` guards read.
  *
- * Nothing here is invented any more. `isAuthenticated` is whether Supabase has
- * a session; the other three are rows read back under row-level security, so
- * they say what the database says and not what a previous run of the app
- * decided.
+ * `isAuthenticated` is whether Supabase has a session, and `hasOnboarded` and
+ * `isVerified` are rows read back under row-level security, so they say what
+ * the database says and not what a previous run of the app decided.
+ * `isSubscribed` is the one exception, and only until billing is wired: no
+ * table answers it, so the paywall sets it for the session.
  *
  * There is deliberately no AsyncStorage mirror. The Supabase client already
  * persists the session there, and a second copy of the *derived* flags would
@@ -102,7 +87,13 @@ async function readFlags(profileId: string): Promise<Omit<SessionState, 'isAuthe
  */
 export function SessionProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
-  const [flags, setFlags] = useState<Omit<SessionState, 'isAuthenticated'>>(SIGNED_OUT);
+  const [flags, setFlags] = useState<ServerFlags>(SIGNED_OUT);
+  /**
+   * The account the paywall last granted Plus to, for as long as this session
+   * lasts. Holding the id rather than a boolean is what stops the grant
+   * following a sign-out into the next account.
+   */
+  const [subscribedFor, setSubscribedFor] = useState<string | null>(null);
   /**
    * True once the stored session has been read back, however it turned out.
    * With no Supabase project configured there is nothing to read, so the answer
@@ -217,18 +208,21 @@ export function SessionProvider({ children }: { children: ReactNode }) {
   }, [userId, refresh]);
 
   /**
-   * Both of these move the badge and the entitlement ahead of the row that
-   * decides them — the success screen and the paywall land before the reviewer
-   * and the store webhook have written anything. The next read puts the truth
-   * back, so neither can hold a flag open on its own.
+   * The success screen lands before the reviewer has written anything, so this
+   * moves the badge ahead of the row that decides it. The next read puts the
+   * truth back, so it cannot hold the flag open on its own.
    */
   const setVerified = useCallback(
     (isVerified: boolean) => setFlags((previous) => ({ ...previous, isVerified })),
     [],
   );
+  /**
+   * What the paywall's trial button does. With no store integration there is
+   * nothing behind it: the grant lasts as long as the session and no longer.
+   */
   const setSubscribed = useCallback(
-    (isSubscribed: boolean) => setFlags((previous) => ({ ...previous, isSubscribed })),
-    [],
+    (isSubscribed: boolean) => setSubscribedFor(isSubscribed ? userId : null),
+    [userId],
   );
 
   const value = useMemo<SessionContextValue>(
@@ -237,6 +231,7 @@ export function SessionProvider({ children }: { children: ReactNode }) {
       // An unconfigured build has no session and is not pretended into one:
       // every read past the welcome screen would throw for want of a client.
       isAuthenticated: Boolean(session),
+      isSubscribed: userId !== null && subscribedFor === userId,
       email: session?.user.email ?? null,
       isReady,
       signIn,
@@ -245,7 +240,18 @@ export function SessionProvider({ children }: { children: ReactNode }) {
       setVerified,
       setSubscribed,
     }),
-    [derived, session, isReady, signIn, signOut, completeOnboarding, setVerified, setSubscribed],
+    [
+      derived,
+      session,
+      userId,
+      subscribedFor,
+      isReady,
+      signIn,
+      signOut,
+      completeOnboarding,
+      setVerified,
+      setSubscribed,
+    ],
   );
 
   return <SessionContext.Provider value={value}>{children}</SessionContext.Provider>;
