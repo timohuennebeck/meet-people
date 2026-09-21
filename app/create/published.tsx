@@ -1,1 +1,1 @@
-export { PlanPublishedScreen as default } from '@features/plans/screens/create/PlanPublishedScreen';
+export { PlanPublishedScreen as default } from '@features/plans/screens/create/plan-published-screen';

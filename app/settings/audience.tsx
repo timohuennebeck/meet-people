@@ -1,1 +1,1 @@
-export { AudienceSettingsScreen as default } from '@features/settings/screens/AudienceSettingsScreen';
+export { AudienceSettingsScreen as default } from '@features/settings/screens/audience-settings-screen';

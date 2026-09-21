@@ -3,7 +3,7 @@ import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
 
 import { en } from './locales/en';
-import { ptBR, type Translation } from './locales/pt-BR';
+import { ptBR, type Translation } from './locales/pt-br';
 
 export const SUPPORTED_LOCALES = ['pt-BR', 'en'] as const;
 export type Locale = (typeof SUPPORTED_LOCALES)[number];

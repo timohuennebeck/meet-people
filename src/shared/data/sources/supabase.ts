@@ -90,7 +90,7 @@ async function viewerId(): Promise<string> {
  *
  * They are held here instead and replayed by `flushDeferredPreferences()` the
  * moment a session appears. The same shape as the profile writes in
- * `@features/onboarding/lib/profileWrites`, and for the same reason: a step
+ * `@features/onboarding/lib/profile-writes`, and for the same reason: a step
  * saves its own answer as the user continues, so an abandoned sign-up keeps
  * everything up to where it stopped.
  *

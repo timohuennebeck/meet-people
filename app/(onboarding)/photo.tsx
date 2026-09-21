@@ -1,1 +1,1 @@
-export { PhotoScreen as default } from '@features/onboarding/screens/PhotoScreen';
+export { PhotoScreen as default } from '@features/onboarding/screens/photo-screen';

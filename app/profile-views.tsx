@@ -1,1 +1,1 @@
-export { ProfileViewersScreen as default } from '@features/profile/screens/ProfileViewersScreen';
+export { ProfileViewersScreen as default } from '@features/profile/screens/profile-viewers-screen';

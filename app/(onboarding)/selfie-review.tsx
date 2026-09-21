@@ -1,1 +1,1 @@
-export { SelfieReviewScreen as default } from '@features/verification/screens/SelfieReviewScreen';
+export { SelfieReviewScreen as default } from '@features/verification/screens/selfie-review-screen';

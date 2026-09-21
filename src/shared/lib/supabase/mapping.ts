@@ -24,7 +24,7 @@ import { formatPlanDate, formatTime, isToday, relativeDay } from '@shared/lib/da
 import { SEARCHABLE_LANGUAGES } from '@shared/lib/languages';
 
 import { supabase } from './client';
-import type { Database } from './database.types';
+import type { Database } from './database-types';
 
 /** A code the `language_code` enum admits — the catalogue, as the database sees it. */
 export type LanguageCode = Database['public']['Enums']['language_code'];

@@ -1,1 +1,1 @@
-export { VerificationSuccessScreen as default } from '@features/verification/screens/VerificationSuccessScreen';
+export { VerificationSuccessScreen as default } from '@features/verification/screens/verification-success-screen';

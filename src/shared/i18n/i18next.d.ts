@@ -1,4 +1,4 @@
-import type { Translation } from './locales/pt-BR';
+import type { Translation } from './locales/pt-br';
 
 /**
  * Makes `t('settings.radius')` type-checked and auto-completed, and turns a

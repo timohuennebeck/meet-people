@@ -1,1 +1,1 @@
-export { LanguagesScreen as default } from '@features/onboarding/screens/LanguagesScreen';
+export { LanguagesScreen as default } from '@features/onboarding/screens/languages-screen';

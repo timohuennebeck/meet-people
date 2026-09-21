@@ -1,1 +1,1 @@
-export { ConfirmationScreen as default } from '@features/onboarding/screens/ConfirmationScreen';
+export { ConfirmationScreen as default } from '@features/onboarding/screens/confirmation-screen';

@@ -1,1 +1,1 @@
-export { AppLanguageSettingsScreen as default } from '@features/settings/screens/AppLanguageSettingsScreen';
+export { AppLanguageSettingsScreen as default } from '@features/settings/screens/app-language-settings-screen';

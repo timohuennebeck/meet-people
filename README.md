@@ -62,7 +62,7 @@ the build number).
 ```bash
 npm run db:start         # prints the API URL and publishable key
 npm run db:reset         # re-applies migrations
-npm run db:types         # regenerates database.types.ts
+npm run db:types         # regenerates database-types.ts
 ```
 
 Copy the printed URL and publishable key into `.env` as
@@ -115,11 +115,11 @@ anything:
   - An **outset** ring — `box-shadow: 0 0 0 Npx` with no `inset`, or a `border`
     on a content-box element — is painted _outside_ and consumes nothing. The
     React Native element must grow by `2N` and keep the design's full padding.
-    `Ring` in `src/shared/ui/Avatar.tsx` is that case: a 12px dot inside a 2.5px
+    `Ring` in `src/shared/ui/avatar.tsx` is that case: a 12px dot inside a 2.5px
     ring is a 17px element, not a 12px one.
   - An **inset** ring — `inset 0 0 0 Npx` — is painted over the padding. The
     element keeps its size and its padding drops by `N`, which is what
-    `padCompensation` in `src/shared/ui/Card.tsx` does.
+    `padCompensation` in `src/shared/ui/card.tsx` does.
 
   Getting this backwards silently shrinks every ringed avatar, dot and flag, so
   check the shadow's `inset` keyword before converting one.
@@ -167,7 +167,7 @@ Screens talk to TanStack Query hooks, which talk to `src/shared/data/source.ts`.
 That module resolves against fixtures today and against Supabase later; its
 method signatures are the seam, so nothing above it changes.
 
-Query keys come from factories in `src/shared/data/queryKeys.ts`, so
+Query keys come from factories in `src/shared/data/query-keys.ts`, so
 invalidation can target a whole feature or a single record without hand-written
 key arrays drifting apart. Mutations apply their change to the cache first and
 roll back on error.

@@ -1,1 +1,1 @@
-export { InterestsScreen as default } from '@features/onboarding/screens/InterestsScreen';
+export { InterestsScreen as default } from '@features/onboarding/screens/interests-screen';

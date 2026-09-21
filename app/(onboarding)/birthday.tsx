@@ -1,1 +1,1 @@
-export { BirthdayScreen as default } from '@features/onboarding/screens/BirthdayScreen';
+export { BirthdayScreen as default } from '@features/onboarding/screens/birthday-screen';

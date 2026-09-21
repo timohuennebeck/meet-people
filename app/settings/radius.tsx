@@ -1,1 +1,1 @@
-export { RadiusSettingsScreen as default } from '@features/settings/screens/RadiusSettingsScreen';
+export { RadiusSettingsScreen as default } from '@features/settings/screens/radius-settings-screen';

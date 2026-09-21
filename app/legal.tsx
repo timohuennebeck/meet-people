@@ -1,1 +1,1 @@
-export { TermsScreen as default } from '@features/legal/screens/TermsScreen';
+export { TermsScreen as default } from '@features/legal/screens/terms-screen';

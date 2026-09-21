@@ -7,6 +7,11 @@ check that file first.
 
 ## Conventions
 
+- **Filenames are kebab-case**, all of them: `age-range-control.tsx`,
+  `use-chat.ts`, `query-keys.ts`. What is _inside_ keeps its own casing —
+  components stay `PascalCase`, hooks stay `useCamelCase` — so
+  `plan-card.tsx` exports `PlanCard`. Routes under `app/` are filenames too,
+  and there the name is also the URL.
 - **Every screen lives in `src/features/<area>/screens/`.** Files under `app/`
   are one-line re-exports; keep them that way.
 - **Copy goes through i18n.** No literal user-facing strings in components.

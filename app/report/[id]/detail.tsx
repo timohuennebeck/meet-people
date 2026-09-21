@@ -1,1 +1,1 @@
-export { ReportDetailScreen as default } from '@features/safety/screens/ReportDetailScreen';
+export { ReportDetailScreen as default } from '@features/safety/screens/report-detail-screen';

@@ -1,1 +1,1 @@
-export { VerificationIntroScreen as default } from '@features/verification/screens/VerificationIntroScreen';
+export { VerificationIntroScreen as default } from '@features/verification/screens/verification-intro-screen';

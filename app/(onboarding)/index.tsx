@@ -1,1 +1,1 @@
-export { WelcomeScreen as default } from '@features/onboarding/screens/WelcomeScreen';
+export { WelcomeScreen as default } from '@features/onboarding/screens/welcome-screen';

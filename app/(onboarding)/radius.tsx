@@ -1,1 +1,1 @@
-export { RadiusScreen as default } from '@features/onboarding/screens/RadiusScreen';
+export { RadiusScreen as default } from '@features/onboarding/screens/radius-screen';

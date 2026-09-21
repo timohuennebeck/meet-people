@@ -1,7 +1,7 @@
 import { NativeTabs } from 'expo-router/unstable-native-tabs';
 import { useTranslation } from 'react-i18next';
 
-import { useUnreadCount } from '@features/chat/data/useChat';
+import { useUnreadCount } from '@features/chat/data/use-chat';
 import { colors } from '@shared/theme/tokens';
 
 /**

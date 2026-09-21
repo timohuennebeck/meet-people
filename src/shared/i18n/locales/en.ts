@@ -1,4 +1,4 @@
-import type { Translation } from './pt-BR';
+import type { Translation } from './pt-br';
 
 /**
  * English. Mirrors the pt-BR key structure exactly; `Translation` makes any

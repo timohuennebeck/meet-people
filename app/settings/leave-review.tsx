@@ -1,1 +1,1 @@
-export { LeaveReviewScreen as default } from '@features/settings/screens/LeaveReviewScreen';
+export { LeaveReviewScreen as default } from '@features/settings/screens/leave-review-screen';

@@ -1,1 +1,1 @@
-export { PronounsScreen as default } from '@features/onboarding/screens/PronounsScreen';
+export { PronounsScreen as default } from '@features/onboarding/screens/pronouns-screen';

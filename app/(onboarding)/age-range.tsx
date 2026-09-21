@@ -1,1 +1,1 @@
-export { AgeRangeScreen as default } from '@features/onboarding/screens/AgeRangeScreen';
+export { AgeRangeScreen as default } from '@features/onboarding/screens/age-range-screen';

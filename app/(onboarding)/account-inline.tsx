@@ -1,1 +1,1 @@
-export { AccountInlineScreen as default } from '@features/onboarding/screens/AccountInlineScreen';
+export { AccountInlineScreen as default } from '@features/onboarding/screens/account-inline-screen';
