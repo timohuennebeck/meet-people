@@ -339,6 +339,7 @@ export const ptBR = {
     notGoing: 'Não vou mais',
     accept: 'Aceitar',
     swipeToDecline: 'Deslize para a esquerda para recusar',
+    decline: 'Recusar',
     addSeat: '+1 vaga',
     waitlistNote: 'Entra se alguém desistir',
     inviteFriends: 'Convidar amigos',

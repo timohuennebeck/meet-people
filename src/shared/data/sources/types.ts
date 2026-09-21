@@ -33,6 +33,12 @@ export interface DataSource {
     setMembership(planId: string, membership: Membership, note?: string): Promise<Plan>;
     /** Host accepts a pending request; the applicant takes the next open seat. */
     acceptRequest(planId: string, requestId: string): Promise<Plan>;
+    /**
+     * Host turns a pending request down. This is what refunds the applicant's
+     * weekly request credit — `private.request_quota_spent()` counts every row
+     * that is not `declined` — so a request left to rot costs them one for good.
+     */
+    declineRequest(planId: string, requestId: string): Promise<Plan>;
   };
 
   users: {

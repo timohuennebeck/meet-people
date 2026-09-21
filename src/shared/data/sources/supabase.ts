@@ -17,7 +17,7 @@ import {
   type PublicProfileRow,
 } from '@shared/lib/supabase/mapping';
 
-import { throwAsDataError } from '../errors';
+import { DataError, throwAsDataError } from '../errors';
 import { DEFAULT_PREFERENCES } from '../fixtures';
 import {
   conversationSchema,
@@ -228,6 +228,33 @@ async function ownMembershipRow(planId: string, uid: string) {
       .eq('profile_id', uid)
       .maybeSingle(),
   );
+}
+
+/**
+ * Answers one pending request, as the host.
+ *
+ * `requestId` is the applicant's profile id — a request has no id of its own
+ * now that it is the same `plan_members` row as the seat it becomes.
+ *
+ * The row count is the point. Row-level security filters rather than refuses,
+ * so a caller who is not the host, or an applicant who withdrew a moment
+ * earlier, produces zero rows and no error at all — and the sheet would seat
+ * somebody the database never moved.
+ */
+async function answerRequest(
+  planId: string,
+  requestId: string,
+  status: 'seated' | 'declined',
+): Promise<Plan> {
+  const answered = await client()
+    .from('plan_members')
+    .update({ status }, { count: 'exact' })
+    .eq('plan_id', planId)
+    .eq('profile_id', requestId)
+    .eq('status', 'requested');
+  unwrap(answered);
+  if ((answered.count ?? 0) === 0) throw new DataError('BAD_TRANSITION');
+  return planDetail(planId);
 }
 
 // ---------------------------------------------------------------------------
@@ -532,20 +559,19 @@ export const supabaseSource: DataSource = {
 
     /**
      * Host accepts a request: the applicant's row moves from `requested` to
-     * `seated`. `requestId` is the applicant's profile id — a request has no
-     * id of its own now that it is the same row as the seat it becomes. The
-     * trigger stamps `seated_at` and may refuse with PLAN_FULL.
+     * `seated`. The trigger stamps `seated_at` and may refuse with PLAN_FULL.
      */
-    acceptRequest: async (planId: string, requestId: string): Promise<Plan> => {
-      unwrap(
-        await client()
-          .from('plan_members')
-          .update({ status: 'seated' })
-          .eq('plan_id', planId)
-          .eq('profile_id', requestId),
-      );
-      return planDetail(planId);
-    },
+    acceptRequest: (planId: string, requestId: string): Promise<Plan> =>
+      answerRequest(planId, requestId, 'seated'),
+
+    /**
+     * Host turns a request down, which is also what gives the applicant their
+     * weekly credit back: `private.request_quota_spent()` counts every row that
+     * is not `declined`, so a request nobody ever answers costs them one for
+     * good.
+     */
+    declineRequest: (planId: string, requestId: string): Promise<Plan> =>
+      answerRequest(planId, requestId, 'declined'),
   },
 
   users: {

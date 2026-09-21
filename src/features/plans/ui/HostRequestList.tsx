@@ -1,10 +1,11 @@
 import { useTranslation } from 'react-i18next';
 import { View } from 'react-native';
+import { Swipeable } from 'react-native-gesture-handler';
 
 import type { Plan } from '@shared/data/schemas';
 import { ActionPill, Button, GlowingMascot, PersonRow, SectionLabel, Text } from '@shared/ui';
 
-import { useAcceptRequest } from '../data/usePlans';
+import { useAcceptRequest, useDeclineRequest } from '../data/usePlans';
 
 /** `1.5px dashed` panel shown while a freshly published plan has no requests. */
 function NoRequestsYet() {
@@ -43,6 +44,7 @@ export interface HostRequestListProps {
 export function HostRequestList({ plan, full }: HostRequestListProps) {
   const { t } = useTranslation();
   const { mutate: accept } = useAcceptRequest(plan.id);
+  const { mutate: decline } = useDeclineRequest(plan.id);
 
   if (full) {
     return (
@@ -73,22 +75,45 @@ export function HostRequestList({ plan, full }: HostRequestListProps) {
       <SectionLabel sheet>{t('plan.requestsCount', { count: plan.requests.length })}</SectionLabel>
 
       {plan.requests.map((request) => (
-        <PersonRow
+        // The line under this list has always promised a swipe; until now
+        // nothing was bound to it, so a request could only ever be accepted.
+        // The accessibility action is the same answer for anyone not swiping.
+        <Swipeable
           key={request.id}
-          avatarUri={request.user.avatarUrl}
-          name={`${request.user.name}, ${request.user.age}`}
-          verified={request.user.verified}
-          // A quoted message when there is one, otherwise their track record.
-          detail={request.message ? `„${request.message}"` : (request.note ?? '')}
-          trailing={
-            <ActionPill
-              label={t('plan.accept')}
-              // Unverified applicants get the outlined pill, a softer yes.
-              outlined={!request.user.verified}
-              onPress={() => accept(request.id)}
+          renderRightActions={() => (
+            <View className="my-[2px] ml-[10px] justify-center rounded-well bg-danger px-[20px]">
+              <Text weight={600} className="text-[14px] text-white">
+                {t('plan.decline')}
+              </Text>
+            </View>
+          )}
+          onSwipeableOpen={(direction) => {
+            if (direction === 'right') decline(request.id);
+          }}
+        >
+          <View
+            accessibilityActions={[{ name: 'decline', label: t('plan.decline') }]}
+            onAccessibilityAction={(event) => {
+              if (event.nativeEvent.actionName === 'decline') decline(request.id);
+            }}
+          >
+            <PersonRow
+              avatarUri={request.user.avatarUrl}
+              name={`${request.user.name}, ${request.user.age}`}
+              verified={request.user.verified}
+              // A quoted message when there is one, otherwise their track record.
+              detail={request.message ? `„${request.message}"` : (request.note ?? '')}
+              trailing={
+                <ActionPill
+                  label={t('plan.accept')}
+                  // Unverified applicants get the outlined pill, a softer yes.
+                  outlined={!request.user.verified}
+                  onPress={() => accept(request.id)}
+                />
+              }
             />
-          }
-        />
+          </View>
+        </Swipeable>
       ))}
 
       <Text weight={600} className="pt-[4px] text-center text-[12px] text-ink-dim">

@@ -145,3 +145,23 @@ export function useAcceptRequest(planId: string) {
     },
   );
 }
+
+/**
+ * Host turns a request down; it leaves the list and seats nobody.
+ *
+ * This is also the only thing that gives the applicant their weekly request
+ * credit back — `private.request_quota_spent()` counts every row that is not
+ * `declined` — so a host who has no way to say no costs each applicant one for
+ * good, and on the free tier three of those end every further request with
+ * `NO_CREDITS`.
+ */
+export function useDeclineRequest(planId: string) {
+  return usePlanMutation<string>(
+    planId,
+    (requestId) => dataSource.plans.declineRequest(planId, requestId),
+    (plan, requestId) => ({
+      ...plan,
+      requests: plan.requests.filter((candidate) => candidate.id !== requestId),
+    }),
+  );
+}

@@ -336,6 +336,7 @@ export const en: Translation = {
     notGoing: "I can't make it",
     accept: 'Accept',
     swipeToDecline: 'Swipe left to decline',
+    decline: 'Decline',
     addSeat: '+1 seat',
     waitlistNote: 'Joins if someone drops out',
     inviteFriends: 'Invite friends',

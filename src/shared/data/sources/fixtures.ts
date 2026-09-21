@@ -80,6 +80,29 @@ function settle<T>(schema: z.ZodType<T>, value: T): Promise<T> {
   return new Promise((resolve) => setTimeout(() => resolve(resolved), LATENCY_MS));
 }
 
+/**
+ * Answers one pending request. Accepting seats the applicant; declining just
+ * takes the request off the list — there is no declined pile to render.
+ */
+function answerRequest(planId: string, requestId: string, seat: boolean): Promise<Plan> {
+  let updated: Plan | undefined;
+  plans = plans.map((plan) => {
+    if (plan.id !== planId) return plan;
+    const request = plan.requests.find((candidate) => candidate.id === requestId);
+    if (!request) return plan;
+    updated = {
+      ...plan,
+      requests: plan.requests.filter((candidate) => candidate.id !== requestId),
+      participants: seat
+        ? [...plan.participants, { user: request.user, isHost: false, isViewer: false }]
+        : plan.participants,
+    };
+    return updated;
+  });
+  if (!updated) return Promise.reject(new Error(`Request ${requestId} not found`));
+  return settle(planSchema, updated);
+}
+
 export const fixtureSource: DataSource = {
   plans: {
     // A copy, so the cache never holds the same array this module mutates.
@@ -112,25 +135,11 @@ export const fixtureSource: DataSource = {
     },
 
     /** Accepts a pending request, seating the applicant. */
-    acceptRequest: (planId: string, requestId: string): Promise<Plan> => {
-      let updated: Plan | undefined;
-      plans = plans.map((plan) => {
-        if (plan.id !== planId) return plan;
-        const request = plan.requests.find((candidate) => candidate.id === requestId);
-        if (!request) return plan;
-        updated = {
-          ...plan,
-          requests: plan.requests.filter((candidate) => candidate.id !== requestId),
-          participants: [
-            ...plan.participants,
-            { user: request.user, isHost: false, isViewer: false },
-          ],
-        };
-        return updated;
-      });
-      if (!updated) return Promise.reject(new Error(`Request ${requestId} not found`));
-      return settle(planSchema, updated);
-    },
+    acceptRequest: (planId: string, requestId: string): Promise<Plan> =>
+      answerRequest(planId, requestId, true),
+
+    declineRequest: (planId: string, requestId: string): Promise<Plan> =>
+      answerRequest(planId, requestId, false),
   },
 
   users: {
