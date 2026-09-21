@@ -2,7 +2,7 @@ import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 
 import { MascotScreen } from '@shared/components/mascot-screen';
-import { useViewer } from '@shared/data/use-viewer';
+import { useViewer } from '@shared/data/queries/use-viewer';
 import { useSession } from '@shared/providers/session-provider';
 import { Button, HostCard, TextButton } from '@shared/ui';
 

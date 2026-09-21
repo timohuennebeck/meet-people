@@ -9,10 +9,10 @@ import {
   type AgeRange,
 } from '@shared/components/age-range-control';
 import { isDataError } from '@shared/data/errors';
+import { usePublishPlan } from '@shared/data/queries/use-plans';
 import { Button, Spacer, Text, TextButton } from '@shared/ui';
 
-import { useCreatePlan } from '../../data/create-plan-provider';
-import { usePublishPlan } from '../../data/use-plans';
+import { useCreatePlan } from '../../lib/create-plan-provider';
 import { CreateStepLayout } from '../../ui/create-step-layout';
 
 /** Create step 7 — an optional age range for the plan, then publish. */

@@ -11,9 +11,9 @@ import { useEffect, useMemo } from 'react';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
-import { useChatInbox } from '@features/chat/data/use-chat';
+import { useChatInbox } from '@shared/data/queries/use-chat';
+import { usePreferences } from '@shared/data/queries/use-preferences';
 import { createQueryClient } from '@shared/data/query-client';
-import { usePreferences } from '@shared/data/use-preferences';
 import { setLocale } from '@shared/i18n';
 import { AnalyticsProvider } from '@shared/providers/analytics-provider';
 import { BillingProvider } from '@shared/providers/billing-provider';

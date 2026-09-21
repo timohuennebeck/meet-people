@@ -3,7 +3,7 @@ import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ScrollView } from 'react-native';
 
-import { usePreferences, useUpdatePreferences } from '@shared/data/use-preferences';
+import { usePreferences, useUpdatePreferences } from '@shared/data/queries/use-preferences';
 import { pickLanguages, searchLanguages, type LanguageOption } from '@shared/lib/languages';
 import { colors } from '@shared/theme/tokens';
 import { Glyph, Screen, SearchHeader, SelectableRow, Text, TextField } from '@shared/ui';

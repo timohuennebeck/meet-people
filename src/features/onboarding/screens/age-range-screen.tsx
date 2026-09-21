@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 
 import { AgePresets, AgeRangeControl } from '@shared/components/age-range-control';
 import { StepScaffold } from '@shared/components/step-scaffold';
-import { usePreferences, useUpdatePreferences } from '@shared/data/use-preferences';
+import { usePreferences, useUpdatePreferences } from '@shared/data/queries/use-preferences';
 import { STEPS } from '@shared/lib/steps';
 import { Button, Spacer } from '@shared/ui';
 

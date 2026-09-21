@@ -4,14 +4,14 @@ import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { View } from 'react-native';
 
+import { useNearbyPlaces, useRecentPlaces } from '@shared/data/queries/use-places';
 import type { Place } from '@shared/data/schemas';
 import { colors } from '@shared/theme/tokens';
 import { Button, Chip, Mascot, SectionLabel, Text, TextField } from '@shared/ui';
+import { PlaceRow } from '@shared/ui/place-row';
 
-import { useCreatePlan } from '../../data/create-plan-provider';
-import { useNearbyPlaces, useRecentPlaces } from '../../data/use-places';
+import { useCreatePlan } from '../../lib/create-plan-provider';
 import { CreateStepLayout } from '../../ui/create-step-layout';
-import { PlaceRow } from '../../ui/place-row';
 
 /** Create step 2 — where to meet. Asked before the time, since the venue limits it. */
 export function CreateWhereScreen() {

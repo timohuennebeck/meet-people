@@ -1,6 +1,6 @@
 import { Stack } from 'expo-router';
 
-import { CreatePlanProvider } from '@features/plans/data/create-plan-provider';
+import { CreatePlanProvider } from '@features/plans/lib/create-plan-provider';
 
 /**
  * The create-plan flow: a push stack, each step drawing its own header.

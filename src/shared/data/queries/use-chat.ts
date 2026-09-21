@@ -2,9 +2,9 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEffect } from 'react';
 
 import { chats } from '@shared/data/api/chats';
+import { useViewerId } from '@shared/data/queries/use-viewer';
 import { chatKeys } from '@shared/data/query-keys';
 import type { Message } from '@shared/data/schemas';
-import { useViewerId } from '@shared/data/use-viewer';
 import { i18n } from '@shared/i18n';
 
 /** The conversations list shown on the Chats tab. */

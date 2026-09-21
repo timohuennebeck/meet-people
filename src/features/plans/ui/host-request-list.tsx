@@ -2,10 +2,10 @@ import { useTranslation } from 'react-i18next';
 import { View } from 'react-native';
 import { Swipeable } from 'react-native-gesture-handler';
 
+import { useAcceptRequest, useAddSeat, useDeclineRequest } from '@shared/data/queries/use-plans';
 import type { Plan } from '@shared/data/schemas';
 import { ActionPill, Button, GlowingMascot, PersonRow, SectionLabel, Text } from '@shared/ui';
 
-import { useAcceptRequest, useAddSeat, useDeclineRequest } from '../data/use-plans';
 import { sharePlan } from '../lib/share';
 
 /** `1.5px dashed` panel shown while a freshly published plan has no requests. */

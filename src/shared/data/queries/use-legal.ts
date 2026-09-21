@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { legal } from '@shared/data/api/legal';
 import type { LegalDoc } from '@shared/lib/legal';
 
-import { legalKeys } from './query-keys';
+import { legalKeys } from '../query-keys';
 
 /**
  * The document in force, in the reader's language.

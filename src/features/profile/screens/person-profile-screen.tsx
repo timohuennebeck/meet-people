@@ -4,14 +4,14 @@ import { useTranslation } from 'react-i18next';
 import { ScrollView, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { useOpenDirect } from '@features/chat/data/use-chat';
 import { isDataError } from '@shared/data/errors';
-import { useViewer } from '@shared/data/use-viewer';
+import { useOpenDirect } from '@shared/data/queries/use-chat';
+import { useRecordProfileView, useUser } from '@shared/data/queries/use-users';
+import { useViewer } from '@shared/data/queries/use-viewer';
 import { cn } from '@shared/lib/cn';
 import { colors } from '@shared/theme/tokens';
 import { Button, CircleButton, Glyph, SealNote, Text } from '@shared/ui';
 
-import { useRecordProfileView, useUser } from '../data/use-users';
 import { ProfileHeader, ProfileInterests } from '../ui/profile-header';
 
 /** `radius:18px · #F7F9FC` tile — one of the three stats under the header. */

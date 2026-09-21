@@ -33,6 +33,7 @@ export { ListGroup, ListRow, SelectableRow } from './list-row';
 export { GlowingMascot, Mascot } from './mascot';
 export { CheckLine, InfoNote, SealNote, WarningNote } from './note';
 export { ActionPill, HostCard, OutlinePill, PersonRow } from './person-row';
+export { PlaceRow, type PlaceRowProps } from './place-row';
 export { PlanPhoto } from './plan-photo';
 export { Screen, type ScreenPadding } from './screen';
 export { SeatList, SeatSummary, type Seat } from './seats';

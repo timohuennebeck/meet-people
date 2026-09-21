@@ -2,12 +2,12 @@ import { useRouter } from 'expo-router';
 import { Info } from 'phosphor-react-native';
 import { useTranslation } from 'react-i18next';
 
-import { useConversations } from '@features/chat/data/use-chat';
-import { usePlans } from '@features/plans/data/use-plans';
 import { MascotScreen } from '@shared/components/mascot-screen';
 import { isDataError } from '@shared/data/errors';
-import { useDeleteAccount } from '@shared/data/use-account';
-import { useViewer } from '@shared/data/use-viewer';
+import { useDeleteAccount } from '@shared/data/queries/use-account';
+import { useConversations } from '@shared/data/queries/use-chat';
+import { usePlans } from '@shared/data/queries/use-plans';
+import { useViewer } from '@shared/data/queries/use-viewer';
 import { useSession } from '@shared/providers/session-provider';
 import { colors } from '@shared/theme/tokens';
 import { Button, InfoNote, Text, TextButton } from '@shared/ui';

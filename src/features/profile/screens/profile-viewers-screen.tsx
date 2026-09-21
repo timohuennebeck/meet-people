@@ -3,11 +3,10 @@ import { useTranslation } from 'react-i18next';
 import { ScrollView, View } from 'react-native';
 
 import { isDataError } from '@shared/data/errors';
+import { useProfileViewCount, useProfileViewers } from '@shared/data/queries/use-users';
 import { formatPastMoment } from '@shared/lib/datetime';
 import { colors } from '@shared/theme/tokens';
 import { Button, Glyph, NavHeader, PersonRow, Screen, Text } from '@shared/ui';
-
-import { useProfileViewCount, useProfileViewers } from '../data/use-users';
 
 /**
  * What a free account is shown instead of the list.

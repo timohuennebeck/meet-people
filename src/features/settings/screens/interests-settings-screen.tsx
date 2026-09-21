@@ -2,7 +2,7 @@ import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 
 import { SuggestionChips } from '@shared/components/suggestion-chips';
-import { usePreferences, useUpdatePreferences } from '@shared/data/use-preferences';
+import { usePreferences, useUpdatePreferences } from '@shared/data/queries/use-preferences';
 import { MAX_INTEREST_LENGTH, MAX_INTERESTS } from '@shared/lib/limits';
 import { Button, NavHeader, Screen, SectionLabel, Spacer, TagInput, Text } from '@shared/ui';
 

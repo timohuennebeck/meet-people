@@ -4,10 +4,10 @@ import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ScrollView, View } from 'react-native';
 
+import { useConversations, useUnreadCount } from '@shared/data/queries/use-chat';
 import { colors } from '@shared/theme/tokens';
 import { CircleButton, Glyph, Screen, SectionLabel, Text, TextField } from '@shared/ui';
 
-import { useConversations, useUnreadCount } from '../data/use-chat';
 import { ConversationRow } from '../ui/conversation-row';
 
 /** The Chats tab: every plan conversation the user is part of. */

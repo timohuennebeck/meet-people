@@ -4,7 +4,7 @@ import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { View } from 'react-native';
 
-import { useViewer } from '@shared/data/use-viewer';
+import { useViewer } from '@shared/data/queries/use-viewer';
 import { useSession } from '@shared/providers/session-provider';
 import { gradients, gradientStops } from '@shared/theme/tokens';
 import {

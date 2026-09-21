@@ -2,7 +2,7 @@ import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { ScrollView, View } from 'react-native';
 
-import { usePreferences } from '@shared/data/use-preferences';
+import { usePreferences } from '@shared/data/queries/use-preferences';
 import { APP_LANGUAGES, languageName } from '@shared/lib/languages';
 import { legalHref } from '@shared/lib/legal';
 import { useSession } from '@shared/providers/session-provider';

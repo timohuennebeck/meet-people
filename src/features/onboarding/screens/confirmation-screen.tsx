@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { View } from 'react-native';
 
 import { StepScaffold } from '@shared/components/step-scaffold';
-import { useViewer } from '@shared/data/use-viewer';
+import { useViewer } from '@shared/data/queries/use-viewer';
 import { STEPS } from '@shared/lib/steps';
 import { useSession } from '@shared/providers/session-provider';
 import { Button, Highlight, Mascot, StepTitle, Text, TextButton } from '@shared/ui';

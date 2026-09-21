@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { ScrollView, View } from 'react-native';
 
 import { isDataError } from '@shared/data/errors';
+import { usePlan, useRecordAttendance } from '@shared/data/queries/use-plans';
 import { formatDayMonth, formatTime, relativeDay } from '@shared/lib/datetime';
 import {
   Button,
@@ -16,7 +17,6 @@ import {
   WarningNote,
 } from '@shared/ui';
 
-import { usePlan, useRecordAttendance } from '../data/use-plans';
 import { attendeeDetail, attendeesOf, type Attendee } from '../lib/attendance';
 import { AttendeeRow } from '../ui/attendee-row';
 

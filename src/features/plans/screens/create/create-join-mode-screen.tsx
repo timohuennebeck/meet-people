@@ -9,7 +9,7 @@ import { cn } from '@shared/lib/cn';
 import { colors } from '@shared/theme/tokens';
 import { Button, InfoNote, SelectableCard, SelectionDot, Text } from '@shared/ui';
 
-import { useCreatePlan } from '../../data/create-plan-provider';
+import { useCreatePlan } from '../../lib/create-plan-provider';
 import { CreateStepLayout } from '../../ui/create-step-layout';
 
 /** One of the two join modes, as a full-width option row. */

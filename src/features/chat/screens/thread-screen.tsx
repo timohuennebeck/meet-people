@@ -4,11 +4,11 @@ import { useTranslation } from 'react-i18next';
 import { Keyboard, KeyboardAvoidingView, Platform, ScrollView, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { useViewerId } from '@shared/data/use-viewer';
+import { useConversations, useMarkRead, useThread } from '@shared/data/queries/use-chat';
+import { useViewerId } from '@shared/data/queries/use-viewer';
 import { Avatar, CircleButton, Glyph, PairAvatar, Text } from '@shared/ui';
 
-import { useConversations, useMarkRead, useThread } from '../data/use-chat';
-import { useComposer } from '../hooks/use-composer';
+import { useComposer } from '../lib/use-composer';
 import { Composer } from '../ui/composer';
 import { MessageBubble } from '../ui/message-bubble';
 

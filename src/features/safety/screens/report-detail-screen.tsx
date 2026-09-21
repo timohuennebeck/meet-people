@@ -3,8 +3,9 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { View } from 'react-native';
 
-import { usePlans } from '@features/plans/data/use-plans';
-import { useUser } from '@features/profile/data/use-users';
+import { usePlans } from '@shared/data/queries/use-plans';
+import { useReportAndBlock } from '@shared/data/queries/use-safety';
+import { useUser } from '@shared/data/queries/use-users';
 import { formatDayMonth } from '@shared/lib/datetime';
 import {
   Button,
@@ -19,7 +20,6 @@ import {
   WarningNote,
 } from '@shared/ui';
 
-import { useReportAndBlock } from '../data/use-safety';
 import { isReportReason } from '../lib/reasons';
 
 /**

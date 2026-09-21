@@ -2,7 +2,7 @@ import { useQuery } from '@tanstack/react-query';
 
 import { users } from '@shared/data/api/users';
 
-import { userKeys } from './query-keys';
+import { userKeys } from '../query-keys';
 
 /**
  * The signed-in user, for the features that need to render them into their own

@@ -4,7 +4,9 @@ import { View } from 'react-native';
 import type { Place } from '@shared/data/schemas';
 import { cn } from '@shared/lib/cn';
 import { colors } from '@shared/theme/tokens';
-import { SelectableCard, SelectionDot, Text } from '@shared/ui';
+
+import { SelectableCard, SelectionDot } from './card';
+import { Text } from './text';
 
 export interface PlaceRowProps {
   place: Place;

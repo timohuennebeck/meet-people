@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 
 import { StepScaffold } from '@shared/components/step-scaffold';
 import { SuggestionChips } from '@shared/components/suggestion-chips';
-import { usePreferences, useUpdatePreferences } from '@shared/data/use-preferences';
+import { usePreferences, useUpdatePreferences } from '@shared/data/queries/use-preferences';
 import { MAX_INTEREST_LENGTH, MAX_INTERESTS } from '@shared/lib/limits';
 import { STEPS } from '@shared/lib/steps';
 import { Button, Spacer, TagInput } from '@shared/ui';

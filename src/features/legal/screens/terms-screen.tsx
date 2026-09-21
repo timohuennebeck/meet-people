@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { ScrollView, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { useLegalDocument } from '@shared/data/use-legal';
+import { useLegalDocument } from '@shared/data/queries/use-legal';
 import { formatDayMonthYear } from '@shared/lib/datetime';
 import { resolveLegalDoc } from '@shared/lib/legal';
 import { useSession } from '@shared/providers/session-provider';

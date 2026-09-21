@@ -2,7 +2,8 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { ScrollView, View } from 'react-native';
 
-import { useOpenPlanChat } from '@features/chat/data/use-chat';
+import { useOpenPlanChat } from '@shared/data/queries/use-chat';
+import { usePlan, useSetMembership } from '@shared/data/queries/use-plans';
 import type { Plan } from '@shared/data/schemas';
 import { formatMonthYear } from '@shared/lib/datetime';
 import {
@@ -16,7 +17,6 @@ import {
   TimelineStep,
 } from '@shared/ui';
 
-import { usePlan, useSetMembership } from '../data/use-plans';
 import { hasEnded } from '../lib/attendance';
 import { openSeatCount, openSeatsLabel, participatingLabel, seatsFor } from '../lib/seats';
 import { HostRequestList } from '../ui/host-request-list';

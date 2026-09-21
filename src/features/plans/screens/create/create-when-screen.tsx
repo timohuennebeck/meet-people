@@ -19,7 +19,7 @@ import {
 import { colors } from '@shared/theme/tokens';
 import { Button, Chip, Glyph, SectionLabel, Spacer, Text } from '@shared/ui';
 
-import { useCreatePlan } from '../../data/create-plan-provider';
+import { useCreatePlan } from '../../lib/create-plan-provider';
 import { CreateStepLayout } from '../../ui/create-step-layout';
 
 /** `height:262px;border-radius:28px` — the card the design draws the wheels in. */

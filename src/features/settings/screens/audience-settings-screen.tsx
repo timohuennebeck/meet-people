@@ -4,8 +4,8 @@ import { View } from 'react-native';
 
 import { AgeRangeControl } from '@shared/components/age-range-control';
 import { ChoiceTile } from '@shared/components/choice-tile';
+import { usePreferences, useUpdatePreferences } from '@shared/data/queries/use-preferences';
 import type { AudienceGender } from '@shared/data/schemas';
-import { usePreferences, useUpdatePreferences } from '@shared/data/use-preferences';
 import { Button, NavHeader, Screen, SectionLabel, Spacer, Text } from '@shared/ui';
 
 /** Settings → Who I want to see: gender tiles and an age range. */

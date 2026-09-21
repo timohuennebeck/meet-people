@@ -33,4 +33,26 @@ module.exports = defineConfig([
       ],
     },
   },
+  {
+    // Features are leaves. Anything two of them need is not a feature's own —
+    // it belongs in `@shared/data/queries`, `@shared/ui` or `@shared/lib`.
+    // Within a feature imports are relative, so banning the alias here costs
+    // nothing and stops the boundary drifting again: it drifted eleven times
+    // while this rule lived only in CLAUDE.md.
+    files: ['src/features/**'],
+    rules: {
+      'no-restricted-imports': [
+        'error',
+        {
+          patterns: [
+            {
+              group: ['@features/*'],
+              message:
+                'Features may not import each other. Move the shared piece to @shared/data/queries, @shared/ui or @shared/lib.',
+            },
+          ],
+        },
+      ],
+    },
+  },
 ]);

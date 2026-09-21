@@ -6,7 +6,7 @@ import { cn } from '@shared/lib/cn';
 import { colors } from '@shared/theme/tokens';
 import { Button, Card, Glyph, Text } from '@shared/ui';
 
-import { useCreatePlan } from '../../data/create-plan-provider';
+import { useCreatePlan } from '../../lib/create-plan-provider';
 import { CreateStepLayout } from '../../ui/create-step-layout';
 
 const MIN_SEATS = 2;

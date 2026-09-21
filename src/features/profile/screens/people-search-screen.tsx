@@ -4,9 +4,9 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Pressable, ScrollView, View } from 'react-native';
 
-import { useNearbyPlaces, useRecentPlaces } from '@features/plans/data/use-places';
-import { usePlans } from '@features/plans/data/use-plans';
-import { PlaceRow } from '@features/plans/ui/place-row';
+import { useNearbyPlaces, useRecentPlaces } from '@shared/data/queries/use-places';
+import { usePlans } from '@shared/data/queries/use-plans';
+import { useRecentSearches, useUserSearch } from '@shared/data/queries/use-users';
 import type { Place, Plan, User } from '@shared/data/schemas';
 import { colors } from '@shared/theme/tokens';
 import {
@@ -20,8 +20,7 @@ import {
   Text,
   TextField,
 } from '@shared/ui';
-
-import { useRecentSearches, useUserSearch } from '../data/use-users';
+import { PlaceRow } from '@shared/ui/place-row';
 
 const SCOPES = [
   { id: 'people', labelKey: 'search.scopePeople' },

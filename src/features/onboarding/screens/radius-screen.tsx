@@ -4,8 +4,8 @@ import { useTranslation } from 'react-i18next';
 import { RadiusControl } from '@shared/components/radius-control';
 import { RadiusMap } from '@shared/components/radius-map';
 import { StepScaffold } from '@shared/components/step-scaffold';
+import { usePreferences, useUpdatePreferences } from '@shared/data/queries/use-preferences';
 import type { DistanceUnit } from '@shared/data/schemas';
-import { usePreferences, useUpdatePreferences } from '@shared/data/use-preferences';
 import { STEPS } from '@shared/lib/steps';
 import { Button, Spacer } from '@shared/ui';
 

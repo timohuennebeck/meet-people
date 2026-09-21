@@ -2,12 +2,12 @@ import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { Pressable, ScrollView, View } from 'react-native';
 
-import { usePreferences } from '@shared/data/use-preferences';
-import { useViewer } from '@shared/data/use-viewer';
+import { usePreferences } from '@shared/data/queries/use-preferences';
+import { useProfileViewCount } from '@shared/data/queries/use-users';
+import { useViewer } from '@shared/data/queries/use-viewer';
 import { colors } from '@shared/theme/tokens';
 import { Button, CircleButton, Glyph, SealNote, Text } from '@shared/ui';
 
-import { useProfileViewCount } from '../data/use-users';
 import { ProfileHeader, ProfileInterests } from '../ui/profile-header';
 
 /**

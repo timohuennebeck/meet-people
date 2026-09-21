@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { View } from 'react-native';
 
 import { StepScaffold } from '@shared/components/step-scaffold';
-import { useAcceptLegal, useLegalDocument } from '@shared/data/use-legal';
+import { useAcceptLegal, useLegalDocument } from '@shared/data/queries/use-legal';
 import { cn } from '@shared/lib/cn';
 import { STEPS } from '@shared/lib/steps';
 import { supabase } from '@shared/lib/supabase/client';

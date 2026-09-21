@@ -5,12 +5,12 @@ import { useTranslation } from 'react-i18next';
 import { Pressable, ScrollView, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { useViewer } from '@shared/data/use-viewer';
+import { usePlans } from '@shared/data/queries/use-plans';
+import { useViewer } from '@shared/data/queries/use-viewer';
 import { formatTime, isOnDayFilter, type DayFilter } from '@shared/lib/datetime';
 import { gradients, shadows } from '@shared/theme/tokens';
 import { Avatar, Chip, Glyph, GlowingMascot, Text } from '@shared/ui';
 
-import { usePlans } from '../data/use-plans';
 import { MapPin, UserDot } from '../ui/map-pin';
 import { PLAN_CARD_WIDTH, PlanCard } from '../ui/plan-card';
 

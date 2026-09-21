@@ -2,7 +2,7 @@ import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { ScrollView, View } from 'react-native';
 
-import { usePreferences, useUpdatePreferences } from '@shared/data/use-preferences';
+import { usePreferences, useUpdatePreferences } from '@shared/data/queries/use-preferences';
 import { setLocale } from '@shared/i18n';
 import { APP_LANGUAGES } from '@shared/lib/languages';
 import { NavHeader, Screen, SectionLabel, SelectableRow, Text } from '@shared/ui';

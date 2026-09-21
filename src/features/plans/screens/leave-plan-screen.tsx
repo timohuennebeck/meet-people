@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { View } from 'react-native';
 
 import { isDataError } from '@shared/data/errors';
+import { usePlan, useSetMembership } from '@shared/data/queries/use-plans';
 import {
   HostCard,
   Button,
@@ -15,8 +16,6 @@ import {
   TextButton,
   WarningNote,
 } from '@shared/ui';
-
-import { usePlan, useSetMembership } from '../data/use-plans';
 
 /**
  * Leaving a plan. The confirmation is honest about the consequences — the seat

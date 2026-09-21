@@ -5,7 +5,7 @@ import { View } from 'react-native';
 import { pickLanguages } from '@shared/lib/languages';
 import { Button, Flag, SelectableCard, SelectionDot, Spacer, Text } from '@shared/ui';
 
-import { useCreatePlan } from '../../data/create-plan-provider';
+import { useCreatePlan } from '../../lib/create-plan-provider';
 import { CreateStepLayout } from '../../ui/create-step-layout';
 
 /** The shortlist this step offers, Lisbon's own language first. */

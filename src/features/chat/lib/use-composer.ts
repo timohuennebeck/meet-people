@@ -1,6 +1,6 @@
 import { useCallback, useState } from 'react';
 
-import { useSendMessage } from '../data/use-chat';
+import { useSendMessage } from '@shared/data/queries/use-chat';
 
 export interface Composer {
   draft: string;

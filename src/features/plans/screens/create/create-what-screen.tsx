@@ -4,7 +4,7 @@ import { View } from 'react-native';
 
 import { Button, Chip, NoteField, SectionLabel, Spacer, Text } from '@shared/ui';
 
-import { useCreatePlan } from '../../data/create-plan-provider';
+import { useCreatePlan } from '../../lib/create-plan-provider';
 import { CreateStepLayout } from '../../ui/create-step-layout';
 
 const MAX_TITLE = 60;

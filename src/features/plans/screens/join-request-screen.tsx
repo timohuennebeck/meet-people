@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { View } from 'react-native';
 
 import { isDataError } from '@shared/data/errors';
+import { usePlan, useSetMembership } from '@shared/data/queries/use-plans';
 import {
   Avatar,
   Button,
@@ -14,8 +15,6 @@ import {
   Text,
   TextButton,
 } from '@shared/ui';
-
-import { usePlan, useSetMembership } from '../data/use-plans';
 
 /**
  * The join-request sheet: a note to the host, a few one-tap additions, and a

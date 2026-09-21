@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ScrollView, View } from 'react-native';
 
-import { useUser } from '@features/profile/data/use-users';
+import { useUser } from '@shared/data/queries/use-users';
 import {
   Button,
   NavHeader,

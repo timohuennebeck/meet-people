@@ -1,9 +1,9 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 import { plans } from '@shared/data/api/plans';
+import { useViewer } from '@shared/data/queries/use-viewer';
 import { chatKeys, planKeys, userKeys } from '@shared/data/query-keys';
 import type { Membership, Plan, User, NewPlan } from '@shared/data/schemas';
-import { useViewer } from '@shared/data/use-viewer';
 
 /**
  * Every plan on the map: upcoming, inside the radius, ordered by `starts_at`.

@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { View } from 'react-native';
 
 import { StepScaffold } from '@shared/components/step-scaffold';
-import { useUpdatePreferences } from '@shared/data/use-preferences';
+import { useUpdatePreferences } from '@shared/data/queries/use-preferences';
 import { STEPS } from '@shared/lib/steps';
 import { gradientAngles, gradients, shadows } from '@shared/theme/tokens';
 import { Button, Mascot, Spacer, Text, TextButton } from '@shared/ui';

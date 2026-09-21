@@ -2,11 +2,10 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { useUser } from '@features/profile/data/use-users';
 import { MascotScreen } from '@shared/components/mascot-screen';
+import { useUnblock } from '@shared/data/queries/use-safety';
+import { useUser } from '@shared/data/queries/use-users';
 import { Button, TextButton } from '@shared/ui';
-
-import { useUnblock } from '../data/use-safety';
 
 /**
  * Step three: the report is in, and the person is blocked.
