@@ -78,6 +78,8 @@ export const ptBR = {
       title: 'O que você\ngosta de fazer?',
       subtitle: 'Escreva e aperte enter.',
       continueWith: 'Continuar com {{count}}',
+      suggestionCoffee: 'Café',
+      suggestionBreakfast: 'Café da manhã',
     },
     languages: {
       title: 'Que idiomas\nvocê fala?',
@@ -418,6 +420,10 @@ export const ptBR = {
       placeholder: 'Tarde de jogos no Café Kotti',
       counter: '{{used}}/{{max}}',
       suggestions: 'SUGESTÕES',
+      suggestionAfternoonCoffee: 'Café da tarde',
+      suggestionEasyRun: 'Corrida leve',
+      suggestionOpenAirCinema: 'Cinema ao ar livre',
+      suggestionParkWalk: 'Caminhada no parque',
     },
     where: {
       title: 'Onde vocês se encontram?',
@@ -632,6 +638,8 @@ export const ptBR = {
     interestsPage: {
       note: 'Escreva e aperte enter. Usamos para ordenar os planos no mapa.',
       suggestions: 'SUGESTÕES',
+      suggestionLiveMusic: 'Música ao vivo',
+      suggestionMuseums: 'Museus',
     },
     audiencePage: {
       title: 'Quem eu quero ver',

@@ -79,6 +79,8 @@ export const en: Translation = {
       title: 'What do you\nlike doing?',
       subtitle: 'Type and press enter.',
       continueWith: 'Continue with {{count}}',
+      suggestionCoffee: 'Coffee',
+      suggestionBreakfast: 'Breakfast',
     },
     languages: {
       title: 'Which languages\ndo you speak?',
@@ -412,6 +414,10 @@ export const en: Translation = {
       placeholder: 'Board games at Café Kotti',
       counter: '{{used}}/{{max}}',
       suggestions: 'SUGGESTIONS',
+      suggestionAfternoonCoffee: 'Afternoon coffee',
+      suggestionEasyRun: 'Easy run',
+      suggestionOpenAirCinema: 'Open-air cinema',
+      suggestionParkWalk: 'Walk in the park',
     },
     where: {
       title: 'Where will you meet?',
@@ -616,6 +622,8 @@ export const en: Translation = {
     interestsPage: {
       note: 'Type and press enter. We use these to sort plans on the map.',
       suggestions: 'SUGGESTIONS',
+      suggestionLiveMusic: 'Live music',
+      suggestionMuseums: 'Museums',
     },
     audiencePage: {
       title: 'Who I want to see',

@@ -1,15 +1,12 @@
 import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
-import { View } from 'react-native';
 
 import { StepScaffold } from '@shared/components/StepScaffold';
+import { SuggestionChips } from '@shared/components/SuggestionChips';
 import { usePreferences, useUpdatePreferences } from '@shared/data/usePreferences';
 import { MAX_INTEREST_LENGTH, MAX_INTERESTS } from '@shared/lib/limits';
 import { STEPS } from '@shared/lib/steps';
-import { Button, Chip, Spacer, TagInput } from '@shared/ui';
-
-/** Suggestions offered under the field, as shown in the design. */
-const SUGGESTIONS = ['Café', 'Café da manhã'];
+import { Button, Spacer, TagInput } from '@shared/ui';
 
 /** Interests, entered as tags. */
 export function InterestsScreen() {
@@ -46,25 +43,17 @@ export function InterestsScreen() {
         onRemove={(tag) => update({ interests: tags.filter((entry) => entry !== tag) })}
       />
 
-      <View className="mt-[14px] shrink-0 flex-row flex-wrap gap-[8px]">
-        {/* Already-added tags drop out of the suggestions: two chips under one
-            key would collide, and removing either would take both. */}
-        {/* Nothing to offer once the cap is reached — a chip that fails silently
-            is worse than no chip. */}
-        {(tags.length >= MAX_INTERESTS ? [] : SUGGESTIONS)
-          .filter(
-            (suggestion) => !tags.some((tag) => tag.toLowerCase() === suggestion.toLowerCase()),
-          )
-          .map((suggestion) => (
-            <Chip
-              key={suggestion}
-              label={`+ ${suggestion}`}
-              size="suggestion"
-              tone="outline"
-              onPress={() => update({ interests: [...tags, suggestion] })}
-            />
-          ))}
-      </View>
+      {/* Suggestions offered under the field, as the design shows them. */}
+      <SuggestionChips
+        className="mt-[14px]"
+        chosen={tags}
+        suggestions={[
+          t('onboarding.interests.suggestionCoffee'),
+          t('onboarding.interests.suggestionBreakfast'),
+        ]}
+        max={MAX_INTERESTS}
+        onAdd={(suggestion) => update({ interests: [...tags, suggestion] })}
+      />
 
       <Spacer min={10} />
     </StepScaffold>

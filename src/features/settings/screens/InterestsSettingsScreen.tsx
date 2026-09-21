@@ -1,13 +1,10 @@
 import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
-import { View } from 'react-native';
 
+import { SuggestionChips } from '@shared/components/SuggestionChips';
 import { usePreferences, useUpdatePreferences } from '@shared/data/usePreferences';
 import { MAX_INTEREST_LENGTH, MAX_INTERESTS } from '@shared/lib/limits';
-import { Button, Chip, NavHeader, Screen, SectionLabel, Spacer, TagInput, Text } from '@shared/ui';
-
-/** Suggestions offered under the field. */
-const SUGGESTIONS = ['Música ao vivo', 'Museus'];
+import { Button, NavHeader, Screen, SectionLabel, Spacer, TagInput, Text } from '@shared/ui';
 
 /** Settings → Interests. The same tag field as onboarding, saved in place. */
 export function InterestsSettingsScreen() {
@@ -40,25 +37,16 @@ export function InterestsSettingsScreen() {
         {t('settings.interestsPage.suggestions')}
       </SectionLabel>
 
-      <View className="mt-[10px] shrink-0 flex-row flex-wrap gap-[8px]">
-        {/* A tag already on the list is not offered again — adding it twice
-            would put two chips under the same key, and removing either would
-            take both. */}
-        {(interests.length >= MAX_INTERESTS ? [] : SUGGESTIONS)
-          .filter(
-            (suggestion) =>
-              !interests.some((tag) => tag.toLowerCase() === suggestion.toLowerCase()),
-          )
-          .map((suggestion) => (
-            <Chip
-              key={suggestion}
-              label={`+ ${suggestion}`}
-              size="suggestion"
-              tone="outline"
-              onPress={() => update({ interests: [...interests, suggestion] })}
-            />
-          ))}
-      </View>
+      <SuggestionChips
+        className="mt-[10px]"
+        chosen={interests}
+        suggestions={[
+          t('settings.interestsPage.suggestionLiveMusic'),
+          t('settings.interestsPage.suggestionMuseums'),
+        ]}
+        max={MAX_INTERESTS}
+        onAdd={(suggestion) => update({ interests: [...interests, suggestion] })}
+      />
 
       <Spacer min={10} />
 

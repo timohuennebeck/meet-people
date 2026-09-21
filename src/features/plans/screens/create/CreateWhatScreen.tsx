@@ -9,14 +9,19 @@ import { CreateStepLayout } from '../../ui/CreateStepLayout';
 
 const MAX_TITLE = 60;
 
-/** Title suggestions offered under the field. */
-const SUGGESTIONS = ['Café da tarde', 'Corrida leve', 'Cinema ao ar livre', 'Caminhada no parque'];
-
 /** Create step 1 — what the plan is called. */
 export function CreateWhatScreen() {
   const { t } = useTranslation();
   const router = useRouter();
   const [title, setTitle] = useState('');
+
+  /** Title suggestions offered under the field. */
+  const suggestions = [
+    t('create.what.suggestionAfternoonCoffee'),
+    t('create.what.suggestionEasyRun'),
+    t('create.what.suggestionOpenAirCinema'),
+    t('create.what.suggestionParkWalk'),
+  ];
 
   return (
     <CreateStepLayout
@@ -50,7 +55,7 @@ export function CreateWhatScreen() {
       <SectionLabel className="mt-[20px] shrink-0">{t('create.what.suggestions')}</SectionLabel>
 
       <View className="mt-[10px] shrink-0 flex-row flex-wrap gap-[8px]">
-        {SUGGESTIONS.map((suggestion) => (
+        {suggestions.map((suggestion) => (
           <Chip
             key={suggestion}
             label={suggestion}
