@@ -63,7 +63,7 @@ the build number).
 ```bash
 npm run db:start         # prints the API URL and publishable key
 npm run db:reset         # re-applies migrations
-npm run db:types         # regenerates database-types.ts
+npm run db:types         # regenerates database.generated.ts
 ```
 
 Copy the printed URL and publishable key into `.env` as

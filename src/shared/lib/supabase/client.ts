@@ -3,10 +3,10 @@ import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 import 'react-native-url-polyfill/auto';
 
 import { env, hasSupabase } from '../env';
-import type { Database } from './database-types';
+import type { Database } from './database.generated';
 
 /**
- * The app's Supabase client, typed against the schema in `database-types.ts`.
+ * The app's Supabase client, typed against the schema in `database.generated.ts`.
  *
  * `npm run db:types` regenerates that file from the hosted project, so every
  * table name, column and enum below is checked at build time rather than

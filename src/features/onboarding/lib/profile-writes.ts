@@ -2,7 +2,7 @@ import type { SupabaseClient } from '@supabase/supabase-js';
 
 import { flushDeferredPreferences } from '@shared/data/api/preferences';
 import { supabase } from '@shared/lib/supabase/client';
-import type { Database, TablesUpdate } from '@shared/lib/supabase/database-types';
+import type { Database, TablesUpdate } from '@shared/lib/supabase/database.generated';
 import { currentProfileId } from '@shared/lib/supabase/session';
 import { uploadImage } from '@shared/lib/supabase/storage';
 

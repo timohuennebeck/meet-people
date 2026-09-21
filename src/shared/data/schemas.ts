@@ -3,9 +3,13 @@
  *
  * Both sources build these, so a backend change that would break a screen
  * shows up as a type error where the row is mapped rather than as a blank
- * render. That check is `tsc`'s: `database-types.ts` is generated from the
+ * render. That check is `tsc`'s: `database.generated.ts` is generated from the
  * live schema, so the column types these are built from are the real ones.
  */
+
+import type { Database } from '@shared/lib/supabase/database.generated';
+
+type Enums = Database['public']['Enums'];
 
 /**
  * The app's own vocabulary, each set declared once as a constant.
@@ -23,6 +27,15 @@
  * TypeScript's `enum` emits runtime code that its own erasable-syntax mode
  * rejects, and its members are not assignable from the plain strings that
  * arrive out of the database.
+ *
+ * Four of these sets happen to spell a Postgres enum exactly, so they take
+ * their type from the generated one and `satisfies` it, the same way
+ * `@shared/lib/supabase/enums` does. Naming the members is still the point —
+ * `JOIN_MODE.APPROVAL` reads where `'approval'` does not — but the *set* is no
+ * longer restated here, so a value renamed in the schema fails the build
+ * rather than quietly matching nothing. `MEMBERSHIP` and `AUDIENCE_GENDER`
+ * cannot: the first has no column behind it, and the second spells one of its
+ * members differently on purpose.
  */
 
 /** Why somebody is being reported — mirrors the `report_reason` enum. */
@@ -32,8 +45,8 @@ export const REPORT_REASON = {
   FAKE_PROFILE: 'fake_profile',
   INAPPROPRIATE: 'inappropriate',
   OTHER: 'other',
-} as const;
-export type ReportReason = (typeof REPORT_REASON)[keyof typeof REPORT_REASON];
+} as const satisfies Record<string, Enums['report_reason']>;
+export type ReportReason = Enums['report_reason'];
 
 /**
  * The reasons in the order the design lists them, which is not the enum's
@@ -52,8 +65,8 @@ export const REPORT_REASONS = [
 export const JOIN_MODE = {
   OPEN: 'open',
   APPROVAL: 'approval',
-} as const;
-export type JoinMode = (typeof JOIN_MODE)[keyof typeof JOIN_MODE];
+} as const satisfies Record<string, Enums['join_mode']>;
+export type JoinMode = Enums['join_mode'];
 
 /**
  * Where the viewer stands relative to a plan. Drives which sheet state renders.
@@ -76,8 +89,8 @@ export const PRONOUNS = {
   HE: 'he',
   THEY: 'they',
   UNSPECIFIED: 'unspecified',
-} as const;
-export type Pronouns = (typeof PRONOUNS)[keyof typeof PRONOUNS];
+} as const satisfies Record<string, Enums['pronouns']>;
+export type Pronouns = Enums['pronouns'];
 
 export interface SpokenLanguage {
   /** BCP-47 language code, e.g. `de`, `en`. */
@@ -236,9 +249,22 @@ export interface ConversationMember {
   avatarUrl: string | null;
 }
 
+/**
+ * Whether a thread is between two people or many.
+ *
+ * `conversations.kind` is a check constraint rather than an enum, so the
+ * generated type is a bare `string` and this set cannot be anchored to it the
+ * way the four above are — the mapping in `@shared/data/api/chats` narrows.
+ */
+export const CONVERSATION_KIND = {
+  DIRECT: 'direct',
+  GROUP: 'group',
+} as const;
+export type ConversationKind = (typeof CONVERSATION_KIND)[keyof typeof CONVERSATION_KIND];
+
 export interface Conversation {
   id: string;
-  kind: 'direct' | 'group';
+  kind: ConversationKind;
   title: string;
   /** One or two avatars; two renders the offset pair used for groups. */
   avatarUrls: (string | null)[];
@@ -267,8 +293,8 @@ export interface Conversation {
 export const DISTANCE_UNIT = {
   MILES: 'mi',
   KILOMETRES: 'km',
-} as const;
-export type DistanceUnit = (typeof DISTANCE_UNIT)[keyof typeof DISTANCE_UNIT];
+} as const satisfies Record<string, Enums['distance_unit']>;
+export type DistanceUnit = Enums['distance_unit'];
 
 /** `NON_BINARY` is `'nonBinary'`; the column's own spelling is `'non_binary'`. */
 export const AUDIENCE_GENDER = {
