@@ -5,6 +5,7 @@ import { View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import type { User } from '@shared/data/schemas';
+import { formatMonthYear } from '@shared/lib/datetime';
 import { gradients, gradientStops } from '@shared/theme/tokens';
 import { Chip, FlaggedAvatar, SectionLabel, Text, VerifiedSeal, flagUri } from '@shared/ui';
 
@@ -24,7 +25,7 @@ export interface ProfileHeaderProps {
  * then the flagged avatar beside the name, location and tenure.
  */
 export function ProfileHeader({ user, actions, locationLine }: ProfileHeaderProps) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const insets = useSafeAreaInsets();
 
   return (
@@ -38,9 +39,11 @@ export function ProfileHeader({ user, actions, locationLine }: ProfileHeaderProp
         {actions}
 
         <View className="mt-[18px] flex-row items-center gap-[16px]">
+          {/* The country is optional on a profile, and an absent one draws no
+              flag: defaulting it made every such person Spanish. */}
           <FlaggedAvatar
             uri={user.avatarUrl}
-            flagUri={flagUri(user.countryCode ?? 'es')}
+            flagUri={user.countryCode ? flagUri(user.countryCode) : undefined}
             size={92}
           />
           <View className="min-w-0 flex-1 gap-[5px]">
@@ -51,7 +54,14 @@ export function ProfileHeader({ user, actions, locationLine }: ProfileHeaderProp
               {user.verified ? <VerifiedSeal size={22} /> : null}
             </View>
             <Text className="text-[15px] text-ink-body">{locationLine}</Text>
-            <Text className="text-[14px] text-ink-dim">{t('profile.tenureLine')}</Text>
+            {/* The design writes "No app desde março · responde em ~2 h" here.
+                Nothing measures a reply time — no column, no view — so the
+                line keeps the half the profile row does answer. */}
+            <Text className="text-[14px] text-ink-dim">
+              {t('profile.tenureLine', {
+                month: formatMonthYear(new Date(user.joinedAt), i18n.language),
+              })}
+            </Text>
           </View>
         </View>
       </View>

@@ -2,9 +2,8 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { View } from 'react-native';
 
 import { cn } from '@shared/lib/cn';
-import { PORTRAITS } from '@shared/lib/placeholder-portraits';
 import { gradientAngles, gradients } from '@shared/theme/tokens';
-import { Avatar } from '@shared/ui';
+import { Face } from '@shared/ui';
 
 /**
  * The radius preview: two concentric brand-tinted circles around the user's
@@ -30,17 +29,24 @@ export function RadiusMap({ height, className }: { height: number; className?: s
         <View className="absolute h-[26px] w-[26px] rounded-full border-[4px] border-white bg-brand" />
       </View>
 
-      <NearbyFace uri={PORTRAITS.phil} className="left-[30px] top-[26px]" />
-      <NearbyFace uri={PORTRAITS.lea} className="bottom-[38px] right-[34px]" />
+      <NearbyFace className="left-[30px] top-[26px]" />
+      <NearbyFace className="bottom-[38px] right-[34px]" />
     </View>
   );
 }
 
-/** A 34px face with the design's `0 0 0 3px #fff` gutter. */
-function NearbyFace({ uri, className }: { uri: string; className: string }) {
+/**
+ * A 34px face with the design's `0 0 0 3px #fff` gutter.
+ *
+ * Deliberately faceless. This is a diagram of a distance, not a list of
+ * neighbours — nothing here queries who is actually nearby, and the design's
+ * two portraits were picsum strangers standing in for people who do not exist.
+ * A silhouette says "somebody" without naming anyone.
+ */
+function NearbyFace({ className }: { className: string }) {
   return (
     <View className={cn('absolute rounded-full border-[3px] border-white', className)}>
-      <Avatar uri={uri} size={34} />
+      <Face uri={null} size={34} />
     </View>
   );
 }

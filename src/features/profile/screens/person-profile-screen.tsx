@@ -129,7 +129,9 @@ export function PersonProfileScreen() {
 
         <ProfileInterests interests={user.interests} />
 
-        <SealNote>{t('profile.verifiedNote')}</SealNote>
+        {/* A claim about a verified selfie, so an unverified profile
+            does not make it. */}
+        {user.verified ? <SealNote>{t('profile.verifiedNote')}</SealNote> : null}
       </ScrollView>
 
       {/* The design's `padding:12px 20px 30px · gap:10px` column draws only the

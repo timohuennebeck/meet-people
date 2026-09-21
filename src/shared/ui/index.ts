@@ -6,10 +6,12 @@ export {
   Avatar,
   AvatarStack,
   EmptySeat,
+  Face,
   FlaggedAvatar,
   PairAvatar,
   Ring,
   VerifiedSeal,
+  type Photo,
 } from './avatar';
 export { Button, Spacer, TextButton, type ButtonVariant, type TextButtonTone } from './button';
 export {

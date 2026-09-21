@@ -416,9 +416,7 @@ function toConversation(row: {
 }): Conversation {
   const id = row.id ?? '';
   const members = (row.members ?? []) as ConversationMemberJson[];
-  const avatarUrls = members
-    .slice(0, 2)
-    .map((member) => avatarUrlFor(member.avatarStoragePath, member.id));
+  const avatarUrls = members.slice(0, 2).map((member) => avatarUrlFor(member.avatarStoragePath));
   const memberCount = row.member_count ?? 1;
   const extra = memberCount - avatarUrls.length;
 
@@ -426,14 +424,14 @@ function toConversation(row: {
     id,
     kind: row.kind === 'group' ? 'group' : 'direct',
     title: row.title ?? '',
-    // A conversation with no other members still has to draw one avatar; the
-    // fallback is seeded on the conversation so it at least stays put.
-    avatarUrls: avatarUrls.length > 0 ? avatarUrls : [avatarUrlFor(null, id)],
+    // A conversation with no other members still has to draw one avatar, and
+    // there is nobody whose photo it could be — so it draws the no-photo state.
+    avatarUrls: avatarUrls.length > 0 ? avatarUrls : [null],
     extraMembers: extra > 0 ? extra : undefined,
     members: members.map((member) => ({
       id: member.id,
       name: member.name ?? '',
-      avatarUrl: avatarUrlFor(member.avatarStoragePath, member.id),
+      avatarUrl: avatarUrlFor(member.avatarStoragePath),
     })),
     preview: row.preview ?? '',
     timeLabel: conversationTimeLabel(row.last_message_at),
@@ -717,7 +715,7 @@ export const supabaseSource: DataSource = {
         id: profile.id,
         name: profile.name,
         age: profile.birthdate ? ageFromBirthdate(new Date(profile.birthdate)) : 18,
-        avatarUrl: avatarUrlFor(profile.avatar_storage_path, profile.id),
+        avatarUrl: avatarUrlFor(profile.avatar_storage_path),
         verified: publicRow?.verified ?? false,
         neighbourhood: profile.neighbourhood ?? '',
         countryCode: profile.country_code ?? undefined,

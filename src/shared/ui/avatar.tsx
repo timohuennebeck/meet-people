@@ -1,4 +1,5 @@
 import { Image } from 'expo-image';
+import { User } from 'phosphor-react-native';
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { View } from 'react-native';
@@ -47,8 +48,43 @@ export function Ring({ children, size, width, color = colors.white, className, s
   );
 }
 
+/** A profile photo, or `null` for somebody who has not uploaded one. */
+export type Photo = string | null;
+
+/**
+ * A face at a given diameter — the photo, or the state for somebody who has
+ * none.
+ *
+ * `avatar_storage_path` stays null until the photo step writes one, and that
+ * step is skippable, so a real person can reach every screen in the app
+ * without a photograph. This renders a silhouette when that happens. It used
+ * to borrow a stranger's photograph from picsum instead, seeded on the profile
+ * id, which put an unrelated person's face under a real name on a real plan.
+ *
+ * Every avatar in this file goes through here, so there is one no-photo state
+ * rather than one per shape.
+ */
+export function Face({ uri, size }: { uri: Photo; size: number }) {
+  const { t } = useTranslation();
+  const box = { width: size, height: size, borderRadius: size / 2 };
+
+  if (!uri) {
+    return (
+      <View
+        className="items-center justify-center bg-surface-chip"
+        style={box}
+        accessibilityLabel={t('common.noPhoto')}
+      >
+        <User size={Math.round(size * 0.52)} weight="fill" color={colors.hairPale} />
+      </View>
+    );
+  }
+
+  return <Image source={{ uri }} style={box} />;
+}
+
 export interface AvatarProps {
-  uri: string;
+  uri: Photo;
   size: number;
   /** Draws the 3px brand ring with a white gutter that marks "you". */
   highlighted?: boolean;
@@ -60,15 +96,17 @@ export function Avatar({ uri, size, highlighted = false, className }: AvatarProp
   if (highlighted) {
     // `border:3px #2F7CF6` with `box-sizing:border-box` and `padding:2px` — the
     // one ringed avatar in the design that *is* border-box, so it eats inward.
+    // Its 3px border and 2px gutter both eat into the stated size, so the face
+    // inside is 10px smaller than the box.
     return (
       <View
         className={cn(
-          'overflow-hidden rounded-full border-[3px] border-brand bg-surface p-[2px]',
+          'items-center justify-center overflow-hidden rounded-full border-[3px] border-brand bg-surface p-[2px]',
           className,
         )}
         style={{ width: size, height: size }}
       >
-        <Image source={{ uri }} style={{ width: '100%', height: '100%', borderRadius: size }} />
+        <Face uri={uri} size={size - 10} />
       </View>
     );
   }
@@ -77,13 +115,13 @@ export function Avatar({ uri, size, highlighted = false, className }: AvatarProp
       className={cn('overflow-hidden rounded-full', className)}
       style={{ width: size, height: size }}
     >
-      <Image source={{ uri }} style={{ width: '100%', height: '100%' }} />
+      <Face uri={uri} size={size} />
     </View>
   );
 }
 
 export interface AvatarStackProps {
-  uris: string[];
+  uris: Photo[];
   /** Diameter of each image, excluding its ring. */
   size?: number;
   /** Gap closed between neighbours. The design uses -7 and -9. */
@@ -106,14 +144,17 @@ export function AvatarStack({
   return (
     <View className={cn('flex-row', className)}>
       {uris.map((uri, index) => (
+        // Two people without photos would collide on a `uri` key, so the
+        // position in the row is the key: the row is a fixed cast, never
+        // reordered.
         <Ring
-          key={uri}
+          key={index}
           size={size}
           width={ring}
           color={ringColor}
           style={{ marginLeft: index === 0 ? 0 : -overlap }}
         >
-          <Image source={{ uri }} style={{ width: size, height: size, borderRadius: size / 2 }} />
+          <Face uri={uri} size={size} />
         </Ring>
       ))}
     </View>
@@ -201,8 +242,8 @@ export function EmptySeat({ size, tinted = false }: { size: number; tinted?: boo
 }
 
 export interface PairAvatarProps {
-  primary: string;
-  secondary: string;
+  primary: Photo;
+  secondary: Photo;
   /** Adds the "+N" pill for group conversations with more members. */
   extra?: number;
   /** Box width. 44 in a chat header, 56 in the conversations list. */
@@ -225,16 +266,10 @@ export function PairAvatar({
   return (
     <View className="shrink-0" style={{ width: size, height }}>
       <Ring size={big} width={2} className="absolute left-0 top-0">
-        <Image
-          source={{ uri: primary }}
-          style={{ width: big, height: big, borderRadius: big / 2 }}
-        />
+        <Face uri={primary} size={big} />
       </Ring>
       <Ring size={small} width={2} className="absolute bottom-0 right-0">
-        <Image
-          source={{ uri: secondary }}
-          style={{ width: small, height: small, borderRadius: small / 2 }}
-        />
+        <Face uri={secondary} size={small} />
       </Ring>
       {extra !== undefined ? (
         <View className="absolute bottom-0 left-0 h-[22px] min-w-[24px] items-center justify-center rounded-pill border-2 border-white bg-surface-chip px-[5px]">
@@ -253,8 +288,9 @@ export function FlaggedAvatar({
   flagUri,
   size = 92,
 }: {
-  uri: string;
-  flagUri: string;
+  uri: Photo;
+  /** Absent for somebody who has not said where they are from. */
+  flagUri?: string;
   size?: number;
 }) {
   return (
@@ -265,14 +301,16 @@ export function FlaggedAvatar({
         className="absolute -left-[3px] -top-[3px]"
         style={shadows.profileAvatar}
       >
-        <Image source={{ uri }} style={{ width: size, height: size, borderRadius: size / 2 }} />
+        <Face uri={uri} size={size} />
       </Ring>
-      <Ring size={FLAG_SIZE} width={3} className="absolute" style={{ right: -5, bottom: -5 }}>
-        <Image
-          source={{ uri: flagUri }}
-          style={{ width: FLAG_SIZE, height: FLAG_SIZE, borderRadius: FLAG_SIZE / 2 }}
-        />
-      </Ring>
+      {flagUri ? (
+        <Ring size={FLAG_SIZE} width={3} className="absolute" style={{ right: -5, bottom: -5 }}>
+          <Image
+            source={{ uri: flagUri }}
+            style={{ width: FLAG_SIZE, height: FLAG_SIZE, borderRadius: FLAG_SIZE / 2 }}
+          />
+        </Ring>
+      ) : null}
     </View>
   );
 }

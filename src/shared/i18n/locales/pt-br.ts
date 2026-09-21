@@ -23,6 +23,7 @@ export const ptBR = {
     or: 'ou',
     close: 'Fechar',
     verified: 'Verificado',
+    noPhoto: 'Sem foto',
     more: 'Mais opções',
     remove: 'Remover {{label}}',
     raiseLower: 'Aumentar o mínimo',
@@ -314,7 +315,8 @@ export const ptBR = {
     standingLine: 'Encontro fixo · sem anfitrião',
     standingTitle: 'Encontro fixo',
     standingDetail: 'Sem anfitrião — quem aparecer, aparece',
-    hostTenure: 'Em Berlim desde março · hospeda pela 4ª vez',
+    hostSinceIn: '{{place}} · no treff desde {{month}}',
+    hostSince: 'No treff desde {{month}}',
     hostRole: 'Host',
     hostBadge: 'VOCÊ É HOST',
     joinedBadge: 'VOCÊ ESTÁ DENTRO',
@@ -526,8 +528,8 @@ export const ptBR = {
     interests: 'INTERESSES',
     invite: 'Convidar para um plano',
     message: 'Mensagem',
-    tenureLine: 'No app desde março · responde em ~2 h',
-    verifiedNote: 'Selfie verificada em março. Perfil confirmado por 3 anfitriões.',
+    tenureLine: 'No app desde {{month}}',
+    verifiedNote: 'Selfie verificada. É a pessoa da foto.',
 
     /**
      * Quem olhou seu perfil. `row` é grátis e conta; `locked*` é o que uma

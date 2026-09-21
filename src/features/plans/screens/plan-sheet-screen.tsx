@@ -4,6 +4,7 @@ import { ScrollView, View } from 'react-native';
 
 import { useOpenPlanChat } from '@features/chat/data/use-chat';
 import type { Plan } from '@shared/data/schemas';
+import { formatMonthYear } from '@shared/lib/datetime';
 import {
   Button,
   HostCard,
@@ -29,15 +30,29 @@ import { StandingMeetupCard } from '../ui/standing-meetup-card';
  * there is no face to show and nobody to name.
  */
 function PlanHost({ plan }: { plan: Plan }) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const host = plan.host;
 
-  if (!plan.host) return <StandingMeetupCard />;
+  if (!host) return <StandingMeetupCard />;
+
+  // The design writes "Em Berlim desde março · hospeda pela 4ª vez" here. The
+  // second half is a count of the plans this person has hosted, which the
+  // embedded host does not carry — `nearby_plans()` returns the profile row
+  // and nothing computed over it — and the first half is a city, which no
+  // column holds. So the line says what the row does answer: the neighbourhood
+  // they put on their profile, and the month they joined.
+  const month = formatMonthYear(new Date(host.joinedAt), i18n.language);
 
   return (
     <HostCard
-      avatarUri={plan.host.avatarUrl}
-      name={`${plan.host.name}, ${plan.host.age}`}
-      detail={t('plan.hostTenure')}
+      avatarUri={host.avatarUrl}
+      name={`${host.name}, ${host.age}`}
+      detail={
+        host.neighbourhood
+          ? t('plan.hostSinceIn', { place: host.neighbourhood, month })
+          : t('plan.hostSince', { month })
+      }
+      verified={host.verified}
     />
   );
 }

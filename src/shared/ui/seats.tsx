@@ -2,17 +2,31 @@ import { View } from 'react-native';
 
 import { cn } from '@shared/lib/cn';
 
-import { Avatar, EmptySeat } from './avatar';
+import { Avatar, EmptySeat, type Photo } from './avatar';
 import { Text } from './text';
 
-export interface Seat {
-  /** Absent for an unclaimed seat. */
-  avatarUri?: string;
-  /** Caption under the avatar — a first name, or "livre" for an open seat. */
+/** A seat somebody is in. Their photo is `null` if they have not uploaded one. */
+export interface TakenSeat {
+  avatarUri: Photo;
+  /** Caption under the avatar — a first name, or "Você". */
   label: string;
   /** Draws the brand ring that marks the viewer. */
   isViewer?: boolean;
 }
+
+/** A seat nobody has claimed, which draws the dashed placeholder. */
+export interface FreeSeat {
+  free: true;
+  /** Caption under the placeholder — "livre". */
+  label: string;
+}
+
+/**
+ * The two states are a union rather than one shape with an optional photo:
+ * "nobody is in this seat" and "the person in it has no photograph" look the
+ * same to a truthiness check, and they must never render the same way.
+ */
+export type Seat = TakenSeat | FreeSeat;
 
 export interface SeatListProps {
   seats: readonly Seat[];
@@ -62,14 +76,14 @@ export function SeatList({
           className={cn('items-center', even && 'flex-1')}
           style={{ gap: captionGap ?? (captionSize === 12 ? 6 : 5) }}
         >
-          {seat.avatarUri ? (
-            <Avatar uri={seat.avatarUri} size={size} highlighted={seat.isViewer} />
-          ) : (
+          {'free' in seat ? (
             <EmptySeat size={size} tinted={tintedEmpty} />
+          ) : (
+            <Avatar uri={seat.avatarUri} size={size} highlighted={seat.isViewer} />
           )}
           <Text
             weight={600}
-            className={cn(!seat.avatarUri && 'text-ink-dim')}
+            className={cn('free' in seat && 'text-ink-dim')}
             style={{ fontSize: captionSize }}
           >
             {seat.label}

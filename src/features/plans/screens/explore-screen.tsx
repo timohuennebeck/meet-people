@@ -107,11 +107,13 @@ export function ExploreScreen() {
 
       {/* Pins. A plan with no host — a standing meetup — has no face to wear,
           so the pin falls back to whoever is in it, and to the repeat mark when
-          nobody is yet. */}
+          nobody is yet. The person is chosen first and their photo read after:
+          `??` across the two photos would give the host's pin to the first
+          guest whenever the host has not uploaded one. */}
       {cards.map((plan) => (
         <MapPin
           key={plan.id}
-          avatarUri={plan.host?.avatarUrl ?? plan.participants[0]?.user.avatarUrl}
+          avatarUri={(plan.host ?? plan.participants[0]?.user)?.avatarUrl}
           x={plan.pin.x}
           y={plan.pin.y}
           title={plan.title}

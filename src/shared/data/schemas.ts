@@ -41,7 +41,8 @@ export interface User {
   id: string;
   name: string;
   age: number;
-  avatarUrl: string;
+  /** `null` for somebody who has not uploaded a photo — the step is skippable. */
+  avatarUrl: string | null;
   verified: boolean;
   /** Neighbourhood, never a street address — the design is explicit about this. */
   neighbourhood: string;
@@ -169,7 +170,7 @@ export interface Message {
 export interface ConversationMember {
   id: string;
   name: string;
-  avatarUrl: string;
+  avatarUrl: string | null;
 }
 
 export interface Conversation {
@@ -177,7 +178,7 @@ export interface Conversation {
   kind: 'direct' | 'group';
   title: string;
   /** One or two avatars; two renders the offset pair used for groups. */
-  avatarUrls: string[];
+  avatarUrls: (string | null)[];
   /** "+N" pill on the avatar pair for larger groups. */
   extraMembers?: number;
   /**

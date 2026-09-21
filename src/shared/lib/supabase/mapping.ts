@@ -6,9 +6,9 @@
  * so the source file stays a list of queries and the decisions below are in one
  * place where they can be argued with.
  *
- * Three of them are decisions rather than transcription, and each is explained
- * at the function that makes it: the avatar fallback, the `whenLabel` the
- * database does not store, and the map pin the database cannot store.
+ * Two of them are decisions rather than transcription, and each is explained
+ * at the function that makes it: the `whenLabel` the database does not store,
+ * and the map pin the database cannot store.
  */
 
 import type { DistanceUnit, Membership, Plan, SpokenLanguage, User } from '@shared/data/schemas';
@@ -115,31 +115,21 @@ export interface NearbyPlanRow {
 // ---------------------------------------------------------------------------
 
 /**
- * A portrait for a profile that has none.
- *
- * **Stand-in.** These are the same picsum placeholders the design export uses,
- * seeded on the profile id so a given person keeps the same face between
- * renders. It exists because `userSchema.avatarUrl` is a required `url()` and
- * every avatar in the design is a photograph — no screen has a no-photo state
- * to fall back to. It goes the day the photo step is mandatory, or the day a
- * real placeholder asset is drawn.
- */
-function placeholderPortrait(profileId: string): string {
-  return `https://picsum.photos/seed/${profileId}/300/300`;
-}
-
-/**
  * Resolves `profiles.avatar_storage_path` to something an `<Image>` can load.
  *
- * The column holds `'<profile id>/<file>.jpg'` in the public `avatars` bucket.
- * The seeded rows hold full picsum URLs instead — the design's own portraits —
- * so anything already absolute is passed through untouched.
+ * The column holds `'<profile id>/<file>.jpg'` in the public `avatars` bucket,
+ * and is null for anyone who has not uploaded a photo — the step is skippable.
+ * Null comes straight back out: `Face` in `@shared/ui` draws the no-photo
+ * state, which is the honest answer. This used to return a picsum URL seeded
+ * on the profile id instead, so every such person wore a stranger's face.
+ *
+ * Anything already absolute passes through untouched, which is what a row
+ * seeded with one of the design's own portrait URLs holds.
  */
-export function avatarUrlFor(path: string | null | undefined, profileId: string): string {
-  if (!path) return placeholderPortrait(profileId);
+export function avatarUrlFor(path: string | null | undefined): string | null {
+  if (!path) return null;
   if (path.startsWith('http')) return path;
-  const publicUrl = supabase?.storage.from('avatars').getPublicUrl(path).data.publicUrl;
-  return publicUrl ?? placeholderPortrait(profileId);
+  return supabase?.storage.from('avatars').getPublicUrl(path).data.publicUrl ?? null;
 }
 
 /**
@@ -187,7 +177,7 @@ export function toUser(row: PublicProfileRow, extras: UserExtras = {}): User {
     id: row.id,
     name: row.name ?? '',
     age: row.age ?? 18,
-    avatarUrl: avatarUrlFor(row.avatar_storage_path, row.id),
+    avatarUrl: avatarUrlFor(row.avatar_storage_path),
     verified: row.verified ?? false,
     neighbourhood: row.neighbourhood ?? '',
     countryCode: row.country_code ?? undefined,

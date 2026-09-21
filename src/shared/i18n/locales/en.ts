@@ -24,6 +24,7 @@ export const en: Translation = {
     or: 'or',
     close: 'Close',
     verified: 'Verified',
+    noPhoto: 'No photo',
     more: 'More options',
     remove: 'Remove {{label}}',
     raiseLower: 'Raise the minimum',
@@ -311,7 +312,8 @@ export const en: Translation = {
     standingLine: 'Standing meetup · no host',
     standingTitle: 'Standing meetup',
     standingDetail: 'No host — whoever turns up, turns up',
-    hostTenure: 'In Berlin since March · hosting for the 4th time',
+    hostSinceIn: '{{place}} · on treff since {{month}}',
+    hostSince: 'On treff since {{month}}',
     hostRole: 'Host',
     hostBadge: "YOU'RE HOSTING",
     joinedBadge: "YOU'RE IN",
@@ -518,8 +520,8 @@ export const en: Translation = {
     interests: 'INTERESTS',
     invite: 'Invite to a plan',
     message: 'Message',
-    tenureLine: 'On the app since March · replies in ~2 h',
-    verifiedNote: 'Selfie verified in March. Profile confirmed by 3 hosts.',
+    tenureLine: 'On the app since {{month}}',
+    verifiedNote: 'Selfie verified. This is the person in the photo.',
 
     views: {
       row_one: '{{count}} person viewed your profile this week',

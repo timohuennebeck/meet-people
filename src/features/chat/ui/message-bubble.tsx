@@ -2,14 +2,17 @@ import { View } from 'react-native';
 
 import { cn } from '@shared/lib/cn';
 import { shadows } from '@shared/theme/tokens';
-import { Avatar, Text } from '@shared/ui';
+import { Avatar, Text, type Photo } from '@shared/ui';
 
 export interface MessageBubbleProps {
   body: string;
   /** True for the signed-in user's own messages. */
   mine: boolean;
-  /** Author avatar; omitted on own messages, which have no avatar. */
-  avatarUri?: string;
+  /**
+   * Author avatar; omitted on own messages, which have no avatar. `null` is an
+   * author who has not uploaded a photo, which still draws a face.
+   */
+  avatarUri?: Photo;
   /** Author name, shown above other people's bubbles in group threads only. */
   authorName?: string;
   /** Receipt line under the bubble, e.g. "Visto 9:24". */
@@ -33,7 +36,9 @@ export function MessageBubble({
 }: MessageBubbleProps) {
   return (
     <View className={cn('flex-row items-end gap-[8px]', mine ? 'justify-end' : 'justify-start')}>
-      {!mine && avatarUri ? <Avatar uri={avatarUri} size={28} className="shrink-0" /> : null}
+      {!mine && avatarUri !== undefined ? (
+        <Avatar uri={avatarUri} size={28} className="shrink-0" />
+      ) : null}
 
       <View className={cn('max-w-[76%] gap-[3px]', mine ? 'items-end' : 'items-start')}>
         {authorName ? (

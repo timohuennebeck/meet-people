@@ -3,11 +3,11 @@ import { Pressable, View } from 'react-native';
 
 import { cn } from '@shared/lib/cn';
 
-import { Avatar, VerifiedSeal } from './avatar';
+import { Avatar, VerifiedSeal, type Photo } from './avatar';
 import { Text } from './text';
 
 export interface HostCardProps {
-  avatarUri: string;
+  avatarUri: Photo;
   /** Name and age as one string, e.g. "Phil, 23". */
   name: string;
   /** Second line — tenure, or the current seat count. */
@@ -56,7 +56,7 @@ export function HostCard({
 }
 
 export interface PersonRowProps {
-  avatarUri: string;
+  avatarUri: Photo;
   name: string;
   detail: string;
   verified?: boolean;

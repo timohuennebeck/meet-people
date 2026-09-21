@@ -4,9 +4,8 @@ import { Star } from 'phosphor-react-native';
 import { useTranslation } from 'react-i18next';
 import { Pressable, View } from 'react-native';
 
-import { PORTRAITS } from '@shared/lib/placeholder-portraits';
 import { colors, gradients, gradientStops, shadows } from '@shared/theme/tokens';
-import { Avatar, AvatarStack, Button, Highlight, Mascot, Screen, Text } from '@shared/ui';
+import { Button, Face, Highlight, Mascot, Screen, Text } from '@shared/ui';
 
 import { LanguagePicker } from '../ui/language-picker';
 import { LegalLink } from '../ui/legal-link';
@@ -16,12 +15,10 @@ import { LegalLink } from '../ui/legal-link';
  * offsets (`left:-4px top:26px` and `right:-6px bottom:44px`).
  */
 function FloatingPlan({
-  avatarUri,
   title,
   meta,
   position,
 }: {
-  avatarUri: string;
   title: string;
   meta: string;
   position: { left?: number; right?: number; top?: number; bottom?: number };
@@ -31,7 +28,10 @@ function FloatingPlan({
       className="absolute flex-row items-center gap-[9px] rounded-field bg-surface py-[9px] pl-[9px] pr-[13px]"
       style={[position, shadows.floatCard]}
     >
-      <Avatar uri={avatarUri} size={34} />
+      {/* Faceless on purpose: nobody is signed in here and these two cards
+          illustrate what a plan looks like rather than reporting real ones.
+          The design's portraits were picsum strangers. */}
+      <Face uri={null} size={34} />
       <View>
         <Text weight={600} className="text-[13px] leading-[15.6px]" numberOfLines={1}>
           {title}
@@ -65,13 +65,11 @@ export function WelcomeScreen() {
       <View className="relative flex-1 items-center justify-center">
         <Mascot size={244} />
         <FloatingPlan
-          avatarUri={PORTRAITS.pinRun}
           title={t('welcome.planRunTitle')}
           meta={t('welcome.planRunMeta')}
           position={{ left: -4, top: 26 }}
         />
         <FloatingPlan
-          avatarUri={PORTRAITS.pinCoffee}
           title={t('welcome.planCoffeeTitle')}
           meta={t('welcome.planCoffeeMeta')}
           position={{ right: -6, bottom: 44 }}
@@ -92,8 +90,11 @@ export function WelcomeScreen() {
 
         <Text className="mt-[11px] text-[16.5px] text-ink-dim">{t('welcome.subtitle')}</Text>
 
+        {/* The design puts three faces before this line. They were picsum
+            strangers presented as members, and three silhouettes in their
+            place would say nothing, so the line stands on its own until real
+            marketing artwork exists. */}
         <View className="mt-[20px] flex-row items-center gap-[10px]">
-          <AvatarStack uris={[PORTRAITS.lea, PORTRAITS.sara, PORTRAITS.noah]} />
           <Text className="text-[14.5px] text-ink-body">{t('welcome.socialProof')}</Text>
         </View>
 

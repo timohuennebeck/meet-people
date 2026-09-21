@@ -90,7 +90,9 @@ export function MyProfileScreen() {
 
         <ProfileInterests interests={preferences?.interests ?? me.interests} />
 
-        <SealNote>{t('profile.verifiedNote')}</SealNote>
+        {/* A claim about a verified selfie, so an unverified profile
+            does not make it. */}
+        {me.verified ? <SealNote>{t('profile.verifiedNote')}</SealNote> : null}
 
         <Button
           label={t('settings.title')}

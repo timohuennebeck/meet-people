@@ -21,7 +21,10 @@ export function seatsFor(plan: Plan, freeLabel: string, viewerLabel: string): Se
   if (plan.capacity === null) return taken;
 
   const open = Math.max(0, plan.capacity - taken.length);
-  return [...taken, ...Array.from({ length: open }, () => ({ label: freeLabel }))];
+  return [
+    ...taken,
+    ...Array.from({ length: open }, () => ({ free: true as const, label: freeLabel })),
+  ];
 }
 
 /**

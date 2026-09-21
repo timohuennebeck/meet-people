@@ -206,6 +206,16 @@ export function formatPastMoment(date: Date, locale: string, now = new Date()): 
   return i18n.t('datetime.dayAtTime', { day, time });
 }
 
+/**
+ * `março de 2026` / `March 2026` — how long somebody has been here.
+ *
+ * The month alone, as the design writes it ("desde março"), would read as
+ * three months ago for an account opened three years ago, so the year stays.
+ */
+export function formatMonthYear(date: Date, locale: string): string {
+  return new Intl.DateTimeFormat(locale, { month: 'long', year: 'numeric' }).format(date);
+}
+
 /** "20 de setembro de 2026" — the date a legal document came into force. */
 export function formatDayMonthYear(date: Date, locale: string): string {
   return new Intl.DateTimeFormat(locale, {
