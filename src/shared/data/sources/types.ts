@@ -125,13 +125,18 @@ export interface DataSource {
      */
     markRead(conversationId: string): Promise<void>;
     /**
-     * Watches one conversation for messages somebody else sends.
+     * Watches every conversation the viewer is in for new messages.
      *
-     * Returns the unsubscribe. `onMessage` fires per inserted row, and the
-     * viewer's own sends are not filtered out here — the thread dedupes by id,
-     * because a send that echoes back is the same message twice, not two.
+     * One subscription for the whole app rather than one per open thread:
+     * replication is filtered by the table's read policy, so this delivers
+     * exactly the messages this person may see and nothing else — and the
+     * Chats badge has to move whether or not the thread is on screen.
+     *
+     * Returns the unsubscribe. The viewer's own sends are not filtered out;
+     * the thread dedupes by id, because a send echoing back is the same
+     * message twice rather than two messages.
      */
-    subscribe(conversationId: string, onMessage: (message: Message) => void): () => void;
+    subscribeToMessages(onMessage: (message: Message) => void): () => void;
     /**
      * The direct thread with one person, opened if the two have none yet, as
      * its conversation id. The server decides whether the viewer may: a thread

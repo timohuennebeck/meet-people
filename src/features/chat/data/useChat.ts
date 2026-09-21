@@ -30,34 +30,44 @@ export function useThread(conversationId: string) {
 }
 
 /**
- * Delivers messages other people send while the thread is open.
+ * Delivers every message anybody sends to this person, wherever they are in
+ * the app.
  *
  * `public.messages` is in the `supabase_realtime` publication and has been
- * since the schema was written; nothing was listening. Without this a reply
- * only appeared on remount or when some other mutation happened to invalidate
- * the thread, which with a 60s `staleTime` is a chat that does not work.
+ * since the schema was written; nothing was listening. Mounted once, at the
+ * root — one channel rather than one per open thread, because the Chats badge
+ * has to move whether or not the thread is on screen, and replication is
+ * already filtered by the table's read policy.
  *
- * Appends into the cache rather than invalidating: a refetch would drop an
- * optimistic bubble that has not come back from its own insert yet.
+ * An arrival is appended into its thread's cache rather than invalidating it:
+ * a refetch would drop an optimistic bubble that has not come back from its own
+ * insert yet. The conversations list *is* invalidated, since the preview, the
+ * ordering and the unread count all move with it.
  */
-export function useThreadRealtime(conversationId: string) {
+export function useChatInbox() {
   const queryClient = useQueryClient();
 
-  useEffect(() => {
-    if (!conversationId) return;
-    const key = chatKeys.thread(conversationId).queryKey;
+  useEffect(
+    () =>
+      dataSource.chats.subscribeToMessages((message) => {
+        queryClient.setQueryData<Message[]>(
+          chatKeys.thread(message.conversationId).queryKey,
+          (previous) => {
+            // Nothing cached means the thread has not been opened; there is no
+            // list to add to, and opening it will fetch this message anyway.
+            if (!previous) return previous;
+            // The sender receives their own insert back. It is already in the
+            // cache under the server's id by then, so this is the same message
+            // arriving twice rather than two messages.
+            if (previous.some((candidate) => candidate.id === message.id)) return previous;
+            return [...previous, message];
+          },
+        );
 
-    return dataSource.chats.subscribe(conversationId, (message) => {
-      queryClient.setQueryData<Message[]>(key, (previous) => {
-        const messages = previous ?? [];
-        // The sender receives their own insert back. It is already in the
-        // cache under the server's id by then, so this is the same message
-        // arriving twice rather than two messages.
-        if (messages.some((candidate) => candidate.id === message.id)) return messages;
-        return [...messages, message];
-      });
-    });
-  }, [conversationId, queryClient]);
+        void queryClient.invalidateQueries({ queryKey: chatKeys.conversations().queryKey });
+      }),
+    [queryClient],
+  );
 }
 
 /**

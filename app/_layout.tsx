@@ -11,6 +11,7 @@ import { useEffect, useMemo } from 'react';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
+import { useChatInbox } from '@features/chat/data/useChat';
 import { createQueryClient } from '@shared/data/queryClient';
 import { usePreferences } from '@shared/data/usePreferences';
 import { setLocale } from '@shared/i18n';
@@ -61,6 +62,24 @@ function LocaleSync() {
     if (appLanguage) setLocale(appLanguage);
   }, [appLanguage]);
 
+  return null;
+}
+
+/**
+ * Holds the app's one Realtime subscription, so a message arriving moves the
+ * Chats badge wherever the reader happens to be.
+ *
+ * Mounted under `SessionProvider` and only once signed in: replication is
+ * scoped by the caller's own read policy, so there is nothing to listen to
+ * before there is a session.
+ */
+function ChatInbox() {
+  const { isAuthenticated } = useSession();
+  return isAuthenticated ? <ChatInboxSubscription /> : null;
+}
+
+function ChatInboxSubscription() {
+  useChatInbox();
   return null;
 }
 
@@ -136,6 +155,7 @@ export default function RootLayout() {
               <SessionProvider>
                 <StatusBar style="dark" />
                 <LocaleSync />
+                <ChatInbox />
                 <RootNavigator />
               </SessionProvider>
             </BillingProvider>

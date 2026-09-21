@@ -236,7 +236,7 @@ export const fixtureSource: DataSource = {
      * Nothing to watch: the only other person in a fixture thread is the
      * scripted reply, which `useScriptedThread` plays back locally.
      */
-    subscribe: (): (() => void) => () => undefined,
+    subscribeToMessages: (): (() => void) => () => undefined,
 
     /**
      * The design scripts one direct thread, with Sara. Anyone else gets a
