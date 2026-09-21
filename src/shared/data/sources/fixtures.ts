@@ -1,18 +1,8 @@
-import { z } from 'zod';
-
 import { i18n } from '@shared/i18n';
 import { whenLabel } from '@shared/lib/supabase/mapping';
 
 import * as fixtures from '../fixtures';
 import {
-  conversationSchema,
-  messageSchema,
-  placeSchema,
-  planSchema,
-  preferencesSchema,
-  profileViewSchema,
-  searchResultsSchema,
-  userSchema,
   type Conversation,
   type Membership,
   type Message,
@@ -63,22 +53,14 @@ function profileViews(): ProfileView[] {
 }
 
 /**
- * Resolves a value after the simulated latency, validating it on the way out.
+ * Resolves after the fixture source's own latency.
  *
- * Fixtures are trusted, so in production the parse is skipped and the value
- * passes straight through. In development it runs and the *parsed* value is
- * what resolves, so defaults and coercions apply here exactly as they do on the
- * Supabase source — and drift surfaces as a console error rather than silently
- * rendering a shape the schema rejects.
+ * The delay is the point: it keeps every screen's loading state on the path
+ * the real source takes, so a spinner that only appears over a network is not
+ * something the offline build can quietly lose.
  */
-function settle<T>(schema: z.ZodType<T>, value: T): Promise<T> {
-  let resolved = value;
-  if (__DEV__) {
-    const result = schema.safeParse(value);
-    if (result.success) resolved = result.data;
-    else console.error('[data] Value does not match its schema:', result.error.issues);
-  }
-  return new Promise((resolve) => setTimeout(() => resolve(resolved), LATENCY_MS));
+function settle<T>(value: T): Promise<T> {
+  return new Promise((resolve) => setTimeout(() => resolve(value), LATENCY_MS));
 }
 
 /**
@@ -101,13 +83,13 @@ function answerRequest(planId: string, requestId: string, seat: boolean): Promis
     return updated;
   });
   if (!updated) return Promise.reject(new Error(`Request ${requestId} not found`));
-  return settle(planSchema, updated);
+  return settle(updated);
 }
 
 export const fixtureSource: DataSource = {
   plans: {
     // A copy, so the cache never holds the same array this module mutates.
-    list: (): Promise<Plan[]> => settle(planSchema.array(), [...plans]),
+    list: (): Promise<Plan[]> => settle([...plans]),
 
     /**
      * Publishes a plan into the in-memory list, seating the viewer as its host
@@ -143,13 +125,13 @@ export const fixtureSource: DataSource = {
       };
 
       plans = [created, ...plans];
-      return settle(planSchema, created);
+      return settle(created);
     },
 
     detail: (planId: string): Promise<Plan> => {
       const plan = plans.find((candidate) => candidate.id === planId);
       if (!plan) return Promise.reject(new Error(`Plan ${planId} not found`));
-      return settle(planSchema, plan);
+      return settle(plan);
     },
 
     /**
@@ -169,7 +151,7 @@ export const fixtureSource: DataSource = {
         return updated;
       });
       if (!updated) return Promise.reject(new Error(`Plan ${planId} not found`));
-      return settle(planSchema, updated);
+      return settle(updated);
     },
 
     /** Accepts a pending request, seating the applicant. */
@@ -197,27 +179,26 @@ export const fixtureSource: DataSource = {
   },
 
   users: {
-    me: (): Promise<User> => settle(userSchema, fixtures.VIEWER),
+    me: (): Promise<User> => settle(fixtures.VIEWER),
     detail: (userId: string): Promise<User> => {
       const user = fixtures.PEOPLE[userId];
       if (!user) return Promise.reject(new Error(`User ${userId} not found`));
-      return settle(userSchema, user);
+      return settle(user);
     },
     search: (term: string) =>
       settle(
-        searchResultsSchema,
         term.trim().length === 0
           ? []
           : fixtures.SEARCH_RESULTS.filter((result) =>
               result.user.name.toLowerCase().includes(term.trim().toLowerCase()),
             ),
       ),
-    recent: () => settle(searchResultsSchema, fixtures.RECENT_SEARCHES),
+    recent: () => settle(fixtures.RECENT_SEARCHES),
 
     /** Three, which is what `viewers` lists — the offline path renders the same screen. */
-    viewCount: (): Promise<number> => settle(z.number().int().min(0), profileViews().length),
+    viewCount: (): Promise<number> => settle(profileViews().length),
 
-    viewers: (): Promise<ProfileView[]> => settle(profileViewSchema.array(), profileViews()),
+    viewers: (): Promise<ProfileView[]> => settle(profileViews()),
 
     /**
      * Accepted and dropped.
@@ -232,8 +213,7 @@ export const fixtureSource: DataSource = {
   },
 
   chats: {
-    conversations: (): Promise<Conversation[]> =>
-      settle(conversationSchema.array(), fixtures.CONVERSATIONS),
+    conversations: (): Promise<Conversation[]> => settle(fixtures.CONVERSATIONS),
 
     /**
      * The fixture conversations carry the unread counts the design draws, and
@@ -265,7 +245,7 @@ export const fixtureSource: DataSource = {
       Promise.resolve(userId === fixtures.SARA.id ? 'c-mara' : `c-${userId}`),
 
     thread: (conversationId: string): Promise<Message[]> =>
-      settle(messageSchema.array(), [...(threads.get(conversationId) ?? [])]),
+      settle([...(threads.get(conversationId) ?? [])]),
 
     send: (conversationId: string, body: string): Promise<Message> => {
       const message: Message = {
@@ -282,7 +262,7 @@ export const fixtureSource: DataSource = {
         ...existing.map((entry) => ({ ...entry, receipt: undefined })),
         message,
       ]);
-      return settle(messageSchema, message);
+      return settle(message);
     },
 
     /** Appends the scripted reply that the design plays back after sending. */
@@ -295,7 +275,7 @@ export const fixtureSource: DataSource = {
         createdAt: new Date().toISOString(),
       };
       threads.set(conversationId, [...(threads.get(conversationId) ?? []), message]);
-      return settle(messageSchema, message);
+      return settle(message);
     },
   },
 
@@ -327,15 +307,15 @@ export const fixtureSource: DataSource = {
   },
 
   places: {
-    recent: (): Promise<Place[]> => settle(placeSchema.array(), fixtures.RECENT_PLACES),
-    nearby: (): Promise<Place[]> => settle(placeSchema.array(), fixtures.NEARBY_PLACES),
+    recent: (): Promise<Place[]> => settle(fixtures.RECENT_PLACES),
+    nearby: (): Promise<Place[]> => settle(fixtures.NEARBY_PLACES),
   },
 
   preferences: {
-    get: (): Promise<Preferences> => settle(preferencesSchema, preferences),
+    get: (): Promise<Preferences> => settle(preferences),
     update: (patch: Partial<Preferences>): Promise<Preferences> => {
       preferences = { ...preferences, ...patch };
-      return settle(preferencesSchema, preferences);
+      return settle(preferences);
     },
   },
 };

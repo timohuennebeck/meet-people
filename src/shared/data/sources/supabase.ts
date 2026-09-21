@@ -1,6 +1,5 @@
 import Constants from 'expo-constants';
 import { Platform } from 'react-native';
-import type { z } from 'zod';
 
 import { i18n } from '@shared/i18n';
 import { ageFromBirthdate } from '@shared/lib/datetime';
@@ -23,15 +22,6 @@ import {
 import { DataError, throwAsDataError } from '../errors';
 import { DEFAULT_PREFERENCES } from '../fixtures';
 import {
-  conversationSchema,
-  legalDocumentSchema,
-  messageSchema,
-  placeSchema,
-  planSchema,
-  preferencesSchema,
-  profileViewSchema,
-  searchResultsSchema,
-  userSchema,
   type AudienceGender,
   type Conversation,
   type DistanceUnit,
@@ -151,22 +141,6 @@ function unwrapSingle<T>(result: { data: T | null; error: unknown | null }, what
   const row = unwrap(result);
   if (row === null) throw new Error(`[data] ${what} not found.`);
   return row;
-}
-
-/**
- * Validates on the way out, exactly as the fixture source does.
- *
- * In development a mismatch is a console error and the raw value still renders,
- * so a schema drift is loud without blanking the screen that found it. In
- * production the parse is skipped: the shape has already been checked by then,
- * and a release is not the place to discover it.
- */
-function validate<T>(schema: z.ZodType<T>, value: T): T {
-  if (!__DEV__) return value;
-  const result = schema.safeParse(value);
-  if (result.success) return result.data;
-  console.error('[data] Value does not match its schema:', result.error.issues);
-  return value;
 }
 
 /** View rows type every column as nullable; the view's own `where` says otherwise. */
@@ -348,7 +322,7 @@ async function planDetail(planId: string): Promise<Plan> {
  */
 async function findPlan(planId: string): Promise<Plan | null> {
   const plan = (await fetchPlans()).find((candidate) => candidate.id === planId);
-  return plan ? validate(planSchema, plan) : null;
+  return plan ? plan : null;
 }
 
 // ---------------------------------------------------------------------------
@@ -404,16 +378,13 @@ async function searchPeople(term: string): Promise<SearchResults> {
   const profiles = rows.map(asProfileRow);
   const counts = await sharedPlanCounts(profiles.map((profile) => profile.id));
 
-  return validate(
-    searchResultsSchema,
-    profiles.map((profile) => {
-      const shared = counts.get(profile.id) ?? 0;
-      return {
-        user: toUser(profile, { sharedPlansCount: shared || undefined }),
-        detail: searchDetailLine(profile.neighbourhood ?? '', shared),
-      };
-    }),
-  );
+  return profiles.map((profile) => {
+    const shared = counts.get(profile.id) ?? 0;
+    return {
+      user: toUser(profile, { sharedPlansCount: shared || undefined }),
+      detail: searchDetailLine(profile.neighbourhood ?? '', shared),
+    };
+  });
 }
 
 // ---------------------------------------------------------------------------
@@ -546,7 +517,7 @@ async function placesWithDistance(
 
 export const supabaseSource: DataSource = {
   plans: {
-    list: async (): Promise<Plan[]> => validate(planSchema.array(), await fetchPlans()),
+    list: async (): Promise<Plan[]> => await fetchPlans(),
 
     detail: planDetail,
 
@@ -742,7 +713,7 @@ export const supabaseSource: DataSource = {
           .then((result) => unwrap(result)),
       ]);
 
-      return validate(userSchema, {
+      return {
         id: profile.id,
         name: profile.name,
         age: profile.birthdate ? ageFromBirthdate(new Date(profile.birthdate)) : 18,
@@ -755,7 +726,7 @@ export const supabaseSource: DataSource = {
         interests: profile.interests,
         languages: spokenLanguagesFor(profile.languages),
         joinedAt: profile.created_at,
-      });
+      };
     },
 
     /** Somebody else's profile, as `public_profiles` is willing to show it. */
@@ -784,14 +755,11 @@ export const supabaseSource: DataSource = {
 
       if (!row) throw new Error(`User ${userId} not found`);
 
-      return validate(
-        userSchema,
-        toUser(asProfileRow(row), {
-          attendanceRate,
-          plansCount,
-          sharedPlansCount: sharedCounts.get(userId) ?? 0,
-        }),
-      );
+      return toUser(asProfileRow(row), {
+        attendanceRate,
+        plansCount,
+        sharedPlansCount: sharedCounts.get(userId) ?? 0,
+      });
     },
 
     search: searchPeople,
@@ -825,13 +793,10 @@ export const supabaseSource: DataSource = {
      */
     viewers: async (): Promise<ProfileView[]> => {
       const rows = unwrap(await client().rpc('profile_viewers'));
-      return validate(
-        profileViewSchema.array(),
-        (rows ?? []).map((row) => ({
-          user: toUser(asProfileRow(row.viewer)),
-          viewedAt: new Date(row.viewed_at).toISOString(),
-        })),
-      );
+      return (rows ?? []).map((row) => ({
+        user: toUser(asProfileRow(row.viewer)),
+        viewedAt: new Date(row.viewed_at).toISOString(),
+      }));
     },
 
     /**
@@ -857,7 +822,7 @@ export const supabaseSource: DataSource = {
           .select('*')
           .order('last_message_at', { ascending: false, nullsFirst: false }),
       );
-      return validate(conversationSchema.array(), (rows ?? []).map(toConversation));
+      return (rows ?? []).map(toConversation);
     },
 
     /**
@@ -927,7 +892,7 @@ export const supabaseSource: DataSource = {
           .limit(THREAD_PAGE_SIZE),
       );
       const messages = (rows ?? []).reverse().map(toMessage);
-      return validate(messageSchema.array(), withSentReceipt(messages, uid));
+      return withSentReceipt(messages, uid);
     },
 
     send: async (conversationId: string, body: string): Promise<Message> => {
@@ -941,7 +906,7 @@ export const supabaseSource: DataSource = {
           .single(),
         'Sent message',
       );
-      return validate(messageSchema, { ...toMessage(row), receipt: i18n.t('chat.sent') });
+      return { ...toMessage(row), receipt: i18n.t('chat.sent') };
     },
 
     /**
@@ -966,13 +931,13 @@ export const supabaseSource: DataSource = {
       if (!row) return null;
 
       const { title, sections } = parseLegalMarkdown(row.content_md);
-      return validate(legalDocumentSchema, {
+      return {
         id: row.id,
         version: row.version,
         effectiveAt: row.effective_at,
         title,
         sections,
-      });
+      };
     },
 
     /**
@@ -1076,7 +1041,7 @@ export const supabaseSource: DataSource = {
           .order('created_at', { ascending: false })
           .limit(8),
       );
-      return validate(placeSchema.array(), await placesWithDistance(rows ?? [], unit));
+      return await placesWithDistance(rows ?? [], unit);
     },
 
     nearby: async (): Promise<Place[]> => {
@@ -1085,7 +1050,7 @@ export const supabaseSource: DataSource = {
       const rows = unwrap(
         await db.from('places').select('id, name, address, provider_place_id').limit(12),
       );
-      return validate(placeSchema.array(), await placesWithDistance(rows ?? [], unit));
+      return await placesWithDistance(rows ?? [], unit);
     },
   },
 
@@ -1103,7 +1068,7 @@ export const supabaseSource: DataSource = {
       // are the fixture defaults, so the early steps open on the same values
       // they would have after sign-up, with anything already chosen on top.
       if (!uid) {
-        return validate(preferencesSchema, { ...DEFAULT_PREFERENCES, ...deferredPreferences });
+        return { ...DEFAULT_PREFERENCES, ...deferredPreferences };
       }
 
       const row = await db
@@ -1115,7 +1080,7 @@ export const supabaseSource: DataSource = {
         .single()
         .then((result) => unwrapSingle(result, 'Preferences'));
 
-      return validate(preferencesSchema, {
+      return {
         radius: row.radius,
         distanceUnit: row.distance_unit,
         ageRange: [row.age_min, row.age_max],
@@ -1124,7 +1089,7 @@ export const supabaseSource: DataSource = {
         spokenLanguages: spokenLanguagesFor(row.languages),
         appLanguage: row.app_language,
         notificationsEnabled: row.notifications_enabled,
-      });
+      };
     },
 
     /**
@@ -1143,7 +1108,7 @@ export const supabaseSource: DataSource = {
 
       if (!uid) {
         deferredPreferences = { ...deferredPreferences, ...patch };
-        return validate(preferencesSchema, { ...DEFAULT_PREFERENCES, ...deferredPreferences });
+        return { ...DEFAULT_PREFERENCES, ...deferredPreferences };
       }
 
       const columns: PreferencesUpdate = {};
