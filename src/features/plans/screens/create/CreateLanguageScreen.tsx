@@ -6,7 +6,7 @@ import { View } from 'react-native';
 import { pickLanguages } from '@shared/lib/languages';
 import { Button, Flag, SelectableCard, SelectionDot, Spacer, Text } from '@shared/ui';
 
-import { NEARBY_PEOPLE, nearbySpeakers } from '../../lib/languages';
+import { nearbyLanguageReach } from '../../lib/languages';
 import { CreateStepLayout } from '../../ui/CreateStepLayout';
 
 /** The shortlist this step offers, Lisbon's own language first. */
@@ -85,13 +85,14 @@ export function CreateLanguageScreen() {
 
   const detailFor = (code: string): string | undefined => {
     if (code === ownLanguage) return t('create.language.yours');
-    const speakers = nearbySpeakers(code);
+    const reach = nearbyLanguageReach(code);
     // A language nobody around here speaks has nothing to report; "falado por
-    // 0 de 7" reads as a warning the host has not earned.
-    if (speakers === 0) return undefined;
+    // 0 de 7" reads as a warning the host has not earned. Neither has a count
+    // that no query stands behind.
+    if (!reach || reach.speakers === 0) return undefined;
     return t('create.language.spokenNearby', {
-      speakers: String(speakers),
-      total: String(NEARBY_PEOPLE),
+      speakers: String(reach.speakers),
+      total: String(reach.total),
     });
   };
 

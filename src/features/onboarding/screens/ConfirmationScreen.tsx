@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { View } from 'react-native';
 
 import { StepScaffold } from '@shared/components/StepScaffold';
-import { VIEWER } from '@shared/data/fixtures';
+import { useViewer } from '@shared/data/useViewer';
 import { STEPS } from '@shared/lib/steps';
 import { useSession } from '@shared/providers/SessionProvider';
 import { Button, Highlight, Mascot, StepTitle, Text, TextButton } from '@shared/ui';
@@ -22,6 +22,13 @@ export function ConfirmationScreen() {
   const { t } = useTranslation();
   const router = useRouter();
   const { isAuthenticated } = useSession();
+  // `name` is step 9 and this is step 8, so a fresh account has not been named
+  // yet and the greeting has nobody to greet. The design draws the name in a
+  // tinted band, so the sentence splits around it when there is one and stands
+  // on its own when there is not — rather than naming whoever the fixtures
+  // happened to hold.
+  const { data: viewer } = useViewer();
+  const name = viewer?.name?.trim();
 
   if (!isAuthenticated) {
     return (
@@ -57,16 +64,22 @@ export function ConfirmationScreen() {
         // everything under it 6px down the screen. The negative margin gives
         // the extra height back to the layout while the band keeps it.
         <View className="flex-row flex-wrap items-center justify-center gap-x-[9px]">
-          <StepTitle>{t('onboarding.confirmation.titleLead')}</StepTitle>
-          <View className="flex-row items-center">
-            <Highlight
-              className="-my-[5px] rounded-[10px] bg-brand-tint px-[10px] pb-[4px] pt-[2px]"
-              textClassName="text-[32px] leading-[38.7px] tracking-[-1.024px] text-brand"
-            >
-              {VIEWER.name}
-            </Highlight>
-            <StepTitle>{t('onboarding.confirmation.titleTrail')}</StepTitle>
-          </View>
+          {name ? (
+            <>
+              <StepTitle>{t('onboarding.confirmation.titleLead')}</StepTitle>
+              <View className="flex-row items-center">
+                <Highlight
+                  className="-my-[5px] rounded-[10px] bg-brand-tint px-[10px] pb-[4px] pt-[2px]"
+                  textClassName="text-[32px] leading-[38.7px] tracking-[-1.024px] text-brand"
+                >
+                  {name}
+                </Highlight>
+                <StepTitle>{t('onboarding.confirmation.titleTrail')}</StepTitle>
+              </View>
+            </>
+          ) : (
+            <StepTitle>{t('onboarding.confirmation.titleSolo')}</StepTitle>
+          )}
         </View>
       }
       footer={

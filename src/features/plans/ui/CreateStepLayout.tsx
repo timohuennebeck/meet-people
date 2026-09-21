@@ -6,7 +6,7 @@ import { StepScaffold } from '@shared/components/StepScaffold';
  * The create flow runs to seven steps: what, where, when, join mode, language,
  * seats and the optional age range.
  */
-export const CREATE_TOTAL = 7;
+const CREATE_TOTAL = 7;
 
 export interface CreateStepLayoutProps {
   step: number;

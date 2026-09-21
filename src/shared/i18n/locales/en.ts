@@ -145,6 +145,7 @@ export const en: Translation = {
     confirmation: {
       titleLead: "You're all set,",
       titleTrail: '.',
+      titleSolo: "You're all set.",
       subtitle:
         "Your account is secure. You're moments away from seeing who has plans nearby today.",
       manageAccount: 'Manage account',

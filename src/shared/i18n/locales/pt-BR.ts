@@ -146,6 +146,8 @@ export const ptBR = {
       // The name is highlighted, so the sentence is split around it.
       titleLead: 'Tudo pronto,',
       titleTrail: '.',
+      // The same sentence for an account that has not been named yet.
+      titleSolo: 'Tudo pronto.',
       subtitle: 'Sua conta está segura. Falta pouco para você ver quem tem planos por perto hoje.',
       manageAccount: 'Gerenciar conta',
       pendingTitle: 'Confirme seu e-mail.',

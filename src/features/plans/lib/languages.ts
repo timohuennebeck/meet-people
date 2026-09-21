@@ -1,4 +1,5 @@
 import { PEOPLE, VIEWER } from '@shared/data/fixtures';
+import { hasSupabase } from '@shared/lib/env';
 
 /**
  * How well a language covers the people around the viewer.
@@ -9,16 +10,29 @@ import { PEOPLE, VIEWER } from '@shared/data/fixtures';
  * the app shows, never from a constant that would quietly stop being true.
  *
  * Nearby is modelled as the people directory minus the viewer — "por perto" is
- * other people, and counting yourself would inflate every row by one. When this
- * reads from Supabase it becomes a query over `profiles.languages` within the
- * viewer's radius; the two numbers this module exposes stay the same shape.
+ * other people, and counting yourself would inflate every row by one.
+ *
+ * Against a real project there is no query for this yet: `nearby_plans` finds
+ * plans within the radius, and nothing finds *people* within it. So this
+ * answers `null` there rather than reporting the fixture cast as if it were the
+ * neighbourhood, and the row simply carries no detail line. The shape is what a
+ * `nearby_language_reach` function would return, so wiring one up is a change
+ * to this function and to nothing else.
  */
 const NEARBY = Object.values(PEOPLE).filter((person) => person.id !== VIEWER.id);
 
-/** How many people are near enough to count, i.e. the "de M" in the line. */
-export const NEARBY_PEOPLE = NEARBY.length;
+export interface LanguageReach {
+  /** How many people nearby list this language among the ones they speak. */
+  speakers: number;
+  /** How many people are near enough to count, i.e. the "de M" in the line. */
+  total: number;
+}
 
-/** How many of them list `code` among the languages they speak. */
-export function nearbySpeakers(code: string): number {
-  return NEARBY.filter((person) => person.languages.some((spoken) => spoken.code === code)).length;
+export function nearbyLanguageReach(code: string): LanguageReach | null {
+  if (hasSupabase) return null;
+  return {
+    speakers: NEARBY.filter((person) => person.languages.some((spoken) => spoken.code === code))
+      .length,
+    total: NEARBY.length,
+  };
 }
