@@ -11,14 +11,7 @@
  * database does not store, and the map pin the database cannot store.
  */
 
-import type {
-  DistanceUnit,
-  JoinMode,
-  Membership,
-  Plan,
-  SpokenLanguage,
-  User,
-} from '@shared/data/schemas';
+import type { DistanceUnit, Membership, Plan, SpokenLanguage, User } from '@shared/data/schemas';
 import { i18n } from '@shared/i18n';
 import { formatPlanDate, formatTime, isToday, relativeDay } from '@shared/lib/datetime';
 import { SEARCHABLE_LANGUAGES } from '@shared/lib/languages';
@@ -36,26 +29,28 @@ export type LanguageCode = Database['public']['Enums']['language_code'];
 /**
  * A row of `public_profiles`, and the object `nearby_plans` embeds for a person.
  *
+ * Derived, so a column that changes type or disappears breaks here at
+ * `tsc` rather than at runtime. Two are narrowed back: the view's own `where`
+ * keeps rows with no `id` and no `joined_at` out, which the generator cannot
+ * know from the column definitions alone.
+ *
  * `languages` is the `language_code` enum on the view and plain strings in the
  * embedded JSON — the same 20 codes either way, since the enum is what the
- * column holds. It is typed as the enum so a caller cannot widen it by
- * accident; the JSON side is a subtype in practice.
+ * column holds, so the JSON side is a subtype in practice.
  */
-export interface PublicProfileRow {
+export type PublicProfileRow = Omit<
+  Database['public']['Views']['public_profiles']['Row'],
+  'id' | 'joined_at'
+> & {
   id: string;
-  name: string | null;
-  age: number | null;
-  avatar_storage_path: string | null;
-  pronouns: 'she' | 'he' | 'they' | 'unspecified' | null;
-  gender: string | null;
-  bio: string | null;
-  neighbourhood: string | null;
-  country_code: string | null;
   joined_at: string;
-  verified: boolean | null;
-  interests: string[] | null;
-  languages: LanguageCode[] | null;
-}
+};
+
+// The four types below describe what is *inside* jsonb columns. Postgres types
+// those as `jsonb` and the generator as `Json`, so their shape is decided by
+// the `jsonb_build_object` calls in `nearby_plans()` and by nothing a type can
+// read. They are hand-written of necessity: changing that SQL means changing
+// these, and no compiler will say so.
 
 /** The `place` object on a `nearby_plans` row. */
 export interface PlanPlaceJson {
@@ -80,14 +75,29 @@ export interface PlanRequestJson {
   position: number;
 }
 
-/** One row of `nearby_plans()`, with its jsonb columns named. */
+/**
+ * One row of `nearby_plans()`, with its jsonb columns named.
+ *
+ * Deliberately **not** derived from
+ * `Database['public']['Functions']['nearby_plans']['Returns']`. A Postgres
+ * `returns table (…)` cannot mark a column `not null`, and the generator emits
+ * every one of them as non-null anyway — so the derived type would claim
+ * `seats: number`, `duration_minutes: number`, `series_id: string`. Those are
+ * exactly the columns whose nullness carries meaning here: a null `seats` is an
+ * uncapped event and a null `duration_minutes` is "sem hora de fim". Deriving
+ * would delete the `row.seats == null` branch in `toPlan` as unreachable and
+ * compute `Math.max(0, null - n)` for every standing meetup.
+ *
+ * `join_mode` is derived, because an enum column is one the generator gets
+ * right.
+ */
 export interface NearbyPlanRow {
   id: string;
   title: string;
   starts_at: string;
   duration_minutes: number | null;
   seats: number | null;
-  join_mode: JoinMode;
+  join_mode: Database['public']['Enums']['join_mode'];
   series_id: string | null;
   age_min: number | null;
   age_max: number | null;
