@@ -1,9 +1,8 @@
 import { i18n } from '@shared/i18n';
 import { supabase } from '@shared/lib/supabase/client';
-import { CONVERSATION_KIND } from '@shared/lib/supabase/enums';
 import { avatarUrlFor, conversationTimeLabel } from '@shared/lib/supabase/mapping';
 
-import type { Conversation, Message } from '../schemas';
+import { CONVERSATION_KIND, type Conversation, type Message } from '../schemas';
 import { planConversationId } from './plans';
 import { client, unwrap, unwrapSingle, viewerId } from './shared';
 

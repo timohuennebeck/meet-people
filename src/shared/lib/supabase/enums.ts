@@ -1,4 +1,4 @@
-import type { Database } from './database-types';
+import type { Database } from './database.generated';
 
 /**
  * The database's own words, named.
@@ -53,10 +53,3 @@ export const LEGAL_DOC_KIND = {
   PRIVACY: 'privacy',
 } as const satisfies Record<string, Enums['legal_doc_kind']>;
 export type LegalDocKind = Enums['legal_doc_kind'];
-
-/** `conversations.kind` is not an enum; this is the check constraint's pair. */
-export const CONVERSATION_KIND = {
-  DIRECT: 'direct',
-  GROUP: 'group',
-} as const;
-export type ConversationKind = (typeof CONVERSATION_KIND)[keyof typeof CONVERSATION_KIND];
