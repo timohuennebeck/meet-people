@@ -1,17 +1,17 @@
 import { useRouter } from 'expo-router';
 import { useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Pressable, View } from 'react-native';
+import { View } from 'react-native';
 
 import { StepScaffold } from '@shared/components/StepScaffold';
 import { cn } from '@shared/lib/cn';
 import { STEPS } from '@shared/lib/steps';
 import { supabase } from '@shared/lib/supabase/client';
-import { colors } from '@shared/theme/tokens';
-import { Button, FieldLabel, Glyph, Spacer, Text, TextField } from '@shared/ui';
+import { Button, Spacer, Text } from '@shared/ui';
 
 import { describeAuthFailure, type AuthFailure } from '../lib/authErrors';
 import { flushProfileWrites } from '../lib/profileWrites';
+import { AuthSwitchLink, CredentialFields } from '../ui/CredentialFields';
 
 /** The label beside the meter, one per lit segment. */
 const STRENGTH_LABEL = ['weak', 'weak', 'fair', 'good', 'strong'] as const;
@@ -64,7 +64,6 @@ export function SignUpScreen() {
   const router = useRouter();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [revealed, setRevealed] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [failure, setFailure] = useState<AuthFailure | null>(null);
   const strength = strengthOf(password);
@@ -120,64 +119,29 @@ export function SignUpScreen() {
       title={t('onboarding.signUp.title')}
       subtitle={t('onboarding.signUp.subtitle')}
     >
-      <FieldLabel className="mt-[24px]">{t('onboarding.account.emailLabel')}</FieldLabel>
-      <TextField
-        className="mt-[9px] rounded-field"
-        height={62}
-        fontSize={17}
-        value={email}
-        onChangeText={setEmail}
-        placeholder={t('onboarding.signUp.emailPlaceholder')}
-        autoCapitalize="none"
-        autoComplete="email"
-        keyboardType="email-address"
-        returnKeyType="next"
-      />
+      <CredentialFields
+        email={email}
+        onEmailChange={setEmail}
+        password={password}
+        onPasswordChange={setPassword}
+        passwordAutoComplete="new-password"
+        failure={failure}
+      >
+        {/* Nothing stands under an untouched field — the meter arrives with the
+            first character typed. */}
+        {strength > 0 ? (
+          <>
+            <StrengthMeter filled={strength} />
 
-      <FieldLabel className="mt-[18px]">{t('onboarding.account.passwordLabel')}</FieldLabel>
-      <TextField
-        className="mt-[9px] gap-[12px] rounded-field"
-        height={62}
-        fontSize={17}
-        value={password}
-        onChangeText={setPassword}
-        placeholder={t('onboarding.account.passwordPlaceholder')}
-        secureTextEntry={!revealed}
-        autoCapitalize="none"
-        autoComplete="new-password"
-        accessory={
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel={t('onboarding.signUp.togglePassword')}
-            className="shrink-0 active:opacity-60"
-            onPress={() => setRevealed((current) => !current)}
-          >
-            <Glyph.EyeGlyph size={21} color={colors.inkDim} />
-          </Pressable>
-        }
-      />
-
-      {/* Nothing stands under an untouched field — the meter arrives with the
-          first character typed. */}
-      {strength > 0 ? (
-        <>
-          <StrengthMeter filled={strength} />
-
-          <View className="mt-[9px] shrink-0 flex-row items-center justify-between">
-            <Text className="text-[14px] text-ink-dim">{t('onboarding.signUp.strength')}</Text>
-            <Text weight={600} className={cn('text-[14px]', STRENGTH_TONE[strength]!.label)}>
-              {t(`onboarding.signUp.${STRENGTH_LABEL[strength]!}`)}
-            </Text>
-          </View>
-        </>
-      ) : null}
-
-      {/* Under the field it is about, above the button that caused it. */}
-      {failure ? (
-        <Text className="mt-[16px] shrink-0 text-[13.5px] leading-[19px] text-danger">
-          {t(`onboarding.authError.${failure}`)}
-        </Text>
-      ) : null}
+            <View className="mt-[9px] shrink-0 flex-row items-center justify-between">
+              <Text className="text-[14px] text-ink-dim">{t('onboarding.signUp.strength')}</Text>
+              <Text weight={600} className={cn('text-[14px]', STRENGTH_TONE[strength]!.label)}>
+                {t(`onboarding.signUp.${STRENGTH_LABEL[strength]!}`)}
+              </Text>
+            </View>
+          </>
+        ) : null}
+      </CredentialFields>
 
       <Button
         label={t(submitting ? 'onboarding.signUp.creating' : 'onboarding.account.createAccount')}
@@ -186,18 +150,11 @@ export function SignUpScreen() {
         onPress={() => void createAccount()}
       />
 
-      <Pressable
-        accessibilityRole="button"
-        className="mt-[14px] shrink-0 active:opacity-60"
+      <AuthSwitchLink
+        prompt={t('onboarding.signUp.haveAccount')}
+        action={t('onboarding.signUp.signIn')}
         onPress={() => router.push('/(onboarding)/sign-in')}
-      >
-        <Text className="text-center text-[15.5px] text-ink-body">
-          {t('onboarding.signUp.haveAccount')}{' '}
-          <Text weight={600} className="text-[15.5px] text-brand">
-            {t('onboarding.signUp.signIn')}
-          </Text>
-        </Text>
-      </Pressable>
+      />
 
       <Spacer />
     </StepScaffold>
