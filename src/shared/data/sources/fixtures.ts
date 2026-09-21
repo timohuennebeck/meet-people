@@ -1,6 +1,7 @@
 import { z } from 'zod';
 
 import { i18n } from '@shared/i18n';
+import { whenLabel } from '@shared/lib/supabase/mapping';
 
 import * as fixtures from '../fixtures';
 import {
@@ -21,7 +22,7 @@ import {
   type ProfileView,
   type User,
 } from '../schemas';
-import type { DataSource } from './types';
+import type { DataSource, NewPlan } from './types';
 
 /**
  * The in-memory source, transcribed from the design.
@@ -107,6 +108,43 @@ export const fixtureSource: DataSource = {
   plans: {
     // A copy, so the cache never holds the same array this module mutates.
     list: (): Promise<Plan[]> => settle(planSchema.array(), [...plans]),
+
+    /**
+     * Publishes a plan into the in-memory list, seating the viewer as its host
+     * the way `seat_plan_host()` does on the real insert.
+     *
+     * The pin is placed near the middle of the map canvas rather than derived
+     * from the place, which has no coordinates here — enough for the new plan
+     * to be visible and tappable in the offline flow.
+     */
+    create: (plan: NewPlan): Promise<Plan> => {
+      const place =
+        [...fixtures.RECENT_PLACES, ...fixtures.NEARBY_PLACES].find(
+          (candidate) => candidate.id === plan.placeId,
+        ) ?? fixtures.NEARBY_PLACES[0]!;
+      const created: Plan = {
+        id: `plan-${Date.now()}`,
+        title: plan.title,
+        languages: plan.languages,
+        joinMode: plan.joinMode,
+        membership: 'host',
+        host: fixtures.VIEWER,
+        place,
+        whenLabel: whenLabel(plan.startsAt, plan.durationMinutes),
+        startsAt: plan.startsAt,
+        durationMinutes: plan.durationMinutes,
+        capacity: plan.seats,
+        participants: [{ user: fixtures.VIEWER, isHost: true, isViewer: true }],
+        requests: [],
+        waitlist: [],
+        ageRange: plan.ageRange ? [plan.ageRange[0], plan.ageRange[1]] : null,
+        pin: { x: 196, y: 300 },
+        pinLabel: plan.title,
+      };
+
+      plans = [created, ...plans];
+      return settle(planSchema, created);
+    },
 
     detail: (planId: string): Promise<Plan> => {
       const plan = plans.find((candidate) => candidate.id === planId);

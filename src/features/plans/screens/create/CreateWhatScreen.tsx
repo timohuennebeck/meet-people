@@ -1,10 +1,10 @@
 import { useRouter } from 'expo-router';
-import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { View } from 'react-native';
 
 import { Button, Chip, NoteField, SectionLabel, Spacer, Text } from '@shared/ui';
 
+import { useCreatePlan } from '../../data/CreatePlanProvider';
 import { CreateStepLayout } from '../../ui/CreateStepLayout';
 
 const MAX_TITLE = 60;
@@ -13,7 +13,9 @@ const MAX_TITLE = 60;
 export function CreateWhatScreen() {
   const { t } = useTranslation();
   const router = useRouter();
-  const [title, setTitle] = useState('');
+  const { draft, set } = useCreatePlan();
+  const title = draft.title;
+  const setTitle = (value: string) => set({ title: value });
 
   /** Title suggestions offered under the field. */
   const suggestions = [
@@ -28,7 +30,13 @@ export function CreateWhatScreen() {
       step={1}
       title={t('create.what.title')}
       subtitle={t('create.what.subtitle')}
-      footer={<Button label={t('common.continue')} onPress={() => router.push('/create/where')} />}
+      footer={
+        <Button
+          label={t('common.continue')}
+          disabled={title.trim().length === 0}
+          onPress={() => router.push('/create/where')}
+        />
+      }
     >
       {/* `radius:22px · padding:18px · 20px/500 · inset 0 0 0 2px`, one line
           tall — 18 + 27 + 18 — and wrapping onto a second rather than

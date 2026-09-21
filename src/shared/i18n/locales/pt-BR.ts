@@ -465,6 +465,7 @@ export const ptBR = {
       title: 'Quem pode\nentrar?',
       subtitle: 'Faixa de idade do plano. Opcional.',
       openToAll: 'Aberto a todas as idades',
+      publishing: 'Publicando…',
     },
     published: {
       title: 'Seu plano está\nno mapa',
@@ -762,6 +763,7 @@ export const ptBR = {
     tooManyInterests: 'Você chegou ao limite de interesses',
     plusRequired: 'Conversar com quem você ainda não encontrou é um recurso do Plus.',
     badTransition: 'Não foi possível fazer isso agora.',
+    publishFailed: 'Não foi possível publicar agora. Tente de novo.',
   },
 
   tabs: {

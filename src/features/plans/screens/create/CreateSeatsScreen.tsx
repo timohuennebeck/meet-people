@@ -1,5 +1,4 @@
 import { useRouter } from 'expo-router';
-import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Pressable, View } from 'react-native';
 
@@ -7,10 +6,14 @@ import { cn } from '@shared/lib/cn';
 import { colors } from '@shared/theme/tokens';
 import { Button, Card, Glyph, Text } from '@shared/ui';
 
+import { useCreatePlan } from '../../data/CreatePlanProvider';
 import { CreateStepLayout } from '../../ui/CreateStepLayout';
 
 const MIN_SEATS = 2;
 const MAX_SEATS = 20;
+
+/** What the stepper opens on — the design draws four. */
+const DEFAULT_SEATS = 4;
 
 /** A round stepper control; the decrement greys out at the minimum. */
 function StepperButton({
@@ -47,7 +50,10 @@ function StepperButton({
 export function CreateSeatsScreen() {
   const { t } = useTranslation();
   const router = useRouter();
-  const [seats, setSeats] = useState(4);
+  const { draft, set } = useCreatePlan();
+  // This step has no uncapped option — that is a standing meetup, which the
+  // create flow does not make — so the stepper always has a number to show.
+  const seats = draft.seats ?? DEFAULT_SEATS;
 
   return (
     <CreateStepLayout
@@ -65,7 +71,7 @@ export function CreateSeatsScreen() {
               <StepperButton
                 kind="minus"
                 disabled={seats <= MIN_SEATS}
-                onPress={() => setSeats((count) => Math.max(MIN_SEATS, count - 1))}
+                onPress={() => set({ seats: Math.max(MIN_SEATS, seats - 1) })}
               />
               <Text
                 weight={600}
@@ -77,7 +83,7 @@ export function CreateSeatsScreen() {
               <StepperButton
                 kind="plus"
                 disabled={seats >= MAX_SEATS}
-                onPress={() => setSeats((count) => Math.min(MAX_SEATS, count + 1))}
+                onPress={() => set({ seats: Math.min(MAX_SEATS, seats + 1) })}
               />
             </View>
             {/* The caption is what moves: its `{{others}}` count is drawn with

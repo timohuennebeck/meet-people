@@ -1,7 +1,6 @@
 import { useRouter } from 'expo-router';
 import { HandWaving, Info, Key } from 'phosphor-react-native';
 import type { ReactNode } from 'react';
-import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { View } from 'react-native';
 
@@ -10,6 +9,7 @@ import { cn } from '@shared/lib/cn';
 import { colors } from '@shared/theme/tokens';
 import { Button, InfoNote, SelectableCard, SelectionDot, Text } from '@shared/ui';
 
+import { useCreatePlan } from '../../data/CreatePlanProvider';
 import { CreateStepLayout } from '../../ui/CreateStepLayout';
 
 /** One of the two join modes, as a full-width option row. */
@@ -56,7 +56,9 @@ function ModeOption({
 export function CreateJoinModeScreen() {
   const { t } = useTranslation();
   const router = useRouter();
-  const [mode, setMode] = useState<JoinMode>('open');
+  const { draft, set } = useCreatePlan();
+  const mode = draft.joinMode;
+  const setMode = (joinMode: JoinMode) => set({ joinMode });
 
   return (
     <CreateStepLayout

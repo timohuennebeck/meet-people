@@ -19,6 +19,7 @@ import {
 import { colors } from '@shared/theme/tokens';
 import { Button, Chip, Glyph, SectionLabel, Spacer, Text } from '@shared/ui';
 
+import { useCreatePlan } from '../../data/CreatePlanProvider';
 import { CreateStepLayout } from '../../ui/CreateStepLayout';
 
 /** `height:262px;border-radius:28px` — the card the design draws the wheels in. */
@@ -36,7 +37,9 @@ type Preset = 'inAnHour' | 'todayEvening' | 'exact';
 export function CreateWhenScreen() {
   const { t, i18n } = useTranslation();
   const router = useRouter();
-  const [duration, setDuration] = useState<Duration>(120);
+  const { draft, set } = useCreatePlan();
+  const duration = draft.durationMinutes as Duration;
+  const setDuration = (next: Duration) => set({ durationMinutes: next });
 
   // The evening chip's own time. Fixed for the life of the screen so its label
   // and the value it sets can never drift apart.
@@ -44,16 +47,20 @@ export function CreateWhenScreen() {
   // A plan cannot start in the past. Pinned at mount rather than recomputed per
   // render, so the native picker is not handed a new floor on every keystroke.
   const earliest = useMemo(() => new Date(), []);
-  const [startsAt, setStartsAt] = useState(evening);
-  const [preset, setPreset] = useState<Preset>('todayEvening');
+  const startsAt = draft.startsAt;
+  const setStartsAt = useCallback((next: Date) => set({ startsAt: next }), [set]);
+  const [preset, setPreset] = useState<Preset>('exact');
 
-  const commit = useCallback((event: DateTimePickerEvent, picked?: Date) => {
-    // Android reports a cancelled dialog as `dismissed` with no date; iOS only
-    // ever reports `set`, once per detent of the wheel.
-    if (event.type !== 'set' || !picked) return;
-    setStartsAt(picked);
-    setPreset('exact');
-  }, []);
+  const commit = useCallback(
+    (event: DateTimePickerEvent, picked?: Date) => {
+      // Android reports a cancelled dialog as `dismissed` with no date; iOS only
+      // ever reports `set`, once per detent of the wheel.
+      if (event.type !== 'set' || !picked) return;
+      setStartsAt(picked);
+      setPreset('exact');
+    },
+    [setStartsAt],
+  );
 
   /**
    * Android has no inline picker, and splits date and time into two dialogs.
@@ -85,7 +92,7 @@ export function CreateWhenScreen() {
     <CreateStepLayout
       step={3}
       title={t('create.when.title')}
-      subtitle={t('create.when.subtitle', { place: 'Café Kotti' })}
+      subtitle={t('create.when.subtitle', { place: draft.place?.name ?? '' })}
       footer={
         <Button label={t('common.continue')} onPress={() => router.push('/create/join-mode')} />
       }

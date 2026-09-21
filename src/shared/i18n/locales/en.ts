@@ -457,6 +457,7 @@ export const en: Translation = {
       title: 'Who can\njoin?',
       subtitle: "The plan's age range. Optional.",
       openToAll: 'Open to all ages',
+      publishing: 'Publishing…',
     },
     published: {
       title: 'Your plan is\non the map',
@@ -733,6 +734,7 @@ export const en: Translation = {
     tooManyInterests: 'You have reached the interest limit',
     plusRequired: "Messaging someone you haven't met yet is a Plus feature.",
     badTransition: "That couldn't be done right now.",
+    publishFailed: "We couldn't publish that just now. Try again.",
   },
 
   tabs: {

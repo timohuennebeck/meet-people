@@ -1,19 +1,16 @@
 import { useRouter } from 'expo-router';
-import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { View } from 'react-native';
 
 import { pickLanguages } from '@shared/lib/languages';
 import { Button, Flag, SelectableCard, SelectionDot, Spacer, Text } from '@shared/ui';
 
+import { useCreatePlan } from '../../data/CreatePlanProvider';
 import { nearbyLanguageReach } from '../../lib/languages';
 import { CreateStepLayout } from '../../ui/CreateStepLayout';
 
 /** The shortlist this step offers, Lisbon's own language first. */
 const OPTIONS = ['pt', 'en', 'es', 'de', 'fr'];
-
-/** What a plan is held in unless the host says otherwise. */
-const DEFAULT_SELECTION = ['pt', 'en'];
 
 interface LanguageRowProps {
   name: string;
@@ -72,16 +69,19 @@ function LanguageRow({ name, flag, detail, selected, onPress }: LanguageRowProps
 export function CreateLanguageScreen() {
   const { t, i18n } = useTranslation();
   const router = useRouter();
-  const [selected, setSelected] = useState<string[]>(DEFAULT_SELECTION);
+  const { draft, set } = useCreatePlan();
+  const selected = draft.languages;
 
   // The viewer's own language is the one the app is running in — `pt-BR` and
   // `pt` are the same answer to "do you already speak this?".
   const ownLanguage = i18n.language.split('-')[0];
 
   const toggle = (code: string) =>
-    setSelected((codes) =>
-      codes.includes(code) ? codes.filter((entry) => entry !== code) : [...codes, code],
-    );
+    set({
+      languages: selected.includes(code)
+        ? selected.filter((entry) => entry !== code)
+        : [...selected, code],
+    });
 
   const detailFor = (code: string): string | undefined => {
     if (code === ownLanguage) return t('create.language.yours');

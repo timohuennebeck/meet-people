@@ -3,6 +3,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { chatKeys, planKeys, userKeys } from '@shared/data/queryKeys';
 import type { Membership, Plan, User } from '@shared/data/schemas';
 import { dataSource } from '@shared/data/source';
+import type { NewPlan } from '@shared/data/sources/types';
 import { useViewer } from '@shared/data/useViewer';
 
 /**
@@ -175,4 +176,28 @@ export function useDeclineRequest(planId: string) {
       requests: plan.requests.filter((candidate) => candidate.id !== requestId),
     }),
   );
+}
+
+/**
+ * Publishes the plan the create flow has been collecting.
+ *
+ * Nothing is optimistic: until the insert returns there is no plan and no id
+ * to navigate to, and a refusal — an unverified host publishing an uncapped
+ * event, a place that has gone — has to reach the last step rather than a
+ * confirmation screen that lies.
+ */
+export function usePublishPlan() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (plan: NewPlan) => dataSource.plans.create(plan),
+    onSuccess: (plan) => {
+      queryClient.setQueryData(planKeys.detail(plan.id).queryKey, plan);
+      void queryClient.invalidateQueries({ queryKey: planKeys.lists() });
+      // `open_plan_chat` made the group chat and `seat_plan_host` seated the
+      // host, so both the Chats tab and the host's own counts have moved.
+      void queryClient.invalidateQueries({ queryKey: chatKeys.conversations().queryKey });
+      void queryClient.invalidateQueries({ queryKey: userKeys.all });
+    },
+  });
 }

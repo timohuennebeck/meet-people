@@ -1,5 +1,5 @@
 import { LinearGradient } from 'expo-linear-gradient';
-import { useRouter } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { View } from 'react-native';
@@ -30,11 +30,22 @@ function ShareAction({ icon, label }: { icon: ReactNode; label: string }) {
   );
 }
 
+/**
+ * The public link to a plan. Short ids are what a person can read out loud, so
+ * the uuid's first segment stands in for it until there is a slug.
+ */
+function planLink(planId: string | undefined): string {
+  return planId ? `treff.app/p/${planId.split('-')[0]}` : 'treff.app';
+}
+
 /** The confirmation after publishing, with the share row. */
 export function PlanPublishedScreen() {
   const { t } = useTranslation();
   const router = useRouter();
   const insets = useSafeAreaInsets();
+  // The id the publish came back with. The link is the one thing on this screen
+  // that has to name the plan that was actually made.
+  const { id } = useLocalSearchParams<{ id?: string }>();
 
   return (
     <Screen padding="hero">
@@ -82,7 +93,7 @@ export function PlanPublishedScreen() {
             <View className="h-[56px] w-full flex-row items-center gap-[9px] self-stretch rounded-pill border border-hair bg-surface px-[20px]">
               <Glyph.LinkGlyph size={16} />
               <Text numberOfLines={1} className="min-w-0 flex-1 text-[16px]">
-                treff.app/p/kotti
+                {planLink(id)}
               </Text>
             </View>
             <Text className="text-[13.5px] text-ink-dim">{t('create.published.link')}</Text>

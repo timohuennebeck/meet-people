@@ -40,7 +40,7 @@ import {
   type SearchResults,
   type User,
 } from '../schemas';
-import type { DataSource } from './types';
+import type { DataSource, NewPlan } from './types';
 
 /**
  * The Supabase source.
@@ -509,6 +509,45 @@ export const supabaseSource: DataSource = {
     list: async (): Promise<Plan[]> => validate(planSchema.array(), await fetchPlans()),
 
     detail: planDetail,
+
+    /**
+     * Publishes a plan.
+     *
+     * Only the `plans` row is written. `private.seat_plan_host()` seats the
+     * host and `private.open_plan_chat()` opens the group chat, both on this
+     * insert — doing either from here would race them and double up.
+     *
+     * The insert policy demands `host_id = auth.uid()`, and demands the host be
+     * verified unless the plan is capped; an unverified host publishing an
+     * uncapped event comes back as a refusal rather than a silent no-op.
+     */
+    create: async (plan: NewPlan): Promise<Plan> => {
+      const db = client();
+      const uid = await viewerId();
+
+      const inserted = await db
+        .from('plans')
+        .insert({
+          host_id: uid,
+          place_id: plan.placeId,
+          title: plan.title.trim(),
+          starts_at: plan.startsAt,
+          duration_minutes: plan.durationMinutes,
+          join_mode: plan.joinMode,
+          seats: plan.seats,
+          age_min: plan.ageRange?.[0] ?? null,
+          age_max: plan.ageRange?.[1] ?? null,
+          languages: plan.languages as LanguageCode[],
+        })
+        .select('id')
+        .single();
+      const row = unwrapSingle(inserted, 'New plan');
+
+      // Read it back the way every other screen sees it, so the card the host
+      // lands on is the same row the map will draw rather than a local echo of
+      // what was typed.
+      return planDetail(row.id);
+    },
 
     /**
      * Moves the viewer between guest / requested / joined.

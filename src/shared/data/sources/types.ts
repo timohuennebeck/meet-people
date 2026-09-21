@@ -1,5 +1,6 @@
 import type {
   Conversation,
+  JoinMode,
   Membership,
   Message,
   Place,
@@ -19,10 +20,33 @@ import type {
  * A new method is added here first; both files then stop compiling until they
  * have it.
  */
+/** A plan as the create flow has it, just before it becomes a row. */
+export interface NewPlan {
+  title: string;
+  placeId: string;
+  /** ISO instant. */
+  startsAt: string;
+  /** Null is "Sem hora de fim". */
+  durationMinutes: number | null;
+  joinMode: JoinMode;
+  languages: string[];
+  /** Null is an uncapped event. */
+  seats: number | null;
+  ageRange: readonly [number, number] | null;
+}
+
 export interface DataSource {
   plans: {
     /** Every plan the viewer may see, soonest first. */
     list(): Promise<Plan[]>;
+    /**
+     * Publishes a plan and returns it as the map will show it.
+     *
+     * The host's own seat and the plan's group chat are not written here:
+     * `private.seat_plan_host()` and `private.open_plan_chat()` fire on the
+     * insert and make both.
+     */
+    create(plan: NewPlan): Promise<Plan>;
     /** One plan, with its participants, its requests and its waitlist. */
     detail(planId: string): Promise<Plan>;
     /**

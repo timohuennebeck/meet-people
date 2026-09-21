@@ -8,6 +8,7 @@ import type { Place } from '@shared/data/schemas';
 import { colors } from '@shared/theme/tokens';
 import { Button, Chip, Mascot, SectionLabel, Text, TextField } from '@shared/ui';
 
+import { useCreatePlan } from '../../data/CreatePlanProvider';
 import { useNearbyPlaces, useRecentPlaces } from '../../data/usePlaces';
 import { CreateStepLayout } from '../../ui/CreateStepLayout';
 import { PlaceRow } from '../../ui/PlaceRow';
@@ -18,7 +19,9 @@ export function CreateWhereScreen() {
   const router = useRouter();
   const { data: recent } = useRecentPlaces();
   const { data: nearby } = useNearbyPlaces();
-  const [selected, setSelected] = useState('p-kotti');
+  const { draft, set } = useCreatePlan();
+  const selected = draft.place?.id ?? null;
+  const setSelected = (place: Place) => set({ place });
   const [query, setQuery] = useState('');
 
   // One filter over both lists: typing narrows what is already offered rather
@@ -46,7 +49,11 @@ export function CreateWhereScreen() {
       subtitle={t('create.where.subtitle')}
       footer={
         <View className="pt-[16px]">
-          <Button label={t('common.continue')} onPress={() => router.push('/create/when')} />
+          <Button
+            label={t('common.continue')}
+            disabled={selected === null}
+            onPress={() => router.push('/create/when')}
+          />
         </View>
       }
     >
@@ -87,7 +94,7 @@ export function CreateWhereScreen() {
                 key={place.id}
                 place={place}
                 selected={selected === place.id}
-                onPress={() => setSelected(place.id)}
+                onPress={() => setSelected(place)}
               />
             ))}
           </View>
@@ -99,7 +106,7 @@ export function CreateWhereScreen() {
                 key={place.id}
                 place={place}
                 selected={selected === place.id}
-                onPress={() => setSelected(place.id)}
+                onPress={() => setSelected(place)}
               />
             ))}
           </View>
