@@ -1,3 +1,5 @@
+import type { TFunction } from 'i18next';
+
 import type { Plan } from '@shared/data/schemas';
 import type { Seat } from '@shared/ui';
 
@@ -33,4 +35,27 @@ export function seatsFor(plan: Plan, freeLabel: string, viewerLabel: string): Se
 export function openSeatCount(plan: Plan): number | null {
   if (plan.capacity === null) return null;
   return Math.max(0, plan.capacity - plan.participants.length);
+}
+
+/**
+ * "3 de 6 participando", or "3 participando" when the plan is uncapped.
+ *
+ * Written out at each call site before, and one of the three had lost the
+ * uncapped branch — an open-ended plan's host card read "3 de null" because
+ * `String(plan.capacity)` was reached with `capacity` null.
+ */
+export function participatingLabel(plan: Plan, t: TFunction): string {
+  if (plan.capacity === null) {
+    return t('plan.participatingUncapped', { count: plan.participants.length });
+  }
+  return t('plan.participating', {
+    filled: String(plan.participants.length),
+    total: String(plan.capacity),
+  });
+}
+
+/** "2 vagas livres", or "Sem limite" when nothing caps the plan. */
+export function openSeatsLabel(plan: Plan, t: TFunction): string {
+  const open = openSeatCount(plan);
+  return open === null ? t('plan.seatsUnlimited') : t('plan.seatsFree', { count: open });
 }

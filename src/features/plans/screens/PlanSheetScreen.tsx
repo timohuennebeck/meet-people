@@ -16,7 +16,7 @@ import {
 
 import { usePlan, useSetMembership } from '../data/usePlans';
 import { hasEnded } from '../lib/attendance';
-import { openSeatCount, seatsFor } from '../lib/seats';
+import { openSeatCount, openSeatsLabel, participatingLabel, seatsFor } from '../lib/seats';
 import { HostRequestList } from '../ui/HostRequestList';
 import { PlanLanguages } from '../ui/PlanLanguages';
 import { PlanSheetHeader } from '../ui/PlanSheetHeader';
@@ -50,21 +50,10 @@ function PlanHost({ plan }: { plan: Plan }) {
  */
 function PlanSeats({ plan }: { plan: Plan }) {
   const { t } = useTranslation();
-  const open = openSeatCount(plan);
 
   return (
     <View className="gap-[10px]">
-      <SeatSummary
-        filled={
-          open === null
-            ? t('plan.participatingUncapped', { count: plan.participants.length })
-            : t('plan.participating', {
-                filled: String(plan.participants.length),
-                total: String(plan.capacity),
-              })
-        }
-        open={open === null ? t('plan.seatsUnlimited') : t('plan.seatsFree', { count: open })}
-      />
+      <SeatSummary filled={participatingLabel(plan, t)} open={openSeatsLabel(plan, t)} />
       <SeatList seats={seatsFor(plan, t('common.freeSeat'), t('common.you'))} size={52} gap={14} />
     </View>
   );
@@ -105,7 +94,6 @@ function OpenState({ plan, onJoin }: { plan: Plan; onJoin: () => void }) {
 function RequestedState({ plan, onWithdraw }: { plan: Plan; onWithdraw: () => void }) {
   const { t } = useTranslation();
   const router = useRouter();
-  const open = openSeatCount(plan);
 
   // Only an approval plan can leave someone waiting, and only a plan with a
   // host can be an approval plan — there is nobody else to do the approving.
@@ -137,10 +125,7 @@ function RequestedState({ plan, onWithdraw }: { plan: Plan; onWithdraw: () => vo
       <HostCard
         avatarUri={host.avatarUrl}
         name={`${host.name}, ${host.age}`}
-        detail={`${t('plan.participating', {
-          filled: String(plan.participants.length),
-          total: String(plan.capacity),
-        })} · ${t('plan.seatsFree', { count: open ?? 0 })}`}
+        detail={`${participatingLabel(plan, t)} · ${openSeatsLabel(plan, t)}`}
         action={t('common.profile')}
         onPressAction={() => router.push(`/people/${host.id}`)}
       />

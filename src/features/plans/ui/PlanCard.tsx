@@ -8,7 +8,7 @@ import { colors, shadows } from '@shared/theme/tokens';
 import { Avatar, PlanPhoto, Text } from '@shared/ui';
 
 import { PlanLanguages } from './PlanLanguages';
-import { openSeatCount } from '../lib/seats';
+import { openSeatCount, participatingLabel } from '../lib/seats';
 
 /** One detail line under a plan's title: icon, then a single line of copy. */
 function DetailLine({ icon, children }: { icon: React.ReactNode; children: string }) {
@@ -118,14 +118,7 @@ export function PlanCard({ plan, variant, onPress }: PlanCardProps) {
                 {`${plan.place.name} · a ${plan.place.distanceLabel}`}
               </DetailLine>
               <DetailLine icon={<HandWaving size={17} color={colors.inkFaint} />}>
-                {`${
-                  plan.capacity === null
-                    ? t('plan.participatingUncapped', { count: plan.participants.length })
-                    : t('plan.participating', {
-                        filled: String(plan.participants.length),
-                        total: String(plan.capacity),
-                      })
-                } · ${
+                {`${participatingLabel(plan, t)} · ${
                   plan.host ? t('plan.hostLine', { name: plan.host.name }) : t('plan.standingLine')
                 }`}
               </DetailLine>
