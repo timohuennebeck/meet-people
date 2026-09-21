@@ -524,7 +524,6 @@ export const en: Translation = {
     interests: 'INTERESTS',
     invite: 'Invite to a plan',
     message: 'Message',
-    distanceLine: '{{neighbourhood}} · {{distance}} from you',
     tenureLine: 'On the app since March · replies in ~2 h',
     verifiedNote: 'Selfie verified in March. Profile confirmed by 3 hosts.',
 

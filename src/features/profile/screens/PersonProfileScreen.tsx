@@ -77,10 +77,14 @@ export function PersonProfileScreen() {
     <View className="flex-1 overflow-hidden bg-surface">
       <ProfileHeader
         user={user}
-        locationLine={t('profile.distanceLine', {
-          neighbourhood: user.neighbourhood,
-          distance: '0,7 mi',
-        })}
+        // The design draws "Kreuzberg · 0,7 mi de você" here, but nothing
+        // answers the second half: `distance_to` measures to a place, and
+        // `profile_locations` keeps other people's points behind row-level
+        // security precisely so a profile cannot be used to locate them. So the
+        // line is the neighbourhood, as it already is on the viewer's own
+        // profile, rather than a distance that was the same 0,7 mi for
+        // everybody.
+        locationLine={user.neighbourhood}
         actions={
           <View className="flex-row items-center justify-between">
             <CircleButton

@@ -534,7 +534,6 @@ export const ptBR = {
     interests: 'INTERESSES',
     invite: 'Convidar para um plano',
     message: 'Mensagem',
-    distanceLine: '{{neighbourhood}} · {{distance}} de você',
     tenureLine: 'No app desde março · responde em ~2 h',
     verifiedNote: 'Selfie verificada em março. Perfil confirmado por 3 anfitriões.',
 
