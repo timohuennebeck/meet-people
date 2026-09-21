@@ -7,7 +7,10 @@ import { View } from 'react-native';
 import type { JoinMode } from '@shared/data/schemas';
 import { cn } from '@shared/lib/cn';
 import { colors } from '@shared/theme/tokens';
-import { Button, InfoNote, SelectableCard, SelectionDot, Text } from '@shared/ui';
+import { Button } from '@shared/ui/button';
+import { SelectableCard, SelectionDot } from '@shared/ui/card';
+import { InfoNote } from '@shared/ui/note';
+import { Text } from '@shared/ui/text';
 
 import { useCreatePlan } from '../../lib/create-plan-provider';
 import { CreateStepLayout } from '../../ui/create-step-layout';

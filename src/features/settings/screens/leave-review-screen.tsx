@@ -6,18 +6,13 @@ import { Pressable, View } from 'react-native';
 
 import { cn } from '@shared/lib/cn';
 import { colors } from '@shared/theme/tokens';
-import {
-  Button,
-  CircleButton,
-  FieldLabel,
-  Glyph,
-  Mascot,
-  NoteField,
-  Screen,
-  Spacer,
-  Text,
-  TextButton,
-} from '@shared/ui';
+import { Button, Spacer, TextButton } from '@shared/ui/button';
+import { FieldLabel, NoteField } from '@shared/ui/fields';
+import { CircleButton } from '@shared/ui/header';
+import * as Glyph from '@shared/ui/icons';
+import { Mascot } from '@shared/ui/mascot';
+import { Screen } from '@shared/ui/screen';
+import { Text } from '@shared/ui/text';
 
 /** The design rates out of five. */
 const STARS = [1, 2, 3, 4, 5] as const;

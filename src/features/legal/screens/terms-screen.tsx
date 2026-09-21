@@ -9,7 +9,10 @@ import { formatDayMonthYear } from '@shared/lib/datetime';
 import { resolveLegalDoc } from '@shared/lib/legal';
 import { useSession } from '@shared/providers/session-provider';
 import { gradients, gradientStops } from '@shared/theme/tokens';
-import { Button, CircleButton, Glyph, Text } from '@shared/ui';
+import { Button } from '@shared/ui/button';
+import { CircleButton } from '@shared/ui/header';
+import * as Glyph from '@shared/ui/icons';
+import { Text } from '@shared/ui/text';
 
 import { LEGAL_DOCUMENTS } from '../lib/documents';
 

@@ -6,17 +6,13 @@ import { usePreferences } from '@shared/data/queries/use-preferences';
 import { APP_LANGUAGES, languageName } from '@shared/lib/languages';
 import { legalHref } from '@shared/lib/legal';
 import { useSession } from '@shared/providers/session-provider';
-import {
-  Flag,
-  FlagStack,
-  ListGroup,
-  ListRow,
-  NavHeader,
-  Screen,
-  SectionLabel,
-  Text,
-  TextButton,
-} from '@shared/ui';
+import { TextButton } from '@shared/ui/button';
+import { SectionLabel } from '@shared/ui/card';
+import { Flag, FlagStack } from '@shared/ui/flag';
+import { NavHeader } from '@shared/ui/header';
+import { ListGroup, ListRow } from '@shared/ui/list-row';
+import { Screen } from '@shared/ui/screen';
+import { Text } from '@shared/ui/text';
 
 /** `#EAF1FE` pill showing the account's verification state. */
 function VerifiedPill({ label }: { label: string }) {

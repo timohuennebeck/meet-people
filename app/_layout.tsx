@@ -1,3 +1,11 @@
+// Teaches NativeWind to map `className` onto `style` for the third-party
+// components the app styles with it — LinearGradient, expo-image's Image and
+// Animated.View. It has to run before anything renders one, and the app's own
+// root is the one place guaranteed to be first; it used to ride in on the
+// `@shared/ui` barrel, which no longer exists. Without it a gradient backdrop
+// renders at zero height with no error anywhere.
+import '@shared/ui/interop';
+
 import {
   Inter_400Regular,
   Inter_500Medium,

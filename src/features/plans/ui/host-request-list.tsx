@@ -4,7 +4,11 @@ import { Swipeable } from 'react-native-gesture-handler';
 
 import { useAcceptRequest, useAddSeat, useDeclineRequest } from '@shared/data/queries/use-plans';
 import type { Plan } from '@shared/data/schemas';
-import { ActionPill, Button, GlowingMascot, PersonRow, SectionLabel, Text } from '@shared/ui';
+import { Button } from '@shared/ui/button';
+import { SectionLabel } from '@shared/ui/card';
+import { GlowingMascot } from '@shared/ui/mascot';
+import { ActionPill, PersonRow } from '@shared/ui/person-row';
+import { Text } from '@shared/ui/text';
 
 import { sharePlan } from '../lib/share';
 

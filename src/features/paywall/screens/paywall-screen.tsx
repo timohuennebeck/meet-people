@@ -4,20 +4,15 @@ import { useTranslation } from 'react-i18next';
 import { View } from 'react-native';
 
 import { useSession } from '@shared/providers/session-provider';
-import {
-  Button,
-  CheckLine,
-  CircleButton,
-  Glyph,
-  Highlight,
-  Mascot,
-  Screen,
-  SelectableCard,
-  SelectionDot,
-  Spacer,
-  Text,
-  TextButton,
-} from '@shared/ui';
+import { Button, Spacer, TextButton } from '@shared/ui/button';
+import { SelectableCard, SelectionDot } from '@shared/ui/card';
+import { CircleButton } from '@shared/ui/header';
+import { Highlight } from '@shared/ui/highlight';
+import * as Glyph from '@shared/ui/icons';
+import { Mascot } from '@shared/ui/mascot';
+import { CheckLine } from '@shared/ui/note';
+import { Screen } from '@shared/ui/screen';
+import { Text } from '@shared/ui/text';
 
 type PlanId = 'monthly' | 'yearly';
 

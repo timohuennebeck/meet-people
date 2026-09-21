@@ -2,10 +2,10 @@ import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { View } from 'react-native';
 
-import { SpokenLanguageList } from '@shared/components/spoken-language-list';
-import { StepScaffold } from '@shared/components/step-scaffold';
 import { STEPS } from '@shared/lib/steps';
-import { Button, Spacer, TextButton } from '@shared/ui';
+import { Button, Spacer, TextButton } from '@shared/ui/button';
+import { SpokenLanguageList } from '@shared/ui/spoken-language-list';
+import { StepScaffold } from '@shared/ui/step-scaffold';
 
 /** The shortlist the design offers on this step. */
 const OPTIONS = ['de', 'en', 'tr', 'es', 'pl'];

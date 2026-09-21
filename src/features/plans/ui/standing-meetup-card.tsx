@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { View } from 'react-native';
 
 import { colors } from '@shared/theme/tokens';
-import { Text } from '@shared/ui';
+import { Text } from '@shared/ui/text';
 
 /**
  * What stands where the host card goes on a plan nobody organises.

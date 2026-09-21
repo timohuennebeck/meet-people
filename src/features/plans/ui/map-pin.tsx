@@ -2,7 +2,8 @@ import { Repeat } from 'phosphor-react-native';
 import { Pressable, View } from 'react-native';
 
 import { colors, shadows } from '@shared/theme/tokens';
-import { Avatar, Text, type Photo } from '@shared/ui';
+import { Avatar, type Photo } from '@shared/ui/avatar';
+import { Text } from '@shared/ui/text';
 
 export interface MapPinProps {
   /**

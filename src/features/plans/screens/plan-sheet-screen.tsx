@@ -6,16 +6,12 @@ import { useOpenPlanChat } from '@shared/data/queries/use-chat';
 import { usePlan, useSetMembership } from '@shared/data/queries/use-plans';
 import type { Plan } from '@shared/data/schemas';
 import { formatMonthYear } from '@shared/lib/datetime';
-import {
-  Button,
-  HostCard,
-  SeatList,
-  SeatSummary,
-  SheetSurface,
-  Text,
-  TextButton,
-  TimelineStep,
-} from '@shared/ui';
+import { Button, TextButton } from '@shared/ui/button';
+import { HostCard } from '@shared/ui/person-row';
+import { SeatList, SeatSummary } from '@shared/ui/seats';
+import { SheetSurface } from '@shared/ui/sheet';
+import { Text } from '@shared/ui/text';
+import { TimelineStep } from '@shared/ui/timeline';
 
 import { hasEnded } from '../lib/attendance';
 import { openSeatCount, openSeatsLabel, participatingLabel, seatsFor } from '../lib/seats';

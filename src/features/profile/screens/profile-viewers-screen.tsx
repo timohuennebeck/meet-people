@@ -6,7 +6,12 @@ import { isDataError } from '@shared/data/errors';
 import { useProfileViewCount, useProfileViewers } from '@shared/data/queries/use-users';
 import { formatPastMoment } from '@shared/lib/datetime';
 import { colors } from '@shared/theme/tokens';
-import { Button, Glyph, NavHeader, PersonRow, Screen, Text } from '@shared/ui';
+import { Button } from '@shared/ui/button';
+import { NavHeader } from '@shared/ui/header';
+import * as Glyph from '@shared/ui/icons';
+import { PersonRow } from '@shared/ui/person-row';
+import { Screen } from '@shared/ui/screen';
+import { Text } from '@shared/ui/text';
 
 /**
  * What a free account is shown instead of the list.

@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next';
 
-import { Text } from '@shared/ui';
+import { Text } from '@shared/ui/text';
 
 import { LegalLink } from './legal-link';
 

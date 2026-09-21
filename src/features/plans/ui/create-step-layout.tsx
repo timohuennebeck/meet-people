@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
 
-import { StepScaffold } from '@shared/components/step-scaffold';
+import { StepScaffold } from '@shared/ui/step-scaffold';
 
 /**
  * The create flow runs to seven steps: what, where, when, join mode, language,

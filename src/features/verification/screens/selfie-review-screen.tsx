@@ -4,7 +4,9 @@ import { useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { View } from 'react-native';
 
-import { Button, Glyph, Text } from '@shared/ui';
+import { Button } from '@shared/ui/button';
+import * as Glyph from '@shared/ui/icons';
+import { Text } from '@shared/ui/text';
 
 import { submitSelfie } from '../lib/submit-selfie';
 import { CameraButton, CameraFrame } from '../ui/camera-frame';

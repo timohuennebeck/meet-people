@@ -5,7 +5,12 @@ import { useTranslation } from 'react-i18next';
 import { Pressable, View } from 'react-native';
 
 import { colors, gradients, gradientStops, shadows } from '@shared/theme/tokens';
-import { Button, Face, Highlight, Mascot, Screen, Text } from '@shared/ui';
+import { Face } from '@shared/ui/avatar';
+import { Button } from '@shared/ui/button';
+import { Highlight } from '@shared/ui/highlight';
+import { Mascot } from '@shared/ui/mascot';
+import { Screen } from '@shared/ui/screen';
+import { Text } from '@shared/ui/text';
 
 import { LanguagePicker } from '../ui/language-picker';
 import { LegalLink } from '../ui/legal-link';

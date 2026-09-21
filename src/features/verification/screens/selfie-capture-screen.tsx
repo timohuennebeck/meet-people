@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { Pressable, View } from 'react-native';
 
 import { haptics } from '@shared/lib/haptics';
-import { Text } from '@shared/ui';
+import { Text } from '@shared/ui/text';
 
 import { CameraFrame } from '../ui/camera-frame';
 import { SelfieCameraNotice, SelfieCameraPreview, useSelfieCamera } from '../ui/selfie-camera';

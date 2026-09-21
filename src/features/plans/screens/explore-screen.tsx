@@ -9,7 +9,11 @@ import { usePlans } from '@shared/data/queries/use-plans';
 import { useViewer } from '@shared/data/queries/use-viewer';
 import { formatTime, isOnDayFilter, type DayFilter } from '@shared/lib/datetime';
 import { gradients, shadows } from '@shared/theme/tokens';
-import { Avatar, Chip, Glyph, GlowingMascot, Text } from '@shared/ui';
+import { Avatar } from '@shared/ui/avatar';
+import { Chip } from '@shared/ui/chip';
+import * as Glyph from '@shared/ui/icons';
+import { GlowingMascot } from '@shared/ui/mascot';
+import { Text } from '@shared/ui/text';
 
 import { MapPin, UserDot } from '../ui/map-pin';
 import { PLAN_CARD_WIDTH, PlanCard } from '../ui/plan-card';

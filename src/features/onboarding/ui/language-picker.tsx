@@ -9,7 +9,9 @@ import { cn } from '@shared/lib/cn';
 import { haptics } from '@shared/lib/haptics';
 import { APP_LANGUAGES } from '@shared/lib/languages';
 import { colors, shadows } from '@shared/theme/tokens';
-import { Flag, SelectionDot, Text } from '@shared/ui';
+import { SelectionDot } from '@shared/ui/card';
+import { Flag } from '@shared/ui/flag';
+import { Text } from '@shared/ui/text';
 
 /** Height of the pill, so the menu can be hung the right distance below it. */
 const PILL_HEIGHT = 44;

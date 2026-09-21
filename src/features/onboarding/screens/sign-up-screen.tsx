@@ -3,12 +3,13 @@ import { useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { View } from 'react-native';
 
-import { StepScaffold } from '@shared/components/step-scaffold';
 import { useAcceptLegal, useLegalDocument } from '@shared/data/queries/use-legal';
 import { cn } from '@shared/lib/cn';
 import { STEPS } from '@shared/lib/steps';
 import { supabase } from '@shared/lib/supabase/client';
-import { Button, Spacer, Text } from '@shared/ui';
+import { Button, Spacer } from '@shared/ui/button';
+import { StepScaffold } from '@shared/ui/step-scaffold';
+import { Text } from '@shared/ui/text';
 
 import { describeAuthFailure, type AuthFailure } from '../lib/auth-errors';
 import { flushProfileWrites } from '../lib/profile-writes';

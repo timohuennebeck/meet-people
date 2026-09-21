@@ -1,10 +1,15 @@
 import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 
-import { SuggestionChips } from '@shared/components/suggestion-chips';
 import { usePreferences, useUpdatePreferences } from '@shared/data/queries/use-preferences';
 import { MAX_INTEREST_LENGTH, MAX_INTERESTS } from '@shared/lib/limits';
-import { Button, NavHeader, Screen, SectionLabel, Spacer, TagInput, Text } from '@shared/ui';
+import { Button, Spacer } from '@shared/ui/button';
+import { SectionLabel } from '@shared/ui/card';
+import { TagInput } from '@shared/ui/fields';
+import { NavHeader } from '@shared/ui/header';
+import { Screen } from '@shared/ui/screen';
+import { SuggestionChips } from '@shared/ui/suggestion-chips';
+import { Text } from '@shared/ui/text';
 
 /** Settings → Interests. The same tag field as onboarding, saved in place. */
 export function InterestsSettingsScreen() {

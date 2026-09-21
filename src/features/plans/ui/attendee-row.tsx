@@ -1,7 +1,9 @@
 import { View } from 'react-native';
 
 import type { User } from '@shared/data/schemas';
-import { Avatar, SelectableCard, SelectionDot, Text } from '@shared/ui';
+import { Avatar } from '@shared/ui/avatar';
+import { SelectableCard, SelectionDot } from '@shared/ui/card';
+import { Text } from '@shared/ui/text';
 
 export interface AttendeeRowProps {
   user: User;

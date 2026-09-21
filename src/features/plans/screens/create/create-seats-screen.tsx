@@ -4,7 +4,10 @@ import { Pressable, View } from 'react-native';
 
 import { cn } from '@shared/lib/cn';
 import { colors } from '@shared/theme/tokens';
-import { Button, Card, Glyph, Text } from '@shared/ui';
+import { Button } from '@shared/ui/button';
+import { Card } from '@shared/ui/card';
+import * as Glyph from '@shared/ui/icons';
+import { Text } from '@shared/ui/text';
 
 import { useCreatePlan } from '../../lib/create-plan-provider';
 import { CreateStepLayout } from '../../ui/create-step-layout';

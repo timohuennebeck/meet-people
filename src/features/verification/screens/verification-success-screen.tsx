@@ -7,17 +7,13 @@ import { View } from 'react-native';
 import { useViewer } from '@shared/data/queries/use-viewer';
 import { useSession } from '@shared/providers/session-provider';
 import { gradients, gradientStops } from '@shared/theme/tokens';
-import {
-  Avatar,
-  Button,
-  CheckLine,
-  Mascot,
-  Screen,
-  StepSubtitle,
-  StepTitle,
-  Text,
-  VerifiedSeal,
-} from '@shared/ui';
+import { Avatar, VerifiedSeal } from '@shared/ui/avatar';
+import { Button } from '@shared/ui/button';
+import { StepSubtitle, StepTitle } from '@shared/ui/card';
+import { Mascot } from '@shared/ui/mascot';
+import { CheckLine } from '@shared/ui/note';
+import { Screen } from '@shared/ui/screen';
+import { Text } from '@shared/ui/text';
 
 /** The full-page confirmation shown once the selfie review clears. */
 export function VerificationSuccessScreen() {

@@ -2,11 +2,15 @@ import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { View } from 'react-native';
 
-import { StepScaffold } from '@shared/components/step-scaffold';
 import { useViewer } from '@shared/data/queries/use-viewer';
 import { STEPS } from '@shared/lib/steps';
 import { useSession } from '@shared/providers/session-provider';
-import { Button, Highlight, Mascot, StepTitle, Text, TextButton } from '@shared/ui';
+import { Button, TextButton } from '@shared/ui/button';
+import { StepTitle } from '@shared/ui/card';
+import { Highlight } from '@shared/ui/highlight';
+import { Mascot } from '@shared/ui/mascot';
+import { StepScaffold } from '@shared/ui/step-scaffold';
+import { Text } from '@shared/ui/text';
 
 /**
  * A short confirmation once the account exists.

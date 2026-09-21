@@ -5,7 +5,9 @@ import { Pressable, View } from 'react-native';
 import type { Plan } from '@shared/data/schemas';
 import { cn } from '@shared/lib/cn';
 import { colors, shadows } from '@shared/theme/tokens';
-import { Avatar, PlanPhoto, Text } from '@shared/ui';
+import { Avatar } from '@shared/ui/avatar';
+import { PlanPhoto } from '@shared/ui/plan-photo';
+import { Text } from '@shared/ui/text';
 
 import { PlanLanguages } from './plan-languages';
 import { openSeatCount, participatingLabel } from '../lib/seats';

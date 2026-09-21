@@ -1,7 +1,7 @@
 import type { TFunction } from 'i18next';
 
 import type { Plan } from '@shared/data/schemas';
-import type { Seat } from '@shared/ui';
+import type { Seat } from '@shared/ui/seats';
 
 /**
  * Turns a plan's participants into the seat row a sheet renders, padding out

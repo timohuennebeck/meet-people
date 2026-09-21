@@ -6,7 +6,12 @@ import { ScrollView } from 'react-native';
 import { usePreferences, useUpdatePreferences } from '@shared/data/queries/use-preferences';
 import { pickLanguages, searchLanguages, type LanguageOption } from '@shared/lib/languages';
 import { colors } from '@shared/theme/tokens';
-import { Glyph, Screen, SearchHeader, SelectableRow, Text, TextField } from '@shared/ui';
+import { TextField } from '@shared/ui/fields';
+import { SearchHeader } from '@shared/ui/header';
+import * as Glyph from '@shared/ui/icons';
+import { SelectableRow } from '@shared/ui/list-row';
+import { Screen } from '@shared/ui/screen';
+import { Text } from '@shared/ui/text';
 
 /** Languages common in the user's neighbourhood, offered while nothing is typed. */
 const NEARBY = ['tr', 'ar'];

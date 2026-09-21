@@ -6,7 +6,11 @@ import { usePreferences } from '@shared/data/queries/use-preferences';
 import { useProfileViewCount } from '@shared/data/queries/use-users';
 import { useViewer } from '@shared/data/queries/use-viewer';
 import { colors } from '@shared/theme/tokens';
-import { Button, CircleButton, Glyph, SealNote, Text } from '@shared/ui';
+import { Button } from '@shared/ui/button';
+import { CircleButton } from '@shared/ui/header';
+import * as Glyph from '@shared/ui/icons';
+import { SealNote } from '@shared/ui/note';
+import { Text } from '@shared/ui/text';
 
 import { ProfileHeader, ProfileInterests } from '../ui/profile-header';
 

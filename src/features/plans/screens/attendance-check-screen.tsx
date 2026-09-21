@@ -6,16 +6,12 @@ import { ScrollView, View } from 'react-native';
 import { isDataError } from '@shared/data/errors';
 import { usePlan, useRecordAttendance } from '@shared/data/queries/use-plans';
 import { formatDayMonth, formatTime, relativeDay } from '@shared/lib/datetime';
-import {
-  Button,
-  NavHeader,
-  Screen,
-  StepSubtitle,
-  StepTitle,
-  Text,
-  TextButton,
-  WarningNote,
-} from '@shared/ui';
+import { Button, TextButton } from '@shared/ui/button';
+import { StepSubtitle, StepTitle } from '@shared/ui/card';
+import { NavHeader } from '@shared/ui/header';
+import { WarningNote } from '@shared/ui/note';
+import { Screen } from '@shared/ui/screen';
+import { Text } from '@shared/ui/text';
 
 import { attendeeDetail, attendeesOf, type Attendee } from '../lib/attendance';
 import { AttendeeRow } from '../ui/attendee-row';

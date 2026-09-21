@@ -10,10 +10,13 @@ import Animated, {
   type EntryAnimationsValues,
 } from 'react-native-reanimated';
 
-import { StepScaffold } from '@shared/components/step-scaffold';
 import { STEPS } from '@shared/lib/steps';
 import { gradientAngles, gradients, shadows } from '@shared/theme/tokens';
-import { Button, Glyph, Mascot, Spacer, Text, TextButton } from '@shared/ui';
+import { Button, Spacer, TextButton } from '@shared/ui/button';
+import * as Glyph from '@shared/ui/icons';
+import { Mascot } from '@shared/ui/mascot';
+import { StepScaffold } from '@shared/ui/step-scaffold';
+import { Text } from '@shared/ui/text';
 
 const RULE_COUNT = 3;
 

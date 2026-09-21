@@ -2,7 +2,9 @@ import type { ReactNode } from 'react';
 import { View } from 'react-native';
 
 import { cn } from '@shared/lib/cn';
-import { Mascot, SelectableCard, SelectionDot, Text } from '@shared/ui';
+import { SelectableCard, SelectionDot } from '@shared/ui/card';
+import { Mascot } from '@shared/ui/mascot';
+import { Text } from '@shared/ui/text';
 
 export interface ChoiceTileProps {
   label: string;

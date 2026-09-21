@@ -5,10 +5,12 @@ import { useRef, useState, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { View } from 'react-native';
 
-import { StepScaffold } from '@shared/components/step-scaffold';
 import { STEPS } from '@shared/lib/steps';
 import { colors } from '@shared/theme/tokens';
-import { Button, Mascot, Text, TextButton } from '@shared/ui';
+import { Button, TextButton } from '@shared/ui/button';
+import { Mascot } from '@shared/ui/mascot';
+import { StepScaffold } from '@shared/ui/step-scaffold';
+import { Text } from '@shared/ui/text';
 
 import { saveLocation } from '../lib/profile-writes';
 

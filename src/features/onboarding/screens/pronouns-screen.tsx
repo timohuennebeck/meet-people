@@ -3,11 +3,12 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { View } from 'react-native';
 
-import { ChoiceTile } from '@shared/components/choice-tile';
-import { StepScaffold } from '@shared/components/step-scaffold';
 import type { Pronouns } from '@shared/data/schemas';
 import { STEPS } from '@shared/lib/steps';
-import { Button, Spacer, Text, TextButton } from '@shared/ui';
+import { Button, Spacer, TextButton } from '@shared/ui/button';
+import { ChoiceTile } from '@shared/ui/choice-tile';
+import { StepScaffold } from '@shared/ui/step-scaffold';
+import { Text } from '@shared/ui/text';
 
 import { saveProfile } from '../lib/profile-writes';
 

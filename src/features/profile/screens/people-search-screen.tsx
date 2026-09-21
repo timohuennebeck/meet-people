@@ -9,18 +9,15 @@ import { usePlans } from '@shared/data/queries/use-plans';
 import { useRecentSearches, useUserSearch } from '@shared/data/queries/use-users';
 import type { Place, Plan, User } from '@shared/data/schemas';
 import { colors } from '@shared/theme/tokens';
-import {
-  Chip,
-  Glyph,
-  NavHeader,
-  OutlinePill,
-  PersonRow,
-  Screen,
-  SectionLabel,
-  Text,
-  TextField,
-} from '@shared/ui';
+import { SectionLabel } from '@shared/ui/card';
+import { Chip } from '@shared/ui/chip';
+import { TextField } from '@shared/ui/fields';
+import { NavHeader } from '@shared/ui/header';
+import * as Glyph from '@shared/ui/icons';
+import { OutlinePill, PersonRow } from '@shared/ui/person-row';
 import { PlaceRow } from '@shared/ui/place-row';
+import { Screen } from '@shared/ui/screen';
+import { Text } from '@shared/ui/text';
 
 const SCOPES = [
   { id: 'people', labelKey: 'search.scopePeople' },

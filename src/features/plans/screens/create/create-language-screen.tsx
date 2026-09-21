@@ -3,7 +3,10 @@ import { useTranslation } from 'react-i18next';
 import { View } from 'react-native';
 
 import { pickLanguages } from '@shared/lib/languages';
-import { Button, Flag, SelectableCard, SelectionDot, Spacer, Text } from '@shared/ui';
+import { Button, Spacer } from '@shared/ui/button';
+import { SelectableCard, SelectionDot } from '@shared/ui/card';
+import { Flag } from '@shared/ui/flag';
+import { Text } from '@shared/ui/text';
 
 import { useCreatePlan } from '../../lib/create-plan-provider';
 import { CreateStepLayout } from '../../ui/create-step-layout';

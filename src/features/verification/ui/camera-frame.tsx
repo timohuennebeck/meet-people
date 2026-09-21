@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { Pressable, View } from 'react-native';
 
 import { cn } from '@shared/lib/cn';
-import { Glyph } from '@shared/ui';
+import * as Glyph from '@shared/ui/icons';
 
 /** The translucent fill every control over the camera sits on. */
 const CONTROL_FILL = 'rgba(14,18,25,0.45)';

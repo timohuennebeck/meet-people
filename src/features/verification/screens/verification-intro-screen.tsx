@@ -2,9 +2,11 @@ import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { View } from 'react-native';
 
-import { StepScaffold } from '@shared/components/step-scaffold';
 import { STEPS } from '@shared/lib/steps';
-import { Button, Mascot, Spacer, Text, TextButton } from '@shared/ui';
+import { Button, Spacer, TextButton } from '@shared/ui/button';
+import { Mascot } from '@shared/ui/mascot';
+import { StepScaffold } from '@shared/ui/step-scaffold';
+import { Text } from '@shared/ui/text';
 
 /** `#EAF1FE · radius:24px` card describing one verification step. */
 function StepCard({ index, title, body }: { index: number; title: string; body: string }) {

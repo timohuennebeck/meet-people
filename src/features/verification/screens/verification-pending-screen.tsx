@@ -2,9 +2,11 @@ import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { View } from 'react-native';
 
-import { StepScaffold } from '@shared/components/step-scaffold';
 import { STEPS } from '@shared/lib/steps';
-import { Button, Spacer, Text, TimelineStep } from '@shared/ui';
+import { Button, Spacer } from '@shared/ui/button';
+import { StepScaffold } from '@shared/ui/step-scaffold';
+import { Text } from '@shared/ui/text';
+import { TimelineStep } from '@shared/ui/timeline';
 
 /** The review timeline, shown while a human checks the selfie. */
 export function VerificationPendingScreen() {

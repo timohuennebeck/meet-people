@@ -2,10 +2,10 @@ import { useRouter } from 'expo-router';
 import { useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { StepScaffold } from '@shared/components/step-scaffold';
 import { STEPS } from '@shared/lib/steps';
 import { supabase } from '@shared/lib/supabase/client';
-import { Button, Spacer } from '@shared/ui';
+import { Button, Spacer } from '@shared/ui/button';
+import { StepScaffold } from '@shared/ui/step-scaffold';
 
 import { describeAuthFailure, type AuthFailure } from '../lib/auth-errors';
 import { flushProfileWrites } from '../lib/profile-writes';

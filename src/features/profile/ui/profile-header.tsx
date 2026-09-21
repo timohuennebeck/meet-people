@@ -7,7 +7,11 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import type { User } from '@shared/data/schemas';
 import { formatMonthYear } from '@shared/lib/datetime';
 import { gradients, gradientStops } from '@shared/theme/tokens';
-import { Chip, FlaggedAvatar, SectionLabel, Text, VerifiedSeal, flagUri } from '@shared/ui';
+import { FlaggedAvatar, VerifiedSeal } from '@shared/ui/avatar';
+import { SectionLabel } from '@shared/ui/card';
+import { Chip } from '@shared/ui/chip';
+import { flagUri } from '@shared/ui/flag';
+import { Text } from '@shared/ui/text';
 
 export interface ProfileHeaderProps {
   user: User;

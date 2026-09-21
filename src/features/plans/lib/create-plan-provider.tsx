@@ -1,9 +1,9 @@
 import { createContext, useCallback, useContext, useMemo, useState } from 'react';
 import type { ReactNode } from 'react';
 
-import type { AgeRange } from '@shared/components/age-range-control';
 import type { JoinMode, Place } from '@shared/data/schemas';
 import { inAnHour } from '@shared/lib/datetime';
+import type { AgeRange } from '@shared/ui/age-range-control';
 
 /**
  * Everything the seven create steps collect, before any of it is a row.

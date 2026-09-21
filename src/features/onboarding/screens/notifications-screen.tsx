@@ -4,11 +4,13 @@ import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { View } from 'react-native';
 
-import { StepScaffold } from '@shared/components/step-scaffold';
 import { useUpdatePreferences } from '@shared/data/queries/use-preferences';
 import { STEPS } from '@shared/lib/steps';
 import { gradientAngles, gradients, shadows } from '@shared/theme/tokens';
-import { Button, Mascot, Spacer, Text, TextButton } from '@shared/ui';
+import { Button, Spacer, TextButton } from '@shared/ui/button';
+import { Mascot } from '@shared/ui/mascot';
+import { StepScaffold } from '@shared/ui/step-scaffold';
+import { Text } from '@shared/ui/text';
 
 const APP_MARK = require('../../../../assets/images/app-icon-mark.png');
 

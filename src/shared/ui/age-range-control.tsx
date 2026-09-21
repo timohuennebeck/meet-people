@@ -1,7 +1,10 @@
 import { View } from 'react-native';
 
 import { cn } from '@shared/lib/cn';
-import { Card, Chip, RangeSlider, SliderBounds, SliderReadout, Text } from '@shared/ui';
+import { Card } from '@shared/ui/card';
+import { Chip } from '@shared/ui/chip';
+import { RangeSlider, SliderBounds, SliderReadout } from '@shared/ui/slider';
+import { Text } from '@shared/ui/text';
 
 /** The slider spans 18–60+; fractions below are measured against that span. */
 export const AGE_MIN = 18;

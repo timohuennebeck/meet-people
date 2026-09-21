@@ -2,7 +2,7 @@ import { View } from 'react-native';
 
 import { usePreferences, useUpdatePreferences } from '@shared/data/queries/use-preferences';
 import { pickLanguages } from '@shared/lib/languages';
-import { SelectableRow } from '@shared/ui';
+import { SelectableRow } from '@shared/ui/list-row';
 
 export interface SpokenLanguageListProps {
   /** The shortlist to offer, in order. Onboarding and settings differ. */

@@ -2,8 +2,11 @@ import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { ScrollView } from 'react-native';
 
-import { SpokenLanguageList } from '@shared/components/spoken-language-list';
-import { NavHeader, Screen, SectionLabel, TextButton } from '@shared/ui';
+import { TextButton } from '@shared/ui/button';
+import { SectionLabel } from '@shared/ui/card';
+import { NavHeader } from '@shared/ui/header';
+import { Screen } from '@shared/ui/screen';
+import { SpokenLanguageList } from '@shared/ui/spoken-language-list';
 
 /** The shortlist the design shows on this page. */
 const OPTIONS = ['de', 'en', 'pt', 'tr'];

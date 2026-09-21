@@ -4,7 +4,9 @@ import { useTranslation } from 'react-i18next';
 import { Pressable } from 'react-native';
 
 import { colors } from '@shared/theme/tokens';
-import { FieldLabel, Glyph, Text, TextField } from '@shared/ui';
+import { FieldLabel, TextField } from '@shared/ui/fields';
+import * as Glyph from '@shared/ui/icons';
+import { Text } from '@shared/ui/text';
 
 import type { AuthFailure } from '../lib/auth-errors';
 

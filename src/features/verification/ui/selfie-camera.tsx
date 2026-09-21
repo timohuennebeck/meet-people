@@ -3,7 +3,8 @@ import { useCallback, useEffect, useRef, useState, type RefObject } from 'react'
 import { useTranslation } from 'react-i18next';
 import { Linking, Pressable, StyleSheet, View } from 'react-native';
 
-import { Button, Text } from '@shared/ui';
+import { Button } from '@shared/ui/button';
+import { Text } from '@shared/ui/text';
 
 /**
  * What the camera can do for us right now.

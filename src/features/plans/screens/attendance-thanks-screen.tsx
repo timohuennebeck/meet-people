@@ -1,8 +1,8 @@
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 
-import { MascotScreen } from '@shared/components/mascot-screen';
-import { Button, TextButton } from '@shared/ui';
+import { Button, TextButton } from '@shared/ui/button';
+import { MascotScreen } from '@shared/ui/mascot-screen';
 
 /**
  * The thank-you after the check-list: what was submitted, and the reassurance

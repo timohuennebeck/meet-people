@@ -3,7 +3,9 @@ import { useTranslation } from 'react-i18next';
 import { View } from 'react-native';
 
 import type { Plan } from '@shared/data/schemas';
-import { Badge, PlanPhoto, Text } from '@shared/ui';
+import { Badge } from '@shared/ui/chip';
+import { PlanPhoto } from '@shared/ui/plan-photo';
+import { Text } from '@shared/ui/text';
 
 export interface PlanSheetHeaderProps {
   plan: Plan;

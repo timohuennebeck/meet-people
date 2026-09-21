@@ -2,7 +2,9 @@ import { Pressable, View } from 'react-native';
 
 import type { Conversation } from '@shared/data/schemas';
 import { cn } from '@shared/lib/cn';
-import { Avatar, CountBadge, PairAvatar, Text } from '@shared/ui';
+import { Avatar, PairAvatar } from '@shared/ui/avatar';
+import { CountBadge } from '@shared/ui/chip';
+import { Text } from '@shared/ui/text';
 
 export interface ConversationRowProps {
   conversation: Conversation;

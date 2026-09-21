@@ -3,9 +3,11 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { View } from 'react-native';
 
-import { StepScaffold } from '@shared/components/step-scaffold';
 import { STEPS } from '@shared/lib/steps';
-import { Button, Mascot, Spacer, TextField } from '@shared/ui';
+import { Button, Spacer } from '@shared/ui/button';
+import { TextField } from '@shared/ui/fields';
+import { Mascot } from '@shared/ui/mascot';
+import { StepScaffold } from '@shared/ui/step-scaffold';
 
 import { saveProfile } from '../lib/profile-writes';
 

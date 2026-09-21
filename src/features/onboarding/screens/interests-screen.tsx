@@ -1,12 +1,13 @@
 import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 
-import { StepScaffold } from '@shared/components/step-scaffold';
-import { SuggestionChips } from '@shared/components/suggestion-chips';
 import { usePreferences, useUpdatePreferences } from '@shared/data/queries/use-preferences';
 import { MAX_INTEREST_LENGTH, MAX_INTERESTS } from '@shared/lib/limits';
 import { STEPS } from '@shared/lib/steps';
-import { Button, Spacer, TagInput } from '@shared/ui';
+import { Button, Spacer } from '@shared/ui/button';
+import { TagInput } from '@shared/ui/fields';
+import { StepScaffold } from '@shared/ui/step-scaffold';
+import { SuggestionChips } from '@shared/ui/suggestion-chips';
 
 /** Interests, entered as tags. */
 export function InterestsScreen() {

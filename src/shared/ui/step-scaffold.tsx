@@ -4,8 +4,10 @@ import { View } from 'react-native';
 
 import { cn } from '@shared/lib/cn';
 import type { StepPosition } from '@shared/lib/steps';
-import { ProgressHeader, Screen, StepSubtitle, StepTitle, Text } from '@shared/ui';
-import type { ScreenPadding } from '@shared/ui';
+import { StepSubtitle, StepTitle } from '@shared/ui/card';
+import { ProgressHeader } from '@shared/ui/header';
+import { Screen, type ScreenPadding } from '@shared/ui/screen';
+import { Text } from '@shared/ui/text';
 
 export interface StepScaffoldProps {
   /** Where this step sits in its flow — see `@shared/lib/steps`. */

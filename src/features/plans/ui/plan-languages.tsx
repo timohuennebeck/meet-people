@@ -2,7 +2,8 @@ import { View } from 'react-native';
 
 import { cn } from '@shared/lib/cn';
 import { pickLanguages } from '@shared/lib/languages';
-import { Flag, Text } from '@shared/ui';
+import { Flag } from '@shared/ui/flag';
+import { Text } from '@shared/ui/text';
 
 /**
  * `radius:999px · padding:5px 12px 5px 5px · 24px flag · 13px/600` — one

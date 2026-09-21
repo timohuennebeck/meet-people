@@ -6,7 +6,12 @@ import { ScrollView, View } from 'react-native';
 
 import { useConversations, useUnreadCount } from '@shared/data/queries/use-chat';
 import { colors } from '@shared/theme/tokens';
-import { CircleButton, Glyph, Screen, SectionLabel, Text, TextField } from '@shared/ui';
+import { SectionLabel } from '@shared/ui/card';
+import { TextField } from '@shared/ui/fields';
+import { CircleButton } from '@shared/ui/header';
+import * as Glyph from '@shared/ui/icons';
+import { Screen } from '@shared/ui/screen';
+import { Text } from '@shared/ui/text';
 
 import { ConversationRow } from '../ui/conversation-row';
 

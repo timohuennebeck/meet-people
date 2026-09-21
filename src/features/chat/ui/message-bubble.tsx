@@ -2,7 +2,8 @@ import { View } from 'react-native';
 
 import { cn } from '@shared/lib/cn';
 import { shadows } from '@shared/theme/tokens';
-import { Avatar, Text, type Photo } from '@shared/ui';
+import { Avatar, type Photo } from '@shared/ui/avatar';
+import { Text } from '@shared/ui/text';
 
 export interface MessageBubbleProps {
   body: string;

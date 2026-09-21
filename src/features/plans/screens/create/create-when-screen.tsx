@@ -17,7 +17,11 @@ import {
   todayAtHour,
 } from '@shared/lib/datetime';
 import { colors } from '@shared/theme/tokens';
-import { Button, Chip, Glyph, SectionLabel, Spacer, Text } from '@shared/ui';
+import { Button, Spacer } from '@shared/ui/button';
+import { SectionLabel } from '@shared/ui/card';
+import { Chip } from '@shared/ui/chip';
+import * as Glyph from '@shared/ui/icons';
+import { Text } from '@shared/ui/text';
 
 import { useCreatePlan } from '../../lib/create-plan-provider';
 import { CreateStepLayout } from '../../ui/create-step-layout';

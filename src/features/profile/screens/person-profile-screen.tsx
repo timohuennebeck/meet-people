@@ -10,7 +10,11 @@ import { useRecordProfileView, useUser } from '@shared/data/queries/use-users';
 import { useViewer } from '@shared/data/queries/use-viewer';
 import { cn } from '@shared/lib/cn';
 import { colors } from '@shared/theme/tokens';
-import { Button, CircleButton, Glyph, SealNote, Text } from '@shared/ui';
+import { Button } from '@shared/ui/button';
+import { CircleButton } from '@shared/ui/header';
+import * as Glyph from '@shared/ui/icons';
+import { SealNote } from '@shared/ui/note';
+import { Text } from '@shared/ui/text';
 
 import { ProfileHeader, ProfileInterests } from '../ui/profile-header';
 

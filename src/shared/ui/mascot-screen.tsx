@@ -2,7 +2,10 @@ import type { ReactNode } from 'react';
 import { View } from 'react-native';
 
 import { cn } from '@shared/lib/cn';
-import { Mascot, NavHeader, Screen, StepSubtitle, StepTitle } from '@shared/ui';
+import { StepSubtitle, StepTitle } from '@shared/ui/card';
+import { NavHeader } from '@shared/ui/header';
+import { Mascot } from '@shared/ui/mascot';
+import { Screen } from '@shared/ui/screen';
 
 export interface MascotScreenProps {
   /**

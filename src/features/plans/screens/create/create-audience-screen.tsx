@@ -2,15 +2,11 @@ import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import {
-  AgeRangeControl,
-  AGE_MAX,
-  AGE_MIN,
-  type AgeRange,
-} from '@shared/components/age-range-control';
 import { isDataError } from '@shared/data/errors';
 import { usePublishPlan } from '@shared/data/queries/use-plans';
-import { Button, Spacer, Text, TextButton } from '@shared/ui';
+import { AgeRangeControl, AGE_MAX, AGE_MIN, type AgeRange } from '@shared/ui/age-range-control';
+import { Button, Spacer, TextButton } from '@shared/ui/button';
+import { Text } from '@shared/ui/text';
 
 import { useCreatePlan } from '../../lib/create-plan-provider';
 import { CreateStepLayout } from '../../ui/create-step-layout';

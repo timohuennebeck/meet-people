@@ -1,7 +1,7 @@
 import { View } from 'react-native';
 
 import { cn } from '@shared/lib/cn';
-import { Chip } from '@shared/ui';
+import { Chip } from '@shared/ui/chip';
 
 export interface SuggestionChipsProps {
   /** What is already on the list; a suggestion matching one is not offered. */

@@ -5,17 +5,14 @@ import { View } from 'react-native';
 
 import { isDataError } from '@shared/data/errors';
 import { usePlan, useSetMembership } from '@shared/data/queries/use-plans';
-import {
-  HostCard,
-  Button,
-  NoteField,
-  Chip,
-  SectionLabel,
-  SheetSurface,
-  Text,
-  TextButton,
-  WarningNote,
-} from '@shared/ui';
+import { Button, TextButton } from '@shared/ui/button';
+import { SectionLabel } from '@shared/ui/card';
+import { Chip } from '@shared/ui/chip';
+import { NoteField } from '@shared/ui/fields';
+import { WarningNote } from '@shared/ui/note';
+import { HostCard } from '@shared/ui/person-row';
+import { SheetSurface } from '@shared/ui/sheet';
+import { Text } from '@shared/ui/text';
 
 /**
  * Leaving a plan. The confirmation is honest about the consequences — the seat

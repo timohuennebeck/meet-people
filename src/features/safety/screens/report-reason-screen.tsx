@@ -4,16 +4,11 @@ import { useTranslation } from 'react-i18next';
 import { ScrollView, View } from 'react-native';
 
 import { useUser } from '@shared/data/queries/use-users';
-import {
-  Button,
-  NavHeader,
-  Screen,
-  SelectableCard,
-  SelectionDot,
-  StepSubtitle,
-  StepTitle,
-  Text,
-} from '@shared/ui';
+import { Button } from '@shared/ui/button';
+import { SelectableCard, SelectionDot, StepSubtitle, StepTitle } from '@shared/ui/card';
+import { NavHeader } from '@shared/ui/header';
+import { Screen } from '@shared/ui/screen';
+import { Text } from '@shared/ui/text';
 
 import { isReportReason, REPORT_REASONS, type ReportReason } from '../lib/reasons';
 

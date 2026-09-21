@@ -5,16 +5,13 @@ import { View } from 'react-native';
 
 import { isDataError } from '@shared/data/errors';
 import { usePlan, useSetMembership } from '@shared/data/queries/use-plans';
-import {
-  Avatar,
-  Button,
-  NoteField,
-  Chip,
-  SealNote,
-  SheetSurface,
-  Text,
-  TextButton,
-} from '@shared/ui';
+import { Avatar } from '@shared/ui/avatar';
+import { Button, TextButton } from '@shared/ui/button';
+import { Chip } from '@shared/ui/chip';
+import { NoteField } from '@shared/ui/fields';
+import { SealNote } from '@shared/ui/note';
+import { SheetSurface } from '@shared/ui/sheet';
+import { Text } from '@shared/ui/text';
 
 /**
  * The join-request sheet: a note to the host, a few one-tap additions, and a

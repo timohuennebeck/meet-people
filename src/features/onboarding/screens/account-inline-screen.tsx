@@ -3,9 +3,13 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { View } from 'react-native';
 
-import { StepScaffold } from '@shared/components/step-scaffold';
 import { STEPS } from '@shared/lib/steps';
-import { Button, Glyph, LabelledDivider, Spacer, Text, TextField } from '@shared/ui';
+import { Button, Spacer } from '@shared/ui/button';
+import { LabelledDivider } from '@shared/ui/card';
+import { TextField } from '@shared/ui/fields';
+import * as Glyph from '@shared/ui/icons';
+import { StepScaffold } from '@shared/ui/step-scaffold';
+import { Text } from '@shared/ui/text';
 
 import { LegalNote } from '../ui/legal-note';
 

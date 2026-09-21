@@ -7,7 +7,6 @@ import { useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Platform, Pressable, View } from 'react-native';
 
-import { StepScaffold } from '@shared/components/step-scaffold';
 import {
   ageFromBirthdate,
   defaultBirthdate,
@@ -18,7 +17,9 @@ import {
 } from '@shared/lib/datetime';
 import { STEPS } from '@shared/lib/steps';
 import { colors } from '@shared/theme/tokens';
-import { Button, Spacer, Text } from '@shared/ui';
+import { Button, Spacer } from '@shared/ui/button';
+import { StepScaffold } from '@shared/ui/step-scaffold';
+import { Text } from '@shared/ui/text';
 
 import { saveProfile } from '../lib/profile-writes';
 

@@ -1,10 +1,11 @@
 import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 
-import { MascotScreen } from '@shared/components/mascot-screen';
 import { useViewer } from '@shared/data/queries/use-viewer';
 import { useSession } from '@shared/providers/session-provider';
-import { Button, HostCard, TextButton } from '@shared/ui';
+import { Button, TextButton } from '@shared/ui/button';
+import { MascotScreen } from '@shared/ui/mascot-screen';
+import { HostCard } from '@shared/ui/person-row';
 
 /**
  * Signing out. Unlike deleting the account nothing is lost here, so the page

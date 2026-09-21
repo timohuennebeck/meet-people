@@ -1,13 +1,13 @@
 import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 
-import { RadiusControl } from '@shared/components/radius-control';
-import { RadiusMap } from '@shared/components/radius-map';
-import { StepScaffold } from '@shared/components/step-scaffold';
 import { usePreferences, useUpdatePreferences } from '@shared/data/queries/use-preferences';
 import type { DistanceUnit } from '@shared/data/schemas';
 import { STEPS } from '@shared/lib/steps';
-import { Button, Spacer } from '@shared/ui';
+import { Button, Spacer } from '@shared/ui/button';
+import { RadiusControl } from '@shared/ui/radius-control';
+import { RadiusMap } from '@shared/ui/radius-map';
+import { StepScaffold } from '@shared/ui/step-scaffold';
 
 /** How far the user is willing to travel. */
 export function RadiusScreen() {

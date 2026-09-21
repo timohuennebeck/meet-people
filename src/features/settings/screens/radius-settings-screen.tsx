@@ -1,10 +1,13 @@
 import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 
-import { RadiusControl } from '@shared/components/radius-control';
-import { RadiusMap } from '@shared/components/radius-map';
 import { usePreferences, useUpdatePreferences } from '@shared/data/queries/use-preferences';
-import { Button, NavHeader, Screen, Spacer, StepSubtitle } from '@shared/ui';
+import { Button, Spacer } from '@shared/ui/button';
+import { StepSubtitle } from '@shared/ui/card';
+import { NavHeader } from '@shared/ui/header';
+import { RadiusControl } from '@shared/ui/radius-control';
+import { RadiusMap } from '@shared/ui/radius-map';
+import { Screen } from '@shared/ui/screen';
 
 /** Settings → Radius. The same controls as the onboarding step, saved in place. */
 export function RadiusSettingsScreen() {

@@ -7,8 +7,13 @@ import { View } from 'react-native';
 import { useNearbyPlaces, useRecentPlaces } from '@shared/data/queries/use-places';
 import type { Place } from '@shared/data/schemas';
 import { colors } from '@shared/theme/tokens';
-import { Button, Chip, Mascot, SectionLabel, Text, TextField } from '@shared/ui';
+import { Button } from '@shared/ui/button';
+import { SectionLabel } from '@shared/ui/card';
+import { Chip } from '@shared/ui/chip';
+import { TextField } from '@shared/ui/fields';
+import { Mascot } from '@shared/ui/mascot';
 import { PlaceRow } from '@shared/ui/place-row';
+import { Text } from '@shared/ui/text';
 
 import { useCreatePlan } from '../../lib/create-plan-provider';
 import { CreateStepLayout } from '../../ui/create-step-layout';

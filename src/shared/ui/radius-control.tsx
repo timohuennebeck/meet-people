@@ -1,7 +1,10 @@
 import { View } from 'react-native';
 
 import type { DistanceUnit } from '@shared/data/schemas';
-import { Card, Chip, SegmentedControl, Slider, SliderReadout, Text } from '@shared/ui';
+import { Card } from '@shared/ui/card';
+import { Chip } from '@shared/ui/chip';
+import { SegmentedControl, Slider, SliderReadout } from '@shared/ui/slider';
+import { Text } from '@shared/ui/text';
 
 /** Presets under the slider, in miles. */
 const PRESETS = [1, 2, 3, 6] as const;

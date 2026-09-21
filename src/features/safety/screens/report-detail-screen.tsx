@@ -7,18 +7,15 @@ import { usePlans } from '@shared/data/queries/use-plans';
 import { useReportAndBlock } from '@shared/data/queries/use-safety';
 import { useUser } from '@shared/data/queries/use-users';
 import { formatDayMonth } from '@shared/lib/datetime';
-import {
-  Button,
-  Chip,
-  HostCard,
-  NavHeader,
-  NoteField,
-  Screen,
-  SectionLabel,
-  Spacer,
-  Text,
-  WarningNote,
-} from '@shared/ui';
+import { Button, Spacer } from '@shared/ui/button';
+import { SectionLabel } from '@shared/ui/card';
+import { Chip } from '@shared/ui/chip';
+import { NoteField } from '@shared/ui/fields';
+import { NavHeader } from '@shared/ui/header';
+import { WarningNote } from '@shared/ui/note';
+import { HostCard } from '@shared/ui/person-row';
+import { Screen } from '@shared/ui/screen';
+import { Text } from '@shared/ui/text';
 
 import { isReportReason } from '../lib/reasons';
 

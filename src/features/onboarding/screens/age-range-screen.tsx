@@ -1,11 +1,11 @@
 import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 
-import { AgePresets, AgeRangeControl } from '@shared/components/age-range-control';
-import { StepScaffold } from '@shared/components/step-scaffold';
 import { usePreferences, useUpdatePreferences } from '@shared/data/queries/use-preferences';
 import { STEPS } from '@shared/lib/steps';
-import { Button, Spacer } from '@shared/ui';
+import { AgePresets, AgeRangeControl } from '@shared/ui/age-range-control';
+import { Button, Spacer } from '@shared/ui/button';
+import { StepScaffold } from '@shared/ui/step-scaffold';
 
 /** Which ages the user wants to see on the map. */
 export function AgeRangeScreen() {

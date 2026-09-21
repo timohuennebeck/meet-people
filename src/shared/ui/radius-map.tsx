@@ -3,7 +3,7 @@ import { View } from 'react-native';
 
 import { cn } from '@shared/lib/cn';
 import { gradientAngles, gradients } from '@shared/theme/tokens';
-import { Face } from '@shared/ui';
+import { Face } from '@shared/ui/avatar';
 
 /**
  * The radius preview: two concentric brand-tinted circles around the user's

@@ -3,10 +3,11 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { View } from 'react-native';
 
-import { StepScaffold } from '@shared/components/step-scaffold';
 import { COUNTRIES } from '@shared/lib/languages';
 import { STEPS } from '@shared/lib/steps';
-import { Button, SelectableRow, Spacer, TextButton } from '@shared/ui';
+import { Button, Spacer, TextButton } from '@shared/ui/button';
+import { SelectableRow } from '@shared/ui/list-row';
+import { StepScaffold } from '@shared/ui/step-scaffold';
 
 import { saveProfile } from '../lib/profile-writes';
 

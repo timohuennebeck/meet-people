@@ -13,8 +13,9 @@ import Animated from 'react-native-reanimated';
  * `<LinearGradient className="absolute inset-0" />` backdrop renders at zero
  * height with no error anywhere: the screen just loses its wash.
  *
- * Importing this module once, from the shared UI barrel, registers the mapping
- * process-wide, so every call site keeps working as written.
+ * `app/_layout.tsx` imports this once, first, which registers the mapping
+ * process-wide before anything renders — so every call site keeps working as
+ * written. It used to ride in on the `@shared/ui` barrel, which is gone.
  */
 cssInterop(LinearGradient, { className: 'style' });
 cssInterop(Image, { className: 'style' });

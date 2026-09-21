@@ -2,11 +2,15 @@ import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { View } from 'react-native';
 
-import { AgeRangeControl } from '@shared/components/age-range-control';
-import { ChoiceTile } from '@shared/components/choice-tile';
 import { usePreferences, useUpdatePreferences } from '@shared/data/queries/use-preferences';
 import type { AudienceGender } from '@shared/data/schemas';
-import { Button, NavHeader, Screen, SectionLabel, Spacer, Text } from '@shared/ui';
+import { AgeRangeControl } from '@shared/ui/age-range-control';
+import { Button, Spacer } from '@shared/ui/button';
+import { SectionLabel } from '@shared/ui/card';
+import { ChoiceTile } from '@shared/ui/choice-tile';
+import { NavHeader } from '@shared/ui/header';
+import { Screen } from '@shared/ui/screen';
+import { Text } from '@shared/ui/text';
 
 /** Settings → Who I want to see: gender tiles and an age range. */
 export function AudienceSettingsScreen() {

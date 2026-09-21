@@ -6,17 +6,13 @@ import { Pressable, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { gradients, gradientStops } from '@shared/theme/tokens';
-import {
-  Button,
-  CircleButton,
-  Glyph,
-  LabelledDivider,
-  Mascot,
-  Screen,
-  StepTitle,
-  Text,
-  TextButton,
-} from '@shared/ui';
+import { Button, TextButton } from '@shared/ui/button';
+import { LabelledDivider, StepTitle } from '@shared/ui/card';
+import { CircleButton } from '@shared/ui/header';
+import * as Glyph from '@shared/ui/icons';
+import { Mascot } from '@shared/ui/mascot';
+import { Screen } from '@shared/ui/screen';
+import { Text } from '@shared/ui/text';
 
 import { planLink, sharePlan } from '../../lib/share';
 

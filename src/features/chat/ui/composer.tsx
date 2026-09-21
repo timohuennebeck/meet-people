@@ -8,7 +8,8 @@ import { Pressable, ScrollView, TextInput, View } from 'react-native';
 import { cn } from '@shared/lib/cn';
 import { haptics } from '@shared/lib/haptics';
 import { colors } from '@shared/theme/tokens';
-import { FONT_FAMILY, Glyph, Text } from '@shared/ui';
+import * as Glyph from '@shared/ui/icons';
+import { FONT_FAMILY, Text } from '@shared/ui/text';
 
 /**
  * One photo out of the library, uncropped — a chat attachment is not a portrait,

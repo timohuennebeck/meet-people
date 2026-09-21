@@ -6,7 +6,10 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useConversations, useMarkRead, useThread } from '@shared/data/queries/use-chat';
 import { useViewerId } from '@shared/data/queries/use-viewer';
-import { Avatar, CircleButton, Glyph, PairAvatar, Text } from '@shared/ui';
+import { Avatar, PairAvatar } from '@shared/ui/avatar';
+import { CircleButton } from '@shared/ui/header';
+import * as Glyph from '@shared/ui/icons';
+import { Text } from '@shared/ui/text';
 
 import { useComposer } from '../lib/use-composer';
 import { Composer } from '../ui/composer';

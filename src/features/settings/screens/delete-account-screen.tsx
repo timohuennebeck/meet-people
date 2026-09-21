@@ -2,7 +2,6 @@ import { useRouter } from 'expo-router';
 import { Info } from 'phosphor-react-native';
 import { useTranslation } from 'react-i18next';
 
-import { MascotScreen } from '@shared/components/mascot-screen';
 import { isDataError } from '@shared/data/errors';
 import { useDeleteAccount } from '@shared/data/queries/use-account';
 import { useConversations } from '@shared/data/queries/use-chat';
@@ -10,7 +9,10 @@ import { usePlans } from '@shared/data/queries/use-plans';
 import { useViewer } from '@shared/data/queries/use-viewer';
 import { useSession } from '@shared/providers/session-provider';
 import { colors } from '@shared/theme/tokens';
-import { Button, InfoNote, Text, TextButton } from '@shared/ui';
+import { Button, TextButton } from '@shared/ui/button';
+import { MascotScreen } from '@shared/ui/mascot-screen';
+import { InfoNote } from '@shared/ui/note';
+import { Text } from '@shared/ui/text';
 
 /**
  * Deleting the account. The question names the person and the sentence under it

@@ -5,7 +5,11 @@ import { ScrollView, View } from 'react-native';
 import { usePreferences, useUpdatePreferences } from '@shared/data/queries/use-preferences';
 import { setLocale } from '@shared/i18n';
 import { APP_LANGUAGES } from '@shared/lib/languages';
-import { NavHeader, Screen, SectionLabel, SelectableRow, Text } from '@shared/ui';
+import { SectionLabel } from '@shared/ui/card';
+import { NavHeader } from '@shared/ui/header';
+import { SelectableRow } from '@shared/ui/list-row';
+import { Screen } from '@shared/ui/screen';
+import { Text } from '@shared/ui/text';
 
 /**
  * Settings → App language. Changes the interface only; the languages the user

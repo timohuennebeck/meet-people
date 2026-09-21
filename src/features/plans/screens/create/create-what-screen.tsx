@@ -2,7 +2,11 @@ import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { View } from 'react-native';
 
-import { Button, Chip, NoteField, SectionLabel, Spacer, Text } from '@shared/ui';
+import { Button, Spacer } from '@shared/ui/button';
+import { SectionLabel } from '@shared/ui/card';
+import { Chip } from '@shared/ui/chip';
+import { NoteField } from '@shared/ui/fields';
+import { Text } from '@shared/ui/text';
 
 import { useCreatePlan } from '../../lib/create-plan-provider';
 import { CreateStepLayout } from '../../ui/create-step-layout';

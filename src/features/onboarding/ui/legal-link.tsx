@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { cn } from '@shared/lib/cn';
 import { haptics } from '@shared/lib/haptics';
 import { legalHref, type LegalDoc } from '@shared/lib/legal';
-import { Text } from '@shared/ui';
+import { Text } from '@shared/ui/text';
 
 export interface LegalLinkProps {
   /** Which document the words open. */
