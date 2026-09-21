@@ -8,7 +8,7 @@ import { PEOPLE } from '@shared/data/fixtures';
 import { useViewerId } from '@shared/data/useViewer';
 import { Avatar, CircleButton, Glyph, PairAvatar, Text } from '@shared/ui';
 
-import { useConversations, useMarkRead, useThread } from '../data/useChat';
+import { useConversations, useMarkRead, useThread, useThreadRealtime } from '../data/useChat';
 import { useScriptedThread } from '../hooks/useScriptedThread';
 import { nextDirectReply, nextGroupReply } from '../lib/scriptedReplies';
 import { Composer } from '../ui/Composer';
@@ -61,6 +61,7 @@ export function ThreadScreen() {
 
   const thread = useScriptedThread(conversationId, isGroup ? nextGroupReply : nextDirectReply);
 
+  useThreadRealtime(conversationId);
   useMarkRead(conversationId, (messages ?? []).length);
 
   // Keep the newest message in view as the thread grows, and again when the

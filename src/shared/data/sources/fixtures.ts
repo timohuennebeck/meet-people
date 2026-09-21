@@ -233,6 +233,12 @@ export const fixtureSource: DataSource = {
     markRead: (): Promise<void> => Promise.resolve(),
 
     /**
+     * Nothing to watch: the only other person in a fixture thread is the
+     * scripted reply, which `useScriptedThread` plays back locally.
+     */
+    subscribe: (): (() => void) => () => undefined,
+
+    /**
      * The design scripts one direct thread, with Sara. Anyone else gets a
      * fresh id so the chat screen still opens — on an empty thread, since
      * nothing here refuses: the Plus gate is the server's rule.

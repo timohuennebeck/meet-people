@@ -123,6 +123,14 @@ export interface DataSource {
      */
     markRead(conversationId: string): Promise<void>;
     /**
+     * Watches one conversation for messages somebody else sends.
+     *
+     * Returns the unsubscribe. `onMessage` fires per inserted row, and the
+     * viewer's own sends are not filtered out here — the thread dedupes by id,
+     * because a send that echoes back is the same message twice, not two.
+     */
+    subscribe(conversationId: string, onMessage: (message: Message) => void): () => void;
+    /**
      * The direct thread with one person, opened if the two have none yet, as
      * its conversation id. The server decides whether the viewer may: a thread
      * with someone they have never sat in a plan with is a Plus feature and

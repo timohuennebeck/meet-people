@@ -30,6 +30,37 @@ export function useThread(conversationId: string) {
 }
 
 /**
+ * Delivers messages other people send while the thread is open.
+ *
+ * `public.messages` is in the `supabase_realtime` publication and has been
+ * since the schema was written; nothing was listening. Without this a reply
+ * only appeared on remount or when some other mutation happened to invalidate
+ * the thread, which with a 60s `staleTime` is a chat that does not work.
+ *
+ * Appends into the cache rather than invalidating: a refetch would drop an
+ * optimistic bubble that has not come back from its own insert yet.
+ */
+export function useThreadRealtime(conversationId: string) {
+  const queryClient = useQueryClient();
+
+  useEffect(() => {
+    if (!conversationId) return;
+    const key = chatKeys.thread(conversationId).queryKey;
+
+    return dataSource.chats.subscribe(conversationId, (message) => {
+      queryClient.setQueryData<Message[]>(key, (previous) => {
+        const messages = previous ?? [];
+        // The sender receives their own insert back. It is already in the
+        // cache under the server's id by then, so this is the same message
+        // arriving twice rather than two messages.
+        if (messages.some((candidate) => candidate.id === message.id)) return messages;
+        return [...messages, message];
+      });
+    });
+  }, [conversationId, queryClient]);
+}
+
+/**
  * Marks a thread read once it is on screen.
  *
  * `conversation_list.unread_count` counts messages newer than the viewer's

@@ -850,6 +850,37 @@ export const supabaseSource: DataSource = {
         'Direct conversation',
       ),
 
+    /**
+     * Subscribes to the `messages` Realtime publication for one conversation.
+     *
+     * `…000200_row_level_security` put `public.messages` in
+     * `supabase_realtime`, and replication respects the table's read policy —
+     * so a conversation the viewer is not in delivers nothing, and this needs
+     * no filtering of its own beyond the conversation it asked for.
+     */
+    subscribe: (conversationId: string, onMessage: (message: Message) => void): (() => void) => {
+      const db = supabase;
+      if (!db) return () => undefined;
+
+      const channel = db
+        .channel(`messages:${conversationId}`)
+        .on(
+          'postgres_changes',
+          {
+            event: 'INSERT',
+            schema: 'public',
+            table: 'messages',
+            filter: `conversation_id=eq.${conversationId}`,
+          },
+          (payload) => onMessage(toMessage(payload.new as MessageRow)),
+        )
+        .subscribe();
+
+      return () => {
+        void db.removeChannel(channel);
+      };
+    },
+
     markRead: async (conversationId: string): Promise<void> => {
       const db = client();
       const uid = await viewerId();
