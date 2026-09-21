@@ -47,7 +47,4 @@ export const STEPS = {
   verification: at(13),
   notifications: at(14),
   rules: at(15),
-  // Steps kept out of the main flow for now, reachable from account settings.
-  phone: at(8),
-  code: at(9),
 } as const satisfies Record<string, StepPosition>;

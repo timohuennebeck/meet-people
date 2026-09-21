@@ -184,19 +184,6 @@ export const ptBR = {
       cameraDenied: 'Libere o acesso à câmera nos ajustes para tirar uma foto.',
       pickFailed: 'Não deu para abrir agora. Tente de novo.',
     },
-    phone: {
-      title: 'Seu telefone',
-      subtitle: 'Um número, um perfil.',
-      placeholder: '151 23456789',
-      sendCode: 'Enviar código',
-    },
-    code: {
-      title: 'Digite o código',
-      sentTo: 'Enviado para {{phone}} ·',
-      change: 'Alterar',
-      resendIn: 'Novo código em {{time}}',
-      confirm: 'Confirmar',
-    },
     notifications: {
       title: 'Podemos te\navisar?',
       subtitle: 'Só o que é sobre você.',

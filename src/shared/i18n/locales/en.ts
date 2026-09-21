@@ -183,19 +183,6 @@ export const en: Translation = {
       cameraDenied: 'Allow camera access in Settings to take a photo.',
       pickFailed: "That wouldn't open just now. Try again.",
     },
-    phone: {
-      title: 'Your phone',
-      subtitle: 'One number, one profile.',
-      placeholder: '7700 900123',
-      sendCode: 'Send code',
-    },
-    code: {
-      title: 'Enter the code',
-      sentTo: 'Sent to {{phone}} ·',
-      change: 'Change',
-      resendIn: 'New code in {{time}}',
-      confirm: 'Confirm',
-    },
     notifications: {
       title: 'Can we let\nyou know?',
       subtitle: "Only what's about you.",
