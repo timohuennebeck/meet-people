@@ -30,10 +30,17 @@ export function resolveLocale(tag: string): Locale {
   return DEFAULT_LOCALE;
 }
 
-/** Picks the closest supported locale for the device. */
+/**
+ * Picks the closest supported locale for the device.
+ *
+ * The device lists its languages in preference order, so this takes the first
+ * one the app can actually speak rather than the first one at all —
+ * `resolveLocale` would answer `pt-BR` for a German tag, which is the right
+ * fallback for a chosen language but the wrong reading of a device that also
+ * lists English further down.
+ */
 function resolveDeviceLocale(): Locale {
   for (const { languageTag } of Localization.getLocales()) {
-    if (SUPPORTED_LOCALES.includes(languageTag as Locale)) return languageTag as Locale;
     const language = languageTag.split('-')[0];
     if (language === 'pt' || language === 'en') return resolveLocale(languageTag);
   }

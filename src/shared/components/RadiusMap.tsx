@@ -24,17 +24,8 @@ export function RadiusMap({ height, className }: { height: number; className?: s
       />
 
       <View className="absolute inset-0 items-center justify-center">
-        <View
-          className="absolute h-[214px] w-[214px] rounded-full"
-          style={{ backgroundColor: 'rgba(47,124,246,0.06)' }}
-        />
-        <View
-          className="absolute h-[150px] w-[150px] rounded-full border-2"
-          style={{
-            backgroundColor: 'rgba(47,124,246,0.12)',
-            borderColor: 'rgba(47,124,246,0.35)',
-          }}
-        />
+        <View className="absolute h-[214px] w-[214px] rounded-full bg-brand/[0.06]" />
+        <View className="absolute h-[150px] w-[150px] rounded-full border-2 border-brand/35 bg-brand/[0.12]" />
         {/* 18px brand dot with a 4px white ring drawn outside it. */}
         <View className="absolute h-[26px] w-[26px] rounded-full border-[4px] border-white bg-brand" />
       </View>

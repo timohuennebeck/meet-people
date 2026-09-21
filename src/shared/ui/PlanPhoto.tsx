@@ -76,8 +76,7 @@ export function PlanPhoto({
           accessibilityRole="button"
           accessibilityLabel={dismissLabel}
           onPress={onDismiss}
-          className="absolute right-[10px] top-[10px] h-[32px] w-[32px] items-center justify-center rounded-full"
-          style={{ backgroundColor: 'rgba(255,255,255,0.9)' }}
+          className="absolute right-[10px] top-[10px] h-[32px] w-[32px] items-center justify-center rounded-full bg-white/90"
         >
           <Text weight={600} className="text-[16px]">
             ×
