@@ -219,10 +219,14 @@ Seed:
 | `free_request_window_days` | `7`       | the same — "Grátis: 3 por semana"           |
 | `min_supported_version`    | `"1.0.0"` | force-update gate, read before sign-in      |
 | `maintenance_mode`         | `false`   | the same                                    |
-| `verification_sla_hours`   | `3`       | "Normalmente menos de 3 horas" (screen 14c) |
 | `selfie_retention_days`    | `7`       | the retention job (§3.8)                    |
-| `plan_seats_max`           | `20`      | the create flow's seat stepper              |
 | `free_radius_max_mi`       | `3`       | radius clamp for non-Plus users (§3.7)      |
+
+`verification_sla_hours` and `plan_seats_max` were here and are gone. Neither could change the
+thing it described — the ceiling on a plan is `plans_seats_check`, which a config row cannot
+loosen, and the SLA is a sentence in `pt-BR`. A row that names a number decided somewhere else is
+not configuration, it is a second place to look. `max_interests` went the same way when the cap
+became a constraint.
 
 Three properties matter. It is readable by **`anon` as well as `authenticated`** — a version gate
 that only works after sign-in cannot lock out a broken build. It has **no write policies**, so only
@@ -236,8 +240,10 @@ Interests are free text (the design's tag input), not a reference table, and liv
 `profiles.interests` — a `text[]` capped at ten by a check constraint. It was a separate table with
 a `before insert` trigger reading the cap from `app_config`, which meant two tables and two places
 to look for one number that has never moved. A second constraint calls
-`private.folded_unique()` so "Café" and "café" cannot both be added and quietly dodge the cap; that
-is what the old table's `unique (profile_id, lower(interest))` did. The client enforces the same
+`private.unique_elements(interests, true)` so "Café" and "café" cannot both be added and quietly
+dodge the cap; that is what the old table's `unique (profile_id, lower(interest))` did. The second
+argument is the case-folding: languages are enum members and already canonical, so they pass
+`unique_elements(languages)` and fold nothing. The client enforces the same
 cap politely (`TagInput` stops at the limit and shows "7/10"; the suggestion chips hide once full),
 so nobody meets either as a database error. Ten because the fixtures show two to five, the profile
 draws them as a wrapped chip row, and past about ten they stop saying anything about the person.
@@ -280,7 +286,7 @@ create table public.profiles (
   updated_at              timestamptz not null default now(),
   constraint adult check (birthdate is null or birthdate <= current_date - interval '18 years'),
   constraint interest_cap check (cardinality(interests) <= 10),
-  constraint interests_folded_unique check (private.folded_unique(interests)),
+  constraint interests_unique check (private.unique_elements(interests, true)),
   constraint languages_unique check (private.unique_elements(languages)),
   constraint age_range_ordered check (age_min <= age_max)
 );
@@ -493,17 +499,26 @@ erased the one fact attendance is derived from. `close-stale-plans` then reads e
 plan's end time has passed: no `left_at` is `attended`, a `left_at` is `cancelled`. No new UI,
 nothing a hostile host can weaponise, nothing gameable by faking a location.
 
+**The derivation is the fallback, not the first word.** Once `record_attendance()` existed, two
+things wrote `outcome` and meant different things by it, and the job won every time: it ran every
+half hour, so within thirty minutes of an evening ending everyone was already `attended` and the
+host's check-list could only correct a published answer. A seat now waits **24 hours** for the host
+before the job fills it in; a `left` row still closes the moment the plan is over, because the
+person already said so and there is nothing to confirm.
+
 An earlier draft split `cancelled` into `cancelled_early` and `cancelled_late` — well before
 `starts_at` versus shortly before it — because Rule 1 says _avise a tempo_ and a courteous
 cancellation is not a last-minute one. It was cut for now: the threshold would have been an
 invented number, and nothing in the design shows the two apart. If the profile ever distinguishes
 them, `left_at` and `starts_at` are both still there to derive it from.
 
-Its weakness is worth naming: someone who silently fails to turn up, without ever tapping leave,
-keeps a perfect score. `no_show` is in the enum for that case, but **nothing can write it yet** —
-it needs the host to say so, which is the host-confirmed attendance deferred in §8. Until then every
-derived row is `attended` or `cancelled`. The `source` column that would have told derived rows
-from host-reported ones goes with it; it comes back in the same migration.
+Its weakness was worth naming and is now mostly closed: someone who silently failed to turn up,
+without ever tapping leave, kept a perfect score. `no_show` is written by `record_attendance()` —
+the host's check-list, which only they may call, only for their own plan, and only once it has
+ended. What is still open is the host who never opens it: those seats fall through to the
+derivation a day later and read `attended`. The `source` column that would tell a derived row from
+a host-reported one is still not there; `recorded_at` within a day of the plan is the tell for
+now.
 
 `attendanceRate` on a profile is `count(outcome = 'attended') / count(*)` over that person's past
 plans.
@@ -862,8 +877,11 @@ Reports are readable only by their author; resolution is out of band (→ Modera
 **Account deletion anonymises rather than deletes.** `delete-account` sets `profiles.deleted_at`,
 scrubs name, avatar, bio, birthdate, gender, interests and languages, drops the
 `profile_locations` row, purges storage objects, and leaves the `profiles` row so foreign keys
-hold. The person is erased; other people's conversations stay readable. `export_my_data()` returns
-one JSON document for the caller.
+hold. The person is erased; other people's conversations stay readable.
+
+`export_my_data()` was written for a "Baixar meus dados" row and is dropped: nothing ever called
+it, and it returned the whole `profiles` row — `birthdate` included — to anyone signed in. It comes
+back with the screen that needs it.
 
 ### 3.10 Columns nothing writes
 
@@ -906,7 +924,7 @@ badge where the host card goes.
 
 That nullability has three consequences, all of which fall out cleanly: the
 join mode can only be `open`, because there is nobody to approve anything; the
-`seat_plan_host` trigger skips, because there is no host to seat; and the
+`plans_open` trigger opens the chat but seats nobody, because there is no host to seat; and the
 attendance check skips too, since confirming who came is the host's question.
 
 ```sql
@@ -994,9 +1012,13 @@ publishes each function in `public` as an RPC endpoint, so a `security definer` 
 policy is also a URL. `materialise_plan_series()` would have let anyone mint plans;
 `close_stale_plans()` would have let anyone stamp attendance; every trigger function was reachable
 and meaningless. Moving them is enough on its own — `private` is not an exposed schema, so nothing
-in it has an endpoint, while policies and triggers resolve by OID and never noticed. Five functions
-stay in `public` because a screen calls them: `nearby_plans`, `distance_to`, `export_my_data`,
-`attendance_rate_of` and `current_legal_document`, and only the last one keeps `anon`.
+in it has an endpoint, while policies and triggers resolve by OID and never noticed. What stays in
+`public` is what something outside the database calls, and nothing else: `nearby_plans`,
+`distance_to`, `attendance_rate_of`, `current_legal_document`, `open_direct_conversation`,
+`record_profile_view`, `profile_view_count`, `profile_viewers`, `record_attendance`, `add_seat`,
+and `delete_my_account` for the `delete-account` edge function. Only `current_legal_document` keeps
+`anon`. Each one corresponds to a grant the client deliberately does not have — that is the test
+for whether a function belongs in `public` at all.
 
 Anonymous users (`(auth.jwt() ->> 'is_anonymous')::boolean`) get the same policies. They can
 complete steps 1–6 and nothing else: creating a plan, sending a request and opening a chat all
@@ -1016,9 +1038,9 @@ require a permanent account, enforced in the policies rather than the UI.
 | RPC                               | Returns                                                                            |
 | --------------------------------- | ---------------------------------------------------------------------------------- |
 | `nearby_plans(...)`               | spatial query + age/gender filters + blocks + viewer membership, in one round trip |
-| `has_plus(uid)`                   | boolean, used by policies and triggers                                             |
-| `export_my_data()`                | one JSON document for the caller                                                   |
 | `distance_to(place_id)`           | metres from the caller's point, without exposing either coordinate                 |
+| `record_attendance(plan, absent)` | the host's answer on who came; the only thing that writes `no_show`                |
+| `add_seat(plan, profile)`         | widen a full plan by one and seat a waiting request, in one transaction            |
 | `open_direct_conversation(other)` | the pair's thread id, created if new; `PLUS_REQUIRED` for a cold one               |
 
 Two jobs that were drafted as edge functions are `pg_cron` calls into SQL functions instead:
@@ -1075,7 +1097,7 @@ supabase/migrations/
                                             quota / block / legal triggers
   20260920000150_derived_reads_and_jobs.sql
                                          nearby_plans(), close_stale_plans(),
-                                            materialise_plan_series(), export_my_data()
+                                            materialise_plan_series()
   20260920000200_row_level_security.sql  RLS on every table, every policy, realtime publication
   20260920000300_function_exposure.sql   the `private` schema: moves every helper and trigger
                                             function out of the REST surface, and narrows who may
@@ -1096,6 +1118,21 @@ supabase/migrations/
   20260920001000_chat_follows_the_plan.sql
                                          group chats by trigger, direct threads by RPC, cold ones
                                             Plus
+  20260920001100_profile_views.sql       who looked at your profile: the count free, the names Plus
+  20260920001200_close_the_write_grants.sql
+                                         the column grants RLS does not cover, and the read-receipt
+                                            hole into other people's chats
+  20260920001300_record_attendance.sql   record_attendance(): the host's check-list, and the only
+                                            thing that writes no_show
+  20260920001400_delete_my_account.sql   deletion anonymises in place, so foreign keys hold
+  20260920001500_seed_legal_documents.sql
+                                         the pt-BR terms and privacy notice as rows
+  20260920001600_add_seat.sql            add_seat(): widen a full plan and seat a waiting request
+  20260920001700_one_answer_per_question.sql
+                                         five rules written down twice: the attendance job racing
+                                            the host, dead export_my_data(), two uniqueness
+                                            helpers, the seat ceiling in three places, two
+                                            triggers ordered by name
 supabase/seed.sql                        app_config, eight people with home points, seven places,
                                             four plans matching the design fixtures, one standing
                                             meetup, two chat threads

@@ -17,9 +17,9 @@ import type { ParseKeys } from 'i18next';
  *   new row for relation "profiles" violates check constraint "interest_cap"
  *
  * — the constraint's name rather than a word we chose. `CONSTRAINT_CODES` maps
- * the names back. `interests_folded_unique` is the same rule seen from the
- * other side: it is what stops "Café" and "café" both counting towards the ten,
- * so it shows the same sentence.
+ * the names back. `interests_unique` is the same rule seen from the other side:
+ * it is what stops "Café" and "café" both counting towards the ten, so it shows
+ * the same sentence.
  *
  * `toDataError` turns either shape into a `DataError` carrying a code the UI
  * can switch on and the i18n key holding the sentence to show. Anything else
@@ -60,7 +60,7 @@ export type DataErrorCode = (typeof DATA_ERROR_CODES)[number];
 /** Check constraints whose name is the only thing a refusal says about them. */
 const CONSTRAINT_CODES: Record<string, DataErrorCode> = {
   interest_cap: 'TOO_MANY_INTERESTS',
-  interests_folded_unique: 'TOO_MANY_INTERESTS',
+  interests_unique: 'TOO_MANY_INTERESTS',
 };
 
 /**

@@ -302,7 +302,7 @@ export function PlanSheetScreen() {
   const { mutate: openPlanChat } = useOpenPlanChat();
 
   /**
-   * The plan's group chat, which `private.open_plan_chat()` made on the plan's
+   * The plan's group chat, which `private.open_plan()` made on the plan's
    * own insert. A plan that predates that trigger has none, and the button
    * stays where it is rather than pushing an empty thread.
    */

@@ -238,8 +238,8 @@ export function usePublishPlan() {
     onSuccess: (plan) => {
       queryClient.setQueryData(planKeys.detail(plan.id).queryKey, plan);
       void queryClient.invalidateQueries({ queryKey: planKeys.lists() });
-      // `open_plan_chat` made the group chat and `seat_plan_host` seated the
-      // host, so both the Chats tab and the host's own counts have moved.
+      // `open_plan` made the group chat and seated the host, so both the Chats
+      // tab and the host's own counts have moved.
       void queryClient.invalidateQueries({ queryKey: chatKeys.conversations().queryKey });
       void queryClient.invalidateQueries({ queryKey: userKeys.all });
     },

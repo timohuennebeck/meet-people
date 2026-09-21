@@ -33,7 +33,7 @@ async function ownMembershipRow(planId: string, uid: string) {
   );
 }
 
-/** The conversation `private.open_plan_chat()` made for a plan. */
+/** The conversation `private.open_plan()` made for a plan. */
 export async function planConversationId(planId: string): Promise<string | null> {
   const row = unwrap(
     await client().from('conversations').select('id').eq('plan_id', planId).maybeSingle(),
@@ -152,9 +152,9 @@ export const plans = {
   /**
    * Publishes a plan.
    *
-   * Only the `plans` row is written. `private.seat_plan_host()` seats the
-   * host and `private.open_plan_chat()` opens the group chat, both on this
-   * insert — doing either from here would race them and double up.
+   * Only the `plans` row is written. `private.open_plan()` opens the group
+   * chat and seats the host into it, on this insert — doing either from here
+   * would race it and double up.
    *
    * The insert policy demands `host_id = auth.uid()`, and demands the host be
    * verified unless the plan is capped; an unverified host publishing an

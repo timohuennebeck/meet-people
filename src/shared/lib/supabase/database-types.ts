@@ -1047,7 +1047,6 @@ export type Database = {
       }
       delete_my_account: { Args: never; Returns: undefined }
       distance_to: { Args: { place: string }; Returns: number }
-      export_my_data: { Args: never; Returns: Json }
       nearby_plans: {
         Args: {
           verified_hosts_only?: boolean
