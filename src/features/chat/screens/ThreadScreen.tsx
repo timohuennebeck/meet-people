@@ -4,7 +4,8 @@ import { useTranslation } from 'react-i18next';
 import { Keyboard, KeyboardAvoidingView, Platform, ScrollView, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { PEOPLE, VIEWER } from '@shared/data/fixtures';
+import { PEOPLE } from '@shared/data/fixtures';
+import { useViewerId } from '@shared/data/useViewer';
 import { Avatar, CircleButton, Glyph, PairAvatar, Text } from '@shared/ui';
 
 import { useConversations, useThread } from '../data/useChat';
@@ -72,6 +73,10 @@ export function ThreadScreen() {
     : [t('chat.quickAgreed'), t('chat.quickOnMyWay'), t('chat.quickLate')];
 
   const typingAuthor = thread.typingAuthorId ? PEOPLE[thread.typingAuthorId] : undefined;
+  // Whose bubbles sit on the right. `VIEWER.id` was a fixture id, so against a
+  // real account nothing ever matched: every message the person had just sent
+  // came back as somebody else's, left-aligned and without its receipt.
+  const viewerId = useViewerId();
   // The design glows the last bubble in the thread, and only when it is the
   // user's own — so in the group thread, where someone else spoke last, nothing
   // glows.
@@ -153,7 +158,11 @@ export function ThreadScreen() {
           showsVerticalScrollIndicator={false}
         >
           {(messages ?? []).map((message, index) => {
-            const mine = message.authorId === VIEWER.id;
+            const mine = message.authorId === viewerId;
+            // Names and faces for other people's bubbles come from the fixture
+            // directory, which only holds the fixture conversations' authors.
+            // A real thread has none, so a group bubble carries no name rather
+            // than a stranger's — until `Message` learns to carry its author.
             const author = PEOPLE[message.authorId];
             return (
               <MessageBubble
