@@ -1,3 +1,5 @@
+import type { ParseKeys } from 'i18next';
+
 /**
  * The failures a screen has to tell apart.
  *
@@ -61,8 +63,15 @@ const CONSTRAINT_CODES: Record<string, DataErrorCode> = {
   interests_folded_unique: 'TOO_MANY_INTERESTS',
 };
 
-/** Where the copy for each code lives, so a screen never builds the key itself. */
-const MESSAGE_KEYS: Record<DataErrorCode, string> = {
+/**
+ * Where the copy for each code lives, so a screen never builds the key itself.
+ *
+ * Typed as `ParseKeys` rather than `string`: that is what makes a key that no
+ * locale declares a compile error here, instead of the literal key text showing
+ * up on a refusal sheet — and it is what lets every screen pass `messageKey`
+ * straight to `t()` without a cast.
+ */
+const MESSAGE_KEYS: Record<DataErrorCode, ParseKeys> = {
   NO_CREDITS: 'errors.noCredits',
   PLAN_FULL: 'errors.planFull',
   BLOCKED: 'errors.blocked',
@@ -84,7 +93,7 @@ const MESSAGE_KEYS: Record<DataErrorCode, string> = {
 export class DataError extends Error {
   readonly code: DataErrorCode;
   /** i18n key for the sentence this failure shows. */
-  readonly messageKey: string;
+  readonly messageKey: ParseKeys;
   /** The original rejection, kept for logs. */
   readonly cause?: unknown;
 

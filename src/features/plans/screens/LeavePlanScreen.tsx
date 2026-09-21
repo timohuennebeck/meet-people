@@ -1,5 +1,4 @@
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import type { ParseKeys } from 'i18next';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { View } from 'react-native';
@@ -50,9 +49,7 @@ export function LeavePlanScreen() {
     );
   };
 
-  // `messageKey` is a plain string on `DataError`, which stays clear of the
-  // i18n types; every key it can hold is declared in `errors.*`.
-  const refusal = isDataError(error) ? t(error.messageKey as ParseKeys) : null;
+  const refusal = isDataError(error) ? t(error.messageKey) : null;
 
   // "com Phil, Sara e você" — the viewer is named by the template's tail, so
   // they must not appear in the list as well.

@@ -1,5 +1,4 @@
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import type { ParseKeys } from 'i18next';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { View } from 'react-native';
@@ -60,10 +59,7 @@ export function JoinRequestScreen() {
     );
   };
 
-  // `messageKey` is a plain string on `DataError`, which stays clear of the
-  // i18n types; every key it can hold is declared in `errors.*`.
-  const refusal =
-    isDataError(error) && error.code !== 'NO_CREDITS' ? t(error.messageKey as ParseKeys) : null;
+  const refusal = isDataError(error) && error.code !== 'NO_CREDITS' ? t(error.messageKey) : null;
 
   // No map backdrop and no scrim: the sheet is presented over the real map
   // now, and the system dims what is behind it.

@@ -1,5 +1,4 @@
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import type { ParseKeys } from 'i18next';
 import { useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ScrollView, View } from 'react-native';
@@ -69,11 +68,9 @@ export function PersonProfileScreen() {
     });
   };
 
-  // `messageKey` is a plain string on `DataError`, which stays clear of the
-  // i18n types; every key it can hold is declared in `errors.*`.
   const refusal =
     isDataError(openDirect.error) && openDirect.error.code !== 'PLUS_REQUIRED'
-      ? t(openDirect.error.messageKey as ParseKeys)
+      ? t(openDirect.error.messageKey)
       : null;
 
   return (
