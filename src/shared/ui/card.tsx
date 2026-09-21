@@ -176,11 +176,11 @@ export function SectionLabel({
   );
 }
 
-type BlockProps = {
+interface BlockProps {
   children: ReactNode;
   className?: string;
   style?: TextProps['style'];
-};
+}
 
 /** `32px/600 · 1.08 line-height · -.032em` — the question at the top of a step. */
 export function StepTitle({ children, className, style }: BlockProps) {

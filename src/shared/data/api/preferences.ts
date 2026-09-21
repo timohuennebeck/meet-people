@@ -27,18 +27,23 @@ import { client, sessionId, unwrap, unwrapSingle, viewerId } from './shared';
  * far the viewer is willing to go.
  */
 
-/** The subset of `profiles` columns the settings screen writes. */
-type PreferencesUpdate = Partial<{
-  radius: number;
-  distance_unit: DistanceUnit;
-  age_min: number;
-  age_max: number;
-  audience_gender: DbAudienceGender;
-  app_language: string;
-  notifications_enabled: boolean;
-  interests: string[];
-  languages: LanguageCode[];
-}>;
+/**
+ * The subset of `profiles` columns the settings screen writes.
+ *
+ * Every field optional because a step writes only what it changed: the update
+ * carries the one column the screen touched, not a whole row.
+ */
+interface PreferencesUpdate {
+  radius?: number;
+  distance_unit?: DistanceUnit;
+  age_min?: number;
+  age_max?: number;
+  audience_gender?: DbAudienceGender;
+  app_language?: string;
+  notifications_enabled?: boolean;
+  interests?: string[];
+  languages?: LanguageCode[];
+}
 
 const AUDIENCE_TO_DB: Record<AudienceGender, DbAudienceGender> = {
   [AUDIENCE_GENDER.EVERYONE]: DB_AUDIENCE_GENDER.EVERYONE,

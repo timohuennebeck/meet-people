@@ -88,6 +88,8 @@ export function useSelfieCamera(): SelfieCamera {
   return { status, live, capture, view, onReady, onMountError };
 }
 
+// Stays a type alias: as an interface it would declare no members of its own,
+// which is its supertype under a second name.
 export type SelfieCameraPreviewProps = Pick<SelfieCamera, 'view' | 'onReady' | 'onMountError'>;
 
 /**

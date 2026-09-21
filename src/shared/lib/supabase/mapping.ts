@@ -46,13 +46,13 @@ export type LanguageCode = Database['public']['Enums']['language_code'];
  * embedded JSON — the same 20 codes either way, since the enum is what the
  * column holds, so the JSON side is a subtype in practice.
  */
-export type PublicProfileRow = Omit<
+export interface PublicProfileRow extends Omit<
   Database['public']['Views']['public_profiles']['Row'],
   'id' | 'joined_at'
-> & {
+> {
   id: string;
   joined_at: string;
-};
+}
 
 // The four types below describe what is *inside* jsonb columns. Postgres types
 // those as `jsonb` and the generator as `Json`, so their shape is decided by
