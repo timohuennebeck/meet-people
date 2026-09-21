@@ -582,6 +582,8 @@ export const ptBR = {
       chipSecondTime: 'Já é a 2ª vez',
       warning: 'Analisamos em até 24 h. Em caso de risco imediato, procure a polícia.',
       send: 'Enviar denúncia',
+      sending: 'Enviando…',
+      failed: 'Não foi possível enviar agora. Tente de novo.',
     },
 
     sent: {

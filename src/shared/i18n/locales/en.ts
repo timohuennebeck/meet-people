@@ -566,6 +566,8 @@ export const en: Translation = {
       chipSecondTime: "That's the 2nd time",
       warning: 'We look into it within 24 h. If you are in immediate danger, call the police.',
       send: 'Send report',
+      sending: 'Sending…',
+      failed: "We couldn't send that just now. Try again.",
     },
 
     sent: {

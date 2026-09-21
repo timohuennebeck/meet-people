@@ -269,6 +269,18 @@ export const fixtureSource: DataSource = {
     },
   },
 
+  safety: {
+    /**
+     * Accepted and dropped. The offline source has no moderation queue and no
+     * second person to hide, and every screen in the flow reads from its own
+     * state — so the report and the block have nowhere to go and nothing to
+     * change.
+     */
+    report: (): Promise<void> => Promise.resolve(),
+    block: (): Promise<void> => Promise.resolve(),
+    unblock: (): Promise<void> => Promise.resolve(),
+  },
+
   places: {
     recent: (): Promise<Place[]> => settle(placeSchema.array(), fixtures.RECENT_PLACES),
     nearby: (): Promise<Place[]> => settle(placeSchema.array(), fixtures.NEARBY_PLACES),

@@ -7,6 +7,7 @@ import type {
   Plan,
   Preferences,
   ProfileView,
+  ReportReason,
   SearchResults,
   User,
 } from '../schemas';
@@ -127,6 +128,25 @@ export interface DataSource {
      * Realtime, so the method resolves to `null` and writes nothing.
      */
     receive(conversationId: string, authorId: string, body: string): Promise<Message | null>;
+  };
+
+  safety: {
+    /**
+     * Files a report. `planId` is context when the report started from a plan
+     * and absent when it started from a profile.
+     *
+     * The reporter is `auth.uid()` — the insert policy will take nothing else —
+     * so it is not a parameter.
+     */
+    report(subjectId: string, reason: ReportReason, detail: string, planId?: string): Promise<void>;
+    /**
+     * Blocks somebody. The two stop existing for each other: `public_profiles`
+     * hides them both ways and `private.decline_requests_on_block()` turns any
+     * request between them down.
+     */
+    block(profileId: string): Promise<void>;
+    /** Lifts a block. */
+    unblock(profileId: string): Promise<void>;
   };
 
   places: {

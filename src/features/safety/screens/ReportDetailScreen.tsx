@@ -15,9 +15,11 @@ import {
   Screen,
   SectionLabel,
   Spacer,
+  Text,
   WarningNote,
 } from '@shared/ui';
 
+import { useReportAndBlock } from '../data/useSafety';
 import { isReportReason } from '../lib/reasons';
 
 /**
@@ -39,6 +41,7 @@ export function ReportDetailScreen() {
   const { data: user } = useUser(id ?? '');
   const { data: plans } = usePlans();
   const [note, setNote] = useState('');
+  const { mutate: report, isPending, isError } = useReportAndBlock();
 
   // The plan is context, not a required field: a report started from a profile
   // has none, and then the card falls back to where the person is from.
@@ -50,9 +53,21 @@ export function ReportDetailScreen() {
   const append = (phrase: string) =>
     setNote((current) => (current.trim() ? `${current.trim()} ${phrase}.` : `${phrase}.`));
 
-  // Replaces, so the back gesture on the confirmation cannot land on a form
-  // whose report has already gone in.
-  const send = () => router.replace(`/report/${id}/sent`);
+  /**
+   * Files the report, blocks the person, and only then confirms.
+   *
+   * The confirmation says both are done, so it must not be reached on a write
+   * that failed — this screen is the last place a refusal can still be read.
+   */
+  const send = () => {
+    if (isPending || !id || !isReportReason(reason)) return;
+    report(
+      { subjectId: id, reason, detail: note, planId },
+      // Replaces, so the back gesture on the confirmation cannot land on a form
+      // whose report has already gone in.
+      { onSuccess: () => router.replace(`/report/${id}/sent`) },
+    );
+  };
 
   return (
     <Screen>
@@ -97,7 +112,15 @@ export function ReportDetailScreen() {
 
       <View className="shrink-0 gap-[14px]">
         <WarningNote>{t('safety.detail.warning')}</WarningNote>
-        <Button label={t('safety.detail.send')} variant="danger" onPress={send} />
+        {isError ? (
+          <Text className="text-center text-[14px] text-ink-dim">{t('safety.detail.failed')}</Text>
+        ) : null}
+        <Button
+          label={isPending ? t('safety.detail.sending') : t('safety.detail.send')}
+          variant="danger"
+          disabled={isPending}
+          onPress={send}
+        />
       </View>
     </Screen>
   );

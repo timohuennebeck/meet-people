@@ -6,6 +6,22 @@ import { z } from 'zod';
  * a screen surfaces here instead of as a blank render.
  */
 
+/**
+ * Why somebody is being reported — the `report_reason` Postgres enum.
+ *
+ * The order here is the design's, which is not the enum's declaration order;
+ * the column stores a value, not a position. Rows are labelled through i18n and
+ * identified by these, never by their copy.
+ */
+export const reportReasonSchema = z.enum([
+  'no_show',
+  'harassment',
+  'fake_profile',
+  'inappropriate',
+  'other',
+]);
+export type ReportReason = z.infer<typeof reportReasonSchema>;
+
 export const joinModeSchema = z.enum(['open', 'approval']);
 export type JoinMode = z.infer<typeof joinModeSchema>;
 
