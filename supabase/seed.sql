@@ -42,8 +42,8 @@ on conflict (key) do update set value = excluded.value, description = excluded.d
 --
 -- Written straight into `auth.users` rather than through the API because a seed
 -- runs before there is an app to sign up with. The `on_auth_user_created`
--- trigger gives each one a profile and a preferences row; the updates below fill
--- them in.
+-- trigger gives each one a profile row — preferences are columns on it since
+-- `…000600_collapse_side_tables` — and the updates below fill it in.
 -- ---------------------------------------------------------------------------
 
 insert into auth.users (
@@ -144,11 +144,16 @@ where p.id = v.id;
 
 -- Everyone but Tom is verified, which is what the design draws: his request row
 -- is the one that reads "Ainda não verificado".
+-- `on conflict` cannot help here: the primary key is a generated uuid, so a
+-- second run would never collide and would simply give everybody a second
+-- submission. The `not exists` is what makes re-seeding idempotent.
 insert into public.verification_submissions (profile_id, storage_path, outcome, submitted_at)
-select id, id::text || '/selfie.jpg', 'verified', now() - interval '20 days'
-from public.profiles
-where id <> '11111111-1111-4111-8111-000000000007'
-on conflict do nothing;
+select p.id, p.id::text || '/selfie.jpg', 'verified', now() - interval '20 days'
+from public.profiles p
+where p.id <> '11111111-1111-4111-8111-000000000007'
+  and not exists (
+    select 1 from public.verification_submissions v where v.profile_id = p.id
+  );
 
 update public.profiles set radius = 3 where id = '11111111-1111-4111-8111-000000000001';
 
@@ -226,13 +231,17 @@ on conflict do nothing;
 -- Tom appears once, not twice: the fixture listed him under both "requests" and
 -- "waitlist", but the waitlist is derived — it is simply the queue in
 -- `created_at` order once the seats run out.
-insert into public.plan_members (plan_id, profile_id, status, message, created_at) values
+-- `requested_at` is supplied rather than left to `admit_member()`, which is
+-- exactly the trigger disabled above; without it `requests_are_dated` refuses
+-- the row. It is also what the weekly quota counts, so it has to match
+-- `created_at` for these to read as three requests made in the last hours.
+insert into public.plan_members (plan_id, profile_id, status, message, created_at, requested_at) values
   ('33333333-3333-4333-8333-000000000002', '11111111-1111-4111-8111-000000000005', 'requested',
-   'Jogo há 2 anos, sou nova em Berlim', now() - interval '3 hours'),
+   'Jogo há 2 anos, sou nova em Berlim', now() - interval '3 hours', now() - interval '3 hours'),
   ('33333333-3333-4333-8333-000000000002', '11111111-1111-4111-8111-000000000006', 'requested',
-   null, now() - interval '2 hours'),
+   null, now() - interval '2 hours', now() - interval '2 hours'),
   ('33333333-3333-4333-8333-000000000002', '11111111-1111-4111-8111-000000000007', 'requested',
-   null, now() - interval '1 hour')
+   null, now() - interval '1 hour', now() - interval '1 hour')
 on conflict do nothing;
 
 alter table public.plan_members enable trigger user;
@@ -263,13 +272,19 @@ on conflict (id) do nothing;
 -- always has something recent at the top.
 -- ---------------------------------------------------------------------------
 
--- Give the run's chat a fixed id so the messages below can name it.
-update public.conversations set id = '66666666-6666-4666-8666-000000000001'
-where plan_id = '33333333-3333-4333-8333-000000000001';
+-- The run's chat was made by `open_plan_chat` with a generated id, and
+-- `plan_members_sync_chat` has already written `conversation_members` rows
+-- against it. Neither foreign key carries `on update cascade`, so renumbering
+-- the conversation here raised a 23503 — the id is read into a setting and the
+-- inserts below name that instead.
+select set_config('treff.seed_run_chat',
+                  (select id::text from public.conversations
+                    where plan_id = '33333333-3333-4333-8333-000000000001'),
+                  true);
 
 -- Left deliberately stale, so the run's thread shows an unread badge.
 update public.conversation_members set last_read_at = now() - interval '1 day'
-where conversation_id = '66666666-6666-4666-8666-000000000001'
+where conversation_id = current_setting('treff.seed_run_chat')::uuid
   and profile_id = '11111111-1111-4111-8111-000000000001';
 
 insert into public.conversations (id, direct_lower_id, direct_higher_id) values
@@ -283,15 +298,15 @@ insert into public.conversation_members (conversation_id, profile_id) values
 on conflict do nothing;
 
 insert into public.messages (conversation_id, author_id, content, created_at) values
-  ('66666666-6666-4666-8666-000000000001', '11111111-1111-4111-8111-000000000004',
+  (current_setting('treff.seed_run_chat')::uuid, '11111111-1111-4111-8111-000000000004',
    'Rota nova hoje: ponte, canal e volta pelo parque.', now() - interval '50 minutes'),
-  ('66666666-6666-4666-8666-000000000001', '11111111-1111-4111-8111-000000000003',
+  (current_setting('treff.seed_run_chat')::uuid, '11111111-1111-4111-8111-000000000003',
    'Boa. Ritmo tranquilo?', now() - interval '48 minutes'),
-  ('66666666-6666-4666-8666-000000000001', '11111111-1111-4111-8111-000000000004',
+  (current_setting('treff.seed_run_chat')::uuid, '11111111-1111-4111-8111-000000000004',
    'Uns 6 min/km, ninguém fica para trás.', now() - interval '46 minutes'),
-  ('66666666-6666-4666-8666-000000000001', '11111111-1111-4111-8111-000000000001',
+  (current_setting('treff.seed_run_chat')::uuid, '11111111-1111-4111-8111-000000000001',
    'Fechado, levo a bola pro depois.', now() - interval '44 minutes'),
-  ('66666666-6666-4666-8666-000000000001', '11111111-1111-4111-8111-000000000005',
+  (current_setting('treff.seed_run_chat')::uuid, '11111111-1111-4111-8111-000000000005',
    'Chego direto do trabalho, 18h55 no máximo.', now() - interval '42 minutes'),
 
   ('66666666-6666-4666-8666-000000000002', '11111111-1111-4111-8111-000000000003',
@@ -311,6 +326,6 @@ insert into public.profile_views (profile_id, viewer_id, viewed_at) values
   ('11111111-1111-4111-8111-000000000001', '11111111-1111-4111-8111-000000000005', now() - interval '3 days')
 on conflict (profile_id, viewer_id) do update set viewed_at = excluded.viewed_at;
 
-select public.materialise_plan_series(21);
+select private.materialise_plan_series(21);
 
 commit;
