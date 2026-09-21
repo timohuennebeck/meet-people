@@ -25,8 +25,8 @@ export function VerificationSuccessScreen() {
   const router = useRouter();
   const { setVerified } = useSession();
   // The card under the mascot is the viewer's own profile, now badged — so it
-  // has to be them. It named the fixture person and wore her face, and the
-  // neighbourhood beside it was a city typed into the locale file.
+  // has to be them: it used to name a sample person and wear her face, with a
+  // neighbourhood that was a city typed into the locale file.
   const { data: viewer } = useViewer();
 
   // Reaching this screen means the review cleared, so the badge is now held.

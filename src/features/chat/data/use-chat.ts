@@ -193,27 +193,3 @@ export function useSendMessage(conversationId: string) {
     },
   });
 }
-
-/**
- * Appends an incoming message.
- *
- * This plays back the design's scripted reply and exists only on the fixture
- * source; against Supabase the method writes nothing and resolves to `null`,
- * because a real reply arrives on the `messages` Realtime publication rather
- * than being invented by the recipient's own client.
- */
-export function useReceiveMessage(conversationId: string) {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: ({ authorId, body }: { authorId: string; body: string }) =>
-      dataSource.chats.receive(conversationId, authorId, body),
-    onSuccess: (message) => {
-      if (!message) return;
-      queryClient.setQueryData<Message[]>(chatKeys.thread(conversationId).queryKey, (previous) => [
-        ...(previous ?? []),
-        message,
-      ]);
-    },
-  });
-}

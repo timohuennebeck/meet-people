@@ -15,7 +15,8 @@ interface LegalDocumentContent {
 /**
  * Which i18n keys make up each document, in reading order.
  *
- * The prose itself lives in the locale files because the app runs on fixtures.
+ * The prose here is the fallback the screen renders if the document table is
+ * empty; in normal operation it comes from `legal_documents.content_md`.
  * In production it comes from `legal_documents.content_md`, picked by kind and
  * locale (see `docs/database.md`) — this map is the seam that fetch replaces,
  * so the screen above it never learns where the text came from.

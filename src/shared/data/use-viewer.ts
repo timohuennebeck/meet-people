@@ -11,8 +11,8 @@ import { dataSource } from './source';
  * It is keyed on `userKeys.me()`, so every screen asking for the viewer
  * dedupes into a single fetch rather than becoming a second source of truth
  * about the same person. It lives in `shared` because several features need
- * it, and it replaces what used to be a direct import of the `VIEWER` fixture
- * — which was the right person only while the fixtures were the only source.
+ * it, and it replaces what used to be a direct import of a `VIEWER` constant
+ * — which was the right person only while the sample content was the app.
  */
 export function useViewer() {
   return useQuery({

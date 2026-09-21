@@ -4,7 +4,7 @@ import { Star } from 'phosphor-react-native';
 import { useTranslation } from 'react-i18next';
 import { Pressable, View } from 'react-native';
 
-import { AVATARS } from '@shared/data/fixtures';
+import { PORTRAITS } from '@shared/lib/placeholder-portraits';
 import { colors, gradients, gradientStops, shadows } from '@shared/theme/tokens';
 import { Avatar, AvatarStack, Button, Highlight, Mascot, Screen, Text } from '@shared/ui';
 
@@ -65,13 +65,13 @@ export function WelcomeScreen() {
       <View className="relative flex-1 items-center justify-center">
         <Mascot size={244} />
         <FloatingPlan
-          avatarUri={AVATARS.pinRun}
+          avatarUri={PORTRAITS.pinRun}
           title={t('welcome.planRunTitle')}
           meta={t('welcome.planRunMeta')}
           position={{ left: -4, top: 26 }}
         />
         <FloatingPlan
-          avatarUri={AVATARS.pinCoffee}
+          avatarUri={PORTRAITS.pinCoffee}
           title={t('welcome.planCoffeeTitle')}
           meta={t('welcome.planCoffeeMeta')}
           position={{ right: -6, bottom: 44 }}
@@ -93,7 +93,7 @@ export function WelcomeScreen() {
         <Text className="mt-[11px] text-[16.5px] text-ink-dim">{t('welcome.subtitle')}</Text>
 
         <View className="mt-[20px] flex-row items-center gap-[10px]">
-          <AvatarStack uris={[AVATARS.lea, AVATARS.sara, AVATARS.noah]} />
+          <AvatarStack uris={[PORTRAITS.lea, PORTRAITS.sara, PORTRAITS.noah]} />
           <Text className="text-[14.5px] text-ink-body">{t('welcome.socialProof')}</Text>
         </View>
 

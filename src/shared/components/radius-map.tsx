@@ -1,8 +1,8 @@
 import { LinearGradient } from 'expo-linear-gradient';
 import { View } from 'react-native';
 
-import { AVATARS } from '@shared/data/fixtures';
 import { cn } from '@shared/lib/cn';
+import { PORTRAITS } from '@shared/lib/placeholder-portraits';
 import { gradientAngles, gradients } from '@shared/theme/tokens';
 import { Avatar } from '@shared/ui';
 
@@ -30,8 +30,8 @@ export function RadiusMap({ height, className }: { height: number; className?: s
         <View className="absolute h-[26px] w-[26px] rounded-full border-[4px] border-white bg-brand" />
       </View>
 
-      <NearbyFace uri={AVATARS.phil} className="left-[30px] top-[26px]" />
-      <NearbyFace uri={AVATARS.lea} className="bottom-[38px] right-[34px]" />
+      <NearbyFace uri={PORTRAITS.phil} className="left-[30px] top-[26px]" />
+      <NearbyFace uri={PORTRAITS.lea} className="bottom-[38px] right-[34px]" />
     </View>
   );
 }

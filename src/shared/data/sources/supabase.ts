@@ -20,7 +20,7 @@ import {
 } from '@shared/lib/supabase/mapping';
 
 import { DataError, throwAsDataError } from '../errors';
-import { DEFAULT_PREFERENCES } from '../fixtures';
+import { DEFAULT_PREFERENCES } from '../preference-defaults';
 import {
   type AudienceGender,
   type Conversation,
@@ -908,17 +908,6 @@ export const supabaseSource: DataSource = {
       );
       return { ...toMessage(row), receipt: i18n.t('chat.sent') };
     },
-
-    /**
-     * No-op.
-     *
-     * `receive` exists to play the design's scripted reply back on the fixture
-     * source. A real incoming message arrives on the `messages` Realtime
-     * publication, which writes into the thread cache directly; there is
-     * nothing for a client to insert on somebody else's behalf, and the RLS
-     * policy would refuse it if there were.
-     */
-    receive: (): Promise<Message | null> => Promise.resolve(null),
   },
 
   legal: {
@@ -1064,9 +1053,9 @@ export const supabaseSource: DataSource = {
       const db = client();
       const uid = await sessionId();
 
-      // Before the account exists there is no row to read. The column defaults
-      // are the fixture defaults, so the early steps open on the same values
-      // they would have after sign-up, with anything already chosen on top.
+      // Before the account exists there is no row to read. `DEFAULT_PREFERENCES`
+      // mirrors the `profiles` column defaults, so the early steps open on the
+      // values the row will be created with, with anything chosen so far on top.
       if (!uid) {
         return { ...DEFAULT_PREFERENCES, ...deferredPreferences };
       }

@@ -1,23 +1,20 @@
-import { hasSupabase } from '@shared/lib/env';
-
-import { fixtureSource } from './sources/fixtures';
 import { supabaseSource } from './sources/supabase';
 import type { DataSource } from './sources/types';
 
 /**
  * The one place the app reads and writes domain data.
  *
- * Two implementations sit behind it, both declared as `DataSource` so neither
- * can drift from the other:
+ * There used to be a second implementation behind this, reading transcribed
+ * copies of the design's content so a clone with no `.env` still rendered every
+ * screen. It went when the design passes finished: a third of its methods had
+ * become no-ops that reported success — a report filed nowhere, a block that
+ * blocked nobody, an account deletion that deleted nothing — which is the one
+ * failure this app cannot afford to practise.
  *
- * - `sources/supabase.ts` when `.env` carries a project URL and key,
- * - `sources/fixtures.ts` otherwise — a fresh clone, a design review, or a
- *   development machine with no network. That one is not a leftover: it is the
- *   only thing that renders a screen when there is nothing to talk to.
- *
- * The choice is made once, at module load, on the same flag the client itself
- * checks. Nothing above this line knows which one answered.
+ * So a build needs credentials. `hasSupabase` still gates the client, and the
+ * router keeps an unconfigured build at the welcome screen rather than letting
+ * it into rooms whose reads would throw.
  */
-export const dataSource: DataSource = hasSupabase ? supabaseSource : fixtureSource;
+export const dataSource: DataSource = supabaseSource;
 
 export type { DataSource } from './sources/types';

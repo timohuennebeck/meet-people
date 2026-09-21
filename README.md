@@ -10,13 +10,14 @@ as the reference the implementation is measured against.
 
 ```bash
 npm install
-cp .env.example .env     # optional; the app runs on fixtures without it
+cp .env.example .env     # then fill in the Supabase URL and publishable key
 npm start
 ```
 
-Nothing needs configuring to run the app. Supabase, PostHog and RevenueCat all
-stay inert until their keys are present, and screens read from the in-memory
-fixture data transcribed from the design.
+Supabase is required: it is the app's only data layer, so without those two
+values a build stops at the welcome screen rather than pretending to sign
+anybody in. PostHog and RevenueCat are optional and stay inert until their keys
+are present.
 
 ### On a device
 
@@ -90,7 +91,7 @@ src/
   shared/
     ui/                   design-system primitives
     components/           composites used by more than one feature
-    data/                 schemas, fixtures, query keys, the data source
+    data/                 types, query keys, the data source
     lib/                  cn, env, languages, the step sequence, Supabase
     i18n/                 pt-BR and en
     providers/            session, analytics, billing
@@ -164,8 +165,8 @@ anything:
 ## Data
 
 Screens talk to TanStack Query hooks, which talk to `src/shared/data/source.ts`.
-That module resolves against fixtures today and against Supabase later; its
-method signatures are the seam, so nothing above it changes.
+That module is the seam: it exposes a `DataSource` whose method signatures are
+all anything above it knows, and `sources/supabase.ts` is what implements them.
 
 Query keys come from factories in `src/shared/data/query-keys.ts`, so
 invalidation can target a whole feature or a single record without hand-written

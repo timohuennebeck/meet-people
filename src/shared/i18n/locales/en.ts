@@ -448,7 +448,6 @@ export const en: Translation = {
       title: 'Which language?',
       subtitle: 'Pick one or more. It shows on the plan card.',
       yours: 'Your language',
-      spokenNearby: 'Spoken by {{speakers}} of {{total}} nearby',
     },
     seats: {
       title: "Who's coming along?",

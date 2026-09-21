@@ -17,7 +17,7 @@ import type {
 /**
  * The seam the whole app reads through.
  *
- * Both sources — the design's fixtures and Supabase — are declared as this
+ * The Supabase source is declared as this
  * type rather than inferred from their own object literals, so neither can
  * quietly grow a method the other lacks or change a signature under a screen.
  * A new method is added here first; both files then stop compiling until they
@@ -159,13 +159,6 @@ export interface DataSource {
     thread(conversationId: string): Promise<Message[]>;
     /** Sends a message as the viewer. */
     send(conversationId: string, body: string): Promise<Message>;
-    /**
-     * Plays back the design's scripted reply.
-     *
-     * Fixtures only: against Supabase an incoming message arrives over
-     * Realtime, so the method resolves to `null` and writes nothing.
-     */
-    receive(conversationId: string, authorId: string, body: string): Promise<Message | null>;
   };
 
   legal: {

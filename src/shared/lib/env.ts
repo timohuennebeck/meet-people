@@ -3,8 +3,9 @@
  * these must be referenced as literal property accesses rather than looked up
  * dynamically.
  *
- * Every value is optional: the app runs against fixtures with nothing
- * configured, and each integration checks its own key before starting.
+ * Every value is optional, and each integration checks its own key before
+ * starting. Supabase is the exception in effect: without it there is no data
+ * layer, so `hasSupabase` keeps such a build at the welcome screen.
  */
 
 /** An empty or unset variable is "not configured", not an empty string. */
@@ -22,5 +23,5 @@ export const env = {
   revenueCatAndroidKey: read(process.env.EXPO_PUBLIC_REVENUECAT_ANDROID_API_KEY),
 } as const;
 
-/** True once Supabase credentials are present; until then the app uses fixtures. */
+/** True once Supabase credentials are present. Nothing past sign-in works without them. */
 export const hasSupabase = Boolean(env.supabaseUrl && env.supabasePublishableKey);

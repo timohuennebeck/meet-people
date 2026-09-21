@@ -28,8 +28,7 @@ export function DeleteAccountScreen() {
   const { mutate: deleteAccount, isPending, error } = useDeleteAccount();
 
   // What actually goes: the plans this person is running, and every thread they
-  // are in. Both were counted off the fixtures before, so the disclosure named
-  // numbers that had nothing to do with the account being deleted.
+  // are in — the disclosure has to count this account, not an example.
   const hostedPlans = (plans ?? []).filter((plan) => plan.host?.id === viewer?.id).length;
   const chats = (conversations ?? []).length;
 

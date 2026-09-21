@@ -25,8 +25,7 @@ export function ConfirmationScreen() {
   // `name` is step 9 and this is step 8, so a fresh account has not been named
   // yet and the greeting has nobody to greet. The design draws the name in a
   // tinted band, so the sentence splits around it when there is one and stands
-  // on its own when there is not — rather than naming whoever the fixtures
-  // happened to hold.
+  // on its own when there is not.
   const { data: viewer } = useViewer();
   const name = viewer?.name?.trim();
 

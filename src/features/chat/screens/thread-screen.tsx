@@ -8,11 +8,9 @@ import { useViewerId } from '@shared/data/use-viewer';
 import { Avatar, CircleButton, Glyph, PairAvatar, Text } from '@shared/ui';
 
 import { useConversations, useMarkRead, useThread } from '../data/use-chat';
-import { useScriptedThread } from '../hooks/use-scripted-thread';
-import { nextDirectReply, nextGroupReply } from '../lib/scripted-replies';
+import { useComposer } from '../hooks/use-composer';
 import { Composer } from '../ui/composer';
 import { MessageBubble } from '../ui/message-bubble';
-import { TypingIndicator } from '../ui/typing-indicator';
 
 /**
  * Whether the software keyboard is on screen.
@@ -58,7 +56,7 @@ export function ThreadScreen() {
   const conversation = conversations?.find((entry) => entry.id === conversationId);
   const isGroup = conversation?.kind === 'group';
 
-  const thread = useScriptedThread(conversationId, isGroup ? nextGroupReply : nextDirectReply);
+  const composer = useComposer(conversationId);
 
   useMarkRead(conversationId, (messages ?? []).length);
 
@@ -67,22 +65,14 @@ export function ThreadScreen() {
   // looking at the middle of the conversation.
   useEffect(() => {
     scrollRef.current?.scrollToEnd({ animated: true });
-  }, [messages, thread.typingAuthorId, keyboardVisible]);
+  }, [messages, keyboardVisible]);
 
   const quickReplies = isGroup
     ? [t('chat.quickWater'), t('chat.quickConfirmed'), t('chat.quickBike')]
     : [t('chat.quickAgreed'), t('chat.quickOnMyWay'), t('chat.quickLate')];
 
-  // Who is in this thread besides the reader, by id. It comes with the
-  // conversation rather than with each message, because a message arriving over
-  // Realtime carries only its own columns — there is no embed on a replication
-  // payload — and a bubble that appears nameless until the next refetch is
-  // worse than one that never had to wait.
   const membersById = new Map((conversation?.members ?? []).map((member) => [member.id, member]));
-  const typingAuthor = thread.typingAuthorId ? membersById.get(thread.typingAuthorId) : undefined;
-  // Whose bubbles sit on the right. `VIEWER.id` was a fixture id, so against a
-  // real account nothing ever matched: every message the person had just sent
-  // came back as somebody else's, left-aligned and without its receipt.
+  // Whose bubbles sit on the right.
   const viewerId = useViewerId();
   // The design glows the last bubble in the thread, and only when it is the
   // user's own — so in the group thread, where someone else spoke last, nothing
@@ -180,20 +170,13 @@ export function ThreadScreen() {
               />
             );
           })}
-
-          {typingAuthor ? (
-            <TypingIndicator
-              avatarUri={typingAuthor.avatarUrl}
-              authorName={isGroup ? typingAuthor.name : undefined}
-            />
-          ) : null}
         </ScrollView>
 
         <Composer
-          value={thread.draft}
-          onChangeText={thread.setDraft}
-          onSend={() => thread.send()}
-          onQuickReply={(reply) => thread.send(reply)}
+          value={composer.draft}
+          onChangeText={composer.setDraft}
+          onSend={() => composer.send()}
+          onQuickReply={(reply) => composer.send(reply)}
           placeholder={isGroup ? t('chat.groupMessagePlaceholder') : t('chat.messagePlaceholder')}
           quickReplies={quickReplies}
           // 30px above the home indicator at rest, as the design draws it. With

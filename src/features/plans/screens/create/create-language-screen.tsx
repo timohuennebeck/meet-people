@@ -6,7 +6,6 @@ import { pickLanguages } from '@shared/lib/languages';
 import { Button, Flag, SelectableCard, SelectionDot, Spacer, Text } from '@shared/ui';
 
 import { useCreatePlan } from '../../data/create-plan-provider';
-import { nearbyLanguageReach } from '../../lib/languages';
 import { CreateStepLayout } from '../../ui/create-step-layout';
 
 /** The shortlist this step offers, Lisbon's own language first. */
@@ -83,18 +82,15 @@ export function CreateLanguageScreen() {
         : [...selected, code],
     });
 
-  const detailFor = (code: string): string | undefined => {
-    if (code === ownLanguage) return t('create.language.yours');
-    const reach = nearbyLanguageReach(code);
-    // A language nobody around here speaks has nothing to report; "falado por
-    // 0 de 7" reads as a warning the host has not earned. Neither has a count
-    // that no query stands behind.
-    if (!reach || reach.speakers === 0) return undefined;
-    return t('create.language.spokenNearby', {
-      speakers: String(reach.speakers),
-      total: String(reach.total),
-    });
-  };
+  /**
+   * The design also puts "falado por 8 de 10 por perto" under each language.
+   * Nothing answers it: `nearby_plans()` finds plans within the radius and
+   * nothing finds *people* within it, so the line was reading a transcribed
+   * copy of the design's cast and calling it the neighbourhood. It comes back
+   * when a `nearby_language_reach` function exists to stand behind it.
+   */
+  const detailFor = (code: string): string | undefined =>
+    code === ownLanguage ? t('create.language.yours') : undefined;
 
   return (
     <CreateStepLayout

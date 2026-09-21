@@ -454,9 +454,6 @@ export const ptBR = {
       title: 'Em que idioma?',
       subtitle: 'Escolha um ou mais. Aparece no card do plano.',
       yours: 'Seu idioma',
-      // Both counts are read in as strings: the line never pluralises, and
-      // `count` would send i18next looking for `spokenNearby_one`.
-      spokenNearby: 'Falado por {{speakers}} de {{total}} por perto',
     },
     seats: {
       title: 'Quem vem junto?',

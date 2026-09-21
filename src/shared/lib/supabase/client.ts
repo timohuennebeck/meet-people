@@ -13,7 +13,7 @@ import type { Database } from './database-types';
  * discovered at runtime.
  *
  * Until `.env` carries a URL and a publishable key, `supabase` is `null` and the
- * app reads from fixtures instead. Sessions persist in AsyncStorage so a
+ * app has no data layer at all. Sessions persist in AsyncStorage so a
  * signed-in user survives a reload, and URL detection is off because React
  * Native has no browser redirect to inspect.
  */
