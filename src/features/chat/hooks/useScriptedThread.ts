@@ -1,5 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 
+import { hasSupabase } from '@shared/lib/env';
+
 import { useReceiveMessage, useSendMessage } from '../data/useChat';
 import type { ScriptedReply } from '../lib/scriptedReplies';
 
@@ -15,6 +17,13 @@ export interface ScriptedThread {
 /**
  * Drives one conversation: sends the user's message, then plays the scripted
  * reply back with a typing pause in between.
+ *
+ * The playback is the fixture source's alone. Against a real project
+ * `useReceiveMessage` writes nothing — a reply arrives on the `messages`
+ * Realtime publication, not from the recipient's own client — so scheduling it
+ * there would raise a typing indicator for someone who is not in the
+ * conversation and then deliver nothing. Sending still works either way; only
+ * the scripted half is skipped.
  *
  * Timers are cleared on unmount so a reply cannot land after the screen is
  * gone, and the reply index lives in a ref so each send advances the script
@@ -66,6 +75,8 @@ export function useScriptedThread(
 
       sendMessage(body);
       setDraft('');
+
+      if (hasSupabase) return;
 
       const reply = nextReply(replyIndex.current);
       replyIndex.current += 1;
