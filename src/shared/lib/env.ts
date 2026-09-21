@@ -17,25 +17,9 @@ const envSchema = z.object({
   revenueCatAndroidKey: z.string().min(1).optional(),
 });
 
-/**
- * Supabase replaced the JWT `anon` key with a `sb_publishable_…` key that can be
- * rotated on its own. The legacy name is still read so an older `.env` keeps
- * working, but it warns rather than failing silently into fixtures.
- */
-const legacyAnonKey = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY || undefined;
-const publishableKey = process.env.EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY || undefined;
-
-if (!publishableKey && legacyAnonKey) {
-  console.warn(
-    '[env] EXPO_PUBLIC_SUPABASE_ANON_KEY is the legacy key. Rename it to ' +
-      'EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY and take the sb_publishable_… value ' +
-      'from the Supabase dashboard.',
-  );
-}
-
 const parsed = envSchema.safeParse({
   supabaseUrl: process.env.EXPO_PUBLIC_SUPABASE_URL || undefined,
-  supabasePublishableKey: publishableKey ?? legacyAnonKey,
+  supabasePublishableKey: process.env.EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY || undefined,
   posthogApiKey: process.env.EXPO_PUBLIC_POSTHOG_API_KEY || undefined,
   posthogHost: process.env.EXPO_PUBLIC_POSTHOG_HOST || undefined,
   revenueCatIosKey: process.env.EXPO_PUBLIC_REVENUECAT_IOS_API_KEY || undefined,
