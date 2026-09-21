@@ -17,7 +17,7 @@ check that file first.
 - **Copy goes through i18n.** No literal user-facing strings in components.
   `pt-BR` is the source locale and holds the design's exact wording; `en` must
   mirror its key structure or the build fails.
-- **Text renders through `@shared/ui`'s `Text`.** React Native cannot synthesise
+- **Text renders through `@shared/ui/text`'s `Text`.** React Native cannot synthesise
   Inter's weights, so each weight maps to its own font file.
 - **Styling is Tailwind via NativeWind.** Use `cn()` from `@shared/lib/cn` to
   compose classes — it knows the custom scales in `tailwind.config.ts`. Reach
@@ -27,8 +27,15 @@ check that file first.
   it for classes and `@shared/theme/tokens.ts` flattens it for raw values, so a
   new colour goes in the palette and nowhere else. Shadows come from `tokens.ts`.
   Never write a hex literal in a component.
-- **Anything two features need moves to `src/shared`.** Features should not
-  import from each other's internals.
+- **Anything two features need moves to `src/shared`.** Features are leaves:
+  they import from `@shared` and never from each other, and `no-restricted-imports`
+  fails the lint if one tries. A feature holds `screens/`, its own `ui/` and its
+  own `lib/` — nothing else. Server reads and writes live in
+  `@shared/data/api/<group>`, and the TanStack Query hooks over them in
+  `@shared/data/queries/`.
+- **No barrel files.** Metro does not tree-shake, so a re-export hub pulls every
+  module behind it into whatever imports one name. Import the module you mean:
+  `@shared/ui/text`, not `@shared/ui`.
 
 ## Translating design values
 
@@ -36,7 +43,7 @@ check that file first.
   Native border always eats inwards, so the two cases convert differently:
   - **Outset** (`box-shadow: 0 0 0 Npx`, no `inset`): painted outside, consumes
     nothing. Grow the element by `2N` and keep the design's padding. Use `Ring`
-    from `@shared/ui` rather than writing it out.
+    from `@shared/ui/avatar` rather than writing it out.
   - **Inset** (`inset 0 0 0 Npx`): painted over the padding. Keep the element's
     size and drop its padding by `N`.
 
