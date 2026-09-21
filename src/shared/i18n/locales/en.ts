@@ -264,8 +264,8 @@ export const en: Translation = {
       notice: "We'll let you know as soon as it's ready.",
     },
     success: {
-      badgeName: 'Mara',
-      badgeMeta: 'Verified profile · Lisbon',
+      badgeMeta: 'Verified profile · {{neighbourhood}}',
+      badgeMetaPlain: 'Verified profile',
       title: "You're\nverified, {{name}}.",
       subtitle: 'Your selfie matches your profile photo. The blue badge is live for everyone.',
       perkSealed: 'Join plans that require a badge',

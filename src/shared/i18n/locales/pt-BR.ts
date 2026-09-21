@@ -265,8 +265,8 @@ export const ptBR = {
       notice: 'Avisamos assim que estiver pronto.',
     },
     success: {
-      badgeName: 'Mara',
-      badgeMeta: 'Perfil verificado · Lissabon',
+      badgeMeta: 'Perfil verificado · {{neighbourhood}}',
+      badgeMetaPlain: 'Perfil verificado',
       title: 'Você está\nverificado, {{name}}.',
       subtitle:
         'Sua selfie confere com sua foto de perfil. O selo azul já aparece para todo mundo.',

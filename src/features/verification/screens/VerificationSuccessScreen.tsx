@@ -4,7 +4,7 @@ import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { View } from 'react-native';
 
-import { AVATARS } from '@shared/data/fixtures';
+import { useViewer } from '@shared/data/useViewer';
 import { useSession } from '@shared/providers/SessionProvider';
 import { gradients, gradientStops } from '@shared/theme/tokens';
 import {
@@ -24,7 +24,10 @@ export function VerificationSuccessScreen() {
   const { t } = useTranslation();
   const router = useRouter();
   const { setVerified } = useSession();
-  const name = t('verification.success.badgeName');
+  // The card under the mascot is the viewer's own profile, now badged — so it
+  // has to be them. It named the fixture person and wore her face, and the
+  // neighbourhood beside it was a city typed into the locale file.
+  const { data: viewer } = useViewer();
 
   // Reaching this screen means the review cleared, so the badge is now held.
   useEffect(() => setVerified(true), [setVerified]);
@@ -44,16 +47,18 @@ export function VerificationSuccessScreen() {
       <View className="relative shrink-0">
         {/* The newly badged profile, overlapping the mascot slightly. */}
         <View className="-mt-[18px] flex-row items-center gap-[12px] rounded-tile border border-hair bg-surface py-[11px] pl-[11px] pr-[15px]">
-          <Avatar uri={AVATARS.maraProfile} size={48} />
+          <Avatar uri={viewer?.avatarUrl ?? ''} size={48} />
           <View className="min-w-0 flex-1 gap-[2px]">
             <View className="flex-row items-center gap-[7px]">
               <Text weight={600} className="text-[17px] tracking-[-0.17px]">
-                {name}
+                {viewer?.name ?? ''}
               </Text>
               <VerifiedSeal size={20} />
             </View>
             <Text className="text-[13.5px] text-ink-ghost">
-              {t('verification.success.badgeMeta')}
+              {viewer?.neighbourhood
+                ? t('verification.success.badgeMeta', { neighbourhood: viewer.neighbourhood })
+                : t('verification.success.badgeMetaPlain')}
             </Text>
           </View>
         </View>
