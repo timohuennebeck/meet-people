@@ -125,7 +125,16 @@ function daysFromToday(date: Date, now: Date): number {
  * - `weekend` — the coming Saturday and Sunday. On a Saturday or a Sunday that
  *   is *this* weekend, the one already under way, not the next.
  */
-export function isOnDayFilter(date: Date, filter: DayFilter, now = new Date()): boolean {
+export function isOnDayFilter({
+  date,
+  filter,
+  now = new Date(),
+}: {
+  date: Date;
+  filter: DayFilter;
+  /** Overridable so a filter can be asked about a day other than today. */
+  now?: Date;
+}): boolean {
   const days = daysFromToday(date, now);
   if (filter === 'today') return days <= 0;
   if (filter === 'tomorrow') return days === 1;
@@ -196,7 +205,15 @@ export function formatTime(date: Date, locale: string): string {
  * The day words come from `datetime.*`, exactly as `whenLabel` builds them —
  * the locale decides the date and the clock, i18n decides "Hoje".
  */
-export function formatPastMoment(date: Date, locale: string, now = new Date()): string {
+export function formatPastMoment({
+  date,
+  locale,
+  now = new Date(),
+}: {
+  date: Date;
+  locale: string;
+  now?: Date;
+}): string {
   const time = formatTime(date, locale);
   const day = {
     today: () => i18n.t('datetime.today'),

@@ -250,11 +250,17 @@ function dayLabel(date: Date, locale: string): string {
  * interface language changed or the day rolled over. A plan with no duration
  * — "Sem hora de fim" on the create flow — gets a start time and nothing else.
  */
-export function whenLabel(
-  startsAt: string,
-  durationMinutes: number | null,
+export function whenLabel({
+  startsAt,
+  durationMinutes,
   locale = i18n.language,
-): string {
+}: {
+  /** ISO instant. */
+  startsAt: string;
+  /** Null is "Sem hora de fim" — a start time and nothing else. */
+  durationMinutes: number | null;
+  locale?: string;
+}): string {
   const start = new Date(startsAt);
   const day = dayLabel(start, locale);
   if (durationMinutes == null) {
@@ -326,11 +332,16 @@ function hash32(value: string): number {
  * `places.point`, and the server returning those coordinates for plans the
  * viewer may already see. At that point this function and `Plan.pin` both go.
  */
-export function pinFor(
-  planId: string,
-  distanceM: number | null | undefined,
-  radiusM: number,
-): { x: number; y: number } {
+export function pinFor({
+  planId,
+  distanceM,
+  radiusM,
+}: {
+  /** Seeds the angle, so a plan's pin stays where it was between renders. */
+  planId: string;
+  distanceM: number | null | undefined;
+  radiusM: number;
+}): { x: number; y: number } {
   const angle = ((hash32(planId) % 3600) / 3600) * 2 * Math.PI;
   const maxX = CANVAS_WIDTH / 2 - CANVAS_MARGIN;
   const maxY = CANVAS_HEIGHT / 2 - CANVAS_MARGIN;
@@ -413,7 +424,7 @@ export function toPlan(row: NearbyPlanRow, context: PlanContext): Plan {
       address: row.place.address,
       distanceLabel: distanceLabel(row.place.distanceM, context.unit),
     },
-    whenLabel: whenLabel(row.starts_at, row.duration_minutes),
+    whenLabel: whenLabel({ startsAt: row.starts_at, durationMinutes: row.duration_minutes }),
     startsAt: new Date(row.starts_at).toISOString(),
     durationMinutes: row.duration_minutes,
     capacity: row.seats,
@@ -421,6 +432,6 @@ export function toPlan(row: NearbyPlanRow, context: PlanContext): Plan {
     requests: queue.slice(0, openSeats),
     waitlist: queue.slice(openSeats),
     ageRange: row.age_min != null && row.age_max != null ? [row.age_min, row.age_max] : null,
-    pin: pinFor(row.id, row.distance_m, context.radiusM),
+    pin: pinFor({ planId: row.id, distanceM: row.distance_m, radiusM: context.radiusM }),
   };
 }

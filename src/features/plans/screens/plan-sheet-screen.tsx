@@ -66,7 +66,11 @@ function PlanSeats({ plan }: { plan: Plan }) {
   return (
     <View className="gap-[10px]">
       <SeatSummary filled={participatingLabel(plan, t)} open={openSeatsLabel(plan, t)} />
-      <SeatList seats={seatsFor(plan, t('common.freeSeat'), t('common.you'))} size={52} gap={14} />
+      <SeatList
+        seats={seatsFor({ plan, freeLabel: t('common.freeSeat'), viewerLabel: t('common.you') })}
+        size={52}
+        gap={14}
+      />
     </View>
   );
 }
@@ -223,7 +227,11 @@ function HostState({ plan, onOpenChat }: { plan: Plan; onOpenChat: () => void })
 
   const seatRow = (
     <SeatList
-      seats={seatsFor(plan, t('common.freeSeat'), `${t('common.you')} · ${t('plan.hostRole')}`)}
+      seats={seatsFor({
+        plan,
+        freeLabel: t('common.freeSeat'),
+        viewerLabel: `${t('common.you')} · ${t('plan.hostRole')}`,
+      })}
       size={full ? 68 : wide ? 58 : 72}
       gap={wide ? 8 : 10}
       even

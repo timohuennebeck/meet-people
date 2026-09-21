@@ -49,7 +49,16 @@ export async function planConversationId(planId: string): Promise<string | null>
  * has nothing to post to, because failing to leave over an undelivered goodbye
  * would be the worse outcome.
  */
-async function postToPlanChat(planId: string, uid: string, body: string): Promise<void> {
+async function postToPlanChat({
+  planId,
+  uid,
+  body,
+}: {
+  planId: string;
+  /** The leaver, who is still a member for as long as this write takes. */
+  uid: string;
+  body: string;
+}): Promise<void> {
   const db = client();
   const conversationId = await planConversationId(planId);
   if (!conversationId) return;
@@ -72,11 +81,16 @@ async function postToPlanChat(planId: string, uid: string, body: string): Promis
  * earlier, produces zero rows and no error at all — and the sheet would seat
  * somebody the database never moved.
  */
-async function answerRequest(
-  planId: string,
-  requestId: string,
-  status: 'seated' | 'declined',
-): Promise<Plan | null> {
+async function answerRequest({
+  planId,
+  requestId,
+  status,
+}: {
+  planId: string;
+  /** The applicant's profile id — a request has no id of its own. */
+  requestId: string;
+  status: 'seated' | 'declined';
+}): Promise<Plan | null> {
   const answered = await client()
     .from('plan_members')
     .update({ status }, { count: 'exact' })
@@ -195,11 +209,16 @@ export const plans = {
    * exactly that), a seat is given up by updating it to `left`. The row's
    * own status decides which.
    */
-  setMembership: async (
-    planId: string,
-    membership: Membership,
-    note?: string,
-  ): Promise<Plan | null> => {
+  setMembership: async ({
+    planId,
+    membership,
+    note,
+  }: {
+    planId: string;
+    membership: Membership;
+    /** On a request, the line the host reads; on leaving, the group goodbye. */
+    note?: string;
+  }): Promise<Plan | null> => {
     const db = client();
     const uid = await viewerId();
 
@@ -234,7 +253,7 @@ export const plans = {
         // leaver out of the conversation, and after that the messages insert
         // policy has nothing to let them write through.
         if (own?.status === 'seated' && note?.trim()) {
-          await postToPlanChat(planId, uid, note.trim());
+          await postToPlanChat({ planId, uid, body: note.trim() });
         }
         if (own?.status === 'requested') {
           unwrap(
@@ -268,7 +287,7 @@ export const plans = {
    * `seated`. The trigger stamps `seated_at` and may refuse with PLAN_FULL.
    */
   acceptRequest: (planId: string, requestId: string): Promise<Plan | null> =>
-    answerRequest(planId, requestId, 'seated'),
+    answerRequest({ planId, requestId, status: 'seated' }),
 
   /**
    * Host turns a request down, which is also what gives the applicant their
@@ -277,7 +296,7 @@ export const plans = {
    * good.
    */
   declineRequest: (planId: string, requestId: string): Promise<Plan | null> =>
-    answerRequest(planId, requestId, 'declined'),
+    answerRequest({ planId, requestId, status: 'declined' }),
 
   /**
    * `plan_members.outcome` is not in the column grant — anyone could

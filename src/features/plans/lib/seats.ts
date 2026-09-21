@@ -11,7 +11,17 @@ import type { Seat } from '@shared/ui/seats';
  * the grid draws one avatar per seat, so an open-ended plan has no grid to
  * finish. The sheets show who is going instead of how many places are left.
  */
-export function seatsFor(plan: Plan, freeLabel: string, viewerLabel: string): Seat[] {
+export function seatsFor({
+  plan,
+  freeLabel,
+  viewerLabel,
+}: {
+  plan: Plan;
+  /** Caption under an unclaimed seat. */
+  freeLabel: string;
+  /** Caption under the viewer's own seat. */
+  viewerLabel: string;
+}): Seat[] {
   const taken: Seat[] = plan.participants.map((participant) => ({
     avatarUri: participant.user.avatarUrl,
     label: participant.isViewer ? viewerLabel : participant.user.name,

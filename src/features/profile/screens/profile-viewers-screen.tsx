@@ -90,7 +90,7 @@ export function ProfileViewersScreen() {
             size={50}
             avatarUri={user.avatarUrl}
             name={`${user.name}, ${user.age}`}
-            detail={formatPastMoment(new Date(viewedAt), i18n.language)}
+            detail={formatPastMoment({ date: new Date(viewedAt), locale: i18n.language })}
             verified={user.verified}
             onPress={() => router.push(`/people/${user.id}`)}
           />

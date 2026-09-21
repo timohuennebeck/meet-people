@@ -26,7 +26,7 @@ export function useReportAndBlock() {
 
   return useMutation({
     mutationFn: async ({ subjectId, reason, detail, planId }: ReportInput) => {
-      await safety.report(subjectId, reason, detail, planId);
+      await safety.report({ subjectId, reason, detail, planId });
       await safety.block(subjectId);
     },
     onSuccess: () => invalidateAfterBlock(queryClient),

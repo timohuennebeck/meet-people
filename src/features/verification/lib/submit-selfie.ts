@@ -21,7 +21,7 @@ export async function submitSelfie(uri: string): Promise<boolean> {
   const profileId = await currentProfileId();
   if (!profileId) return false;
 
-  const storagePath = await uploadImage('verification', profileId, uri);
+  const storagePath = await uploadImage({ bucket: 'verification', profileId, uri });
   if (!storagePath) return false;
 
   const { error } = await supabase

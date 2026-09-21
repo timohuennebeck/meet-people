@@ -9,12 +9,18 @@ export const safety = {
    * Files a report. The reporter is `auth.uid()`: the insert policy takes
    * nothing else, and `no_self_report` refuses a report against yourself.
    */
-  report: async (
-    subjectId: string,
-    reason: ReportReason,
-    detail: string,
-    planId?: string,
-  ): Promise<void> => {
+  report: async ({
+    subjectId,
+    reason,
+    detail,
+    planId,
+  }: {
+    subjectId: string;
+    reason: ReportReason;
+    detail: string;
+    /** The plan the report is about, when it started from one. */
+    planId?: string;
+  }): Promise<void> => {
     const db = client();
     const uid = await viewerId();
     unwrap(

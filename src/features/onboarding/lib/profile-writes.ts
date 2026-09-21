@@ -91,7 +91,7 @@ export function saveProfile(patch: TablesUpdate<'profiles'>): void {
  */
 export function saveAvatar(uri: string): void {
   void run(async (client, profileId) => {
-    const path = await uploadImage('avatars', profileId, uri);
+    const path = await uploadImage({ bucket: 'avatars', profileId, uri });
     if (!path) return;
 
     const { error } = await client

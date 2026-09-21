@@ -101,7 +101,7 @@ export function ExploreScreen() {
   // rather than re-keying the list. `startsAt` is the ISO instant the row
   // carries alongside its pre-formatted label.
   const cards = useMemo(
-    () => (plans ?? []).filter((plan) => isOnDayFilter(new Date(plan.startsAt), filter)),
+    () => (plans ?? []).filter((plan) => isOnDayFilter({ date: new Date(plan.startsAt), filter })),
     [plans, filter],
   );
 

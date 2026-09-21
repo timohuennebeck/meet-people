@@ -33,6 +33,11 @@ check that file first.
   own `lib/` — nothing else. Server reads and writes live in
   `@shared/data/api/<group>`, and the TanStack Query hooks over them in
   `@shared/data/queries/`.
+- **Three parameters or more means one object.** Two positional arguments of
+  the same type are a bug waiting to be typed in the wrong order — `seatsFor`
+  took two strings and `pinFor` two numbers. Destructure in the signature and
+  name each field, so the call site reads as a sentence and the compiler
+  catches a swap.
 - **No barrel files.** Metro does not tree-shake, so a re-export hub pulls every
   module behind it into whatever imports one name. Import the module you mean:
   `@shared/ui/text`, not `@shared/ui`.

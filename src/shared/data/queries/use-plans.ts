@@ -103,11 +103,11 @@ export function useSetMembership(planId: string) {
 
   return usePlanMutation<MembershipChange>(
     planId,
-    ({ membership, note }) => plans.setMembership(planId, membership, note),
+    ({ membership, note }) => plans.setMembership({ planId, membership, note }),
     (plan, { membership }) => ({
       ...plan,
       membership,
-      participants: seatViewer(plan, membership, viewer),
+      participants: seatViewer({ plan, membership, viewer }),
     }),
   );
 }
@@ -123,7 +123,16 @@ export interface MembershipChange {
 }
 
 /** The participant list as it will read once this membership change lands. */
-function seatViewer(plan: Plan, membership: Membership, viewer: User | undefined) {
+function seatViewer({
+  plan,
+  membership,
+  viewer,
+}: {
+  plan: Plan;
+  membership: Membership;
+  /** Undefined until the viewer's own profile has loaded. */
+  viewer: User | undefined;
+}) {
   if (membership !== 'joined') {
     return plan.participants.filter((participant) => !participant.isViewer);
   }

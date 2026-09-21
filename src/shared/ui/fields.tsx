@@ -16,7 +16,16 @@ type FocusHandler = NonNullable<TextInputProps['onFocus']>;
  * so compensating by the border width in both states keeps the text on the same
  * x and the field the same size as it gains its ring.
  */
-function useFocusRing(onFocus?: FocusHandler, onBlur?: FocusHandler, enabled = true) {
+function useFocusRing({
+  onFocus,
+  onBlur,
+  enabled = true,
+}: {
+  onFocus?: FocusHandler;
+  onBlur?: FocusHandler;
+  /** False for the fields the design leaves ringless. */
+  enabled?: boolean;
+} = {}) {
   const [focused, setFocused] = useState(false);
 
   return {
@@ -77,7 +86,7 @@ export function TextField({
   onBlur,
   ...rest
 }: TextFieldProps) {
-  const ring = useFocusRing(onFocus, onBlur, showRing);
+  const ring = useFocusRing({ onFocus, onBlur, enabled: showRing });
 
   return (
     <View
@@ -149,7 +158,7 @@ export function NoteField({
   onBlur,
   ...rest
 }: NoteFieldProps) {
-  const ring = useFocusRing(onFocus, onBlur);
+  const ring = useFocusRing({ onFocus, onBlur });
 
   // The wrapper's `minHeight` cannot stretch a `flex:1` child: a column with no
   // resolved height gives its children nothing to grow into, so the input can

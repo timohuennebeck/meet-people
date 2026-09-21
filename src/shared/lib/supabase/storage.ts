@@ -28,11 +28,16 @@ export type ImageBucket = 'avatars' | 'verification';
  * body Supabase Storage accepts on React Native: a `Blob` there carries no data
  * the JS side can hand over, and would upload an empty object.
  */
-export async function uploadImage(
-  bucket: ImageBucket,
-  profileId: string,
-  uri: string,
-): Promise<string | null> {
+export async function uploadImage({
+  bucket,
+  profileId,
+  uri,
+}: {
+  bucket: ImageBucket;
+  profileId: string;
+  /** A local `file://` URI, as the camera and the picker hand it over. */
+  uri: string;
+}): Promise<string | null> {
   if (!supabase) return null;
 
   try {
